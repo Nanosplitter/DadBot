@@ -5,7 +5,6 @@ import sys
 import re
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-# import schedule
 from noncommands import haikudetector
 from noncommands import imchecker
 from noncommands import reminderLoop
@@ -23,7 +22,7 @@ if "DadBot" not in str(os.getcwd()):
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-intents = nextcord.Intents.default()
+intents = nextcord.Intents.default().all()
 
 bot = Bot(command_prefix=config["bot_prefix"], intents=intents)
 
@@ -82,9 +81,7 @@ async def on_message(message):
         await haikuDetector.checkForHaiku(message)
 
     await bot.process_commands(message)
-
-
-
+    
 
 # The code in this event is executed every time a command has been *successfully* executed
 @bot.event
@@ -93,7 +90,6 @@ async def on_command_completion(ctx):
     split = fullCommandName.split(" ")
     executedCommand = str(split[0])
     print(f"Executed {executedCommand} command in {ctx.guild.name} (ID: {ctx.message.guild.id}) by {ctx.message.author} (ID: {ctx.message.author.id})")
-
 
 # The code in this event is executed every time a valid commands catches an error
 @bot.event
@@ -108,6 +104,7 @@ async def on_command_error(context, error):
             color=config["error"]
         )
         await context.send(embed=embed)
+
     elif isinstance(error, commands.MissingPermissions):
         embed = nextcord.Embed(
             title="Error!",
@@ -116,7 +113,9 @@ async def on_command_error(context, error):
             color=config["error"]
         )
         await context.send(embed=embed)
-    raise error
+        
+    if not isinstance(error, commands.errors.CommandNotFound):
+        raise error
 
 @tasks.loop(seconds=5)
 async def checkTimes():

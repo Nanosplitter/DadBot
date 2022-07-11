@@ -17,6 +17,10 @@ class Caught(commands.Cog, name="caught"):
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @commands.command(name="caught")
     async def caught(self, context):
+        members = []
+        for i in context.guild.members:
+            members.append(str(i))
+        print(members)
         """
         See how many times everyone on the server has been caught by DadBot.
         """
@@ -34,7 +38,8 @@ class Caught(commands.Cog, name="caught"):
         res += "{:38s} {:s}\n".format("Username", "Caught Count")
         res += ("-"*51) + "\n"
         for m in mycursor:
-            res += "{:38s} {:d}\n".format(m[1], int(m[2]))
+            if m[1] in members:
+                res += "{:38s} {:d}\n".format(m[1], int(m[2]))
         res += "```"
         mycursor.close()
         mydb.close()

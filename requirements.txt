@@ -4,7 +4,6 @@ nextcord
 nextcord.py[voice]
 pyyaml
 pandas
-mysql
 mysql-connector
 dateparser
 pytz

@@ -23,7 +23,6 @@ class Help(commands.Cog, name="help"):
         if not isinstance(prefix, str):
             prefix = prefix[0]
         embed = nextcord.Embed(title="Help", description="List of available commands:", color=config["success"])
-        print(self.bot.cogs)
         for i in self.bot.cogs:
             cog = self.bot.get_cog(i.lower())
             if i not in ["owner", "template", "moderation"]:

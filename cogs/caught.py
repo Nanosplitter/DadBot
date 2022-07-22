@@ -15,7 +15,7 @@ class Caught(commands.Cog, name="caught"):
         self.bot = bot
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @commands.command(name="caught")
+    @bot.slash_command(guild_ids=[850473081063211048])
     async def caught(self, context):
         members = []
         for i in context.guild.members:

@@ -17,6 +17,9 @@ class Memes(commands.Cog, name="memes"):
 
     @commands.command(name="nobitches")
     async def nobitches(self, context, *text):
+        """
+        Make a No Bitches? Megamind meme with custom text
+        """
         params = {
             "template_id": "370867422", 
             "username": "nanosplitter", 

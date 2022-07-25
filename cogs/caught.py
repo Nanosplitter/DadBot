@@ -15,12 +15,11 @@ class Caught(commands.Cog, name="caught"):
         self.bot = bot
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @bot.slash_command(guild_ids=[850473081063211048])
+    @commands.command(name="caught")
     async def caught(self, context):
         members = []
         for i in context.guild.members:
             members.append(str(i))
-        print(members)
         """
         See how many times everyone on the server has been caught by DadBot.
         """

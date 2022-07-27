@@ -23,7 +23,7 @@ class NewPicture(commands.Cog, name="newpicture"):
     @commands.command(name="newperson")
     async def newperson(self, context):
         """
-        Creates a picture of a person that does not exist.(From https://thispersondoesnotexist.com/)
+        [No Arguments] Creates a picture of a person that does not exist.(From https://thispersondoesnotexist.com/)
         """
         fileName = str(uuid.uuid1()) + str(random.choice(range(1, 1337))) + ".png"
         await self.save_online_person(fileName)
@@ -34,7 +34,7 @@ class NewPicture(commands.Cog, name="newpicture"):
     @commands.command(name="newcat")
     async def newcat(self, context):
         """
-        Creates a picture of a cat that does not exist. (From https://thiscatdoesnotexist.com/)
+        [No Arguments] Creates a picture of a cat that does not exist. (From https://thiscatdoesnotexist.com/)
         """
         fileName = str(uuid.uuid1()) + str(random.choice(range(1, 1337))) + ".png"
         await self.save_online_cat(fileName)
@@ -45,7 +45,7 @@ class NewPicture(commands.Cog, name="newpicture"):
     @commands.command(name="newdog")
     async def newdog(self, context):
         """
-        Gets a random dog pic from https://random.dog
+        [No Arguments] Gets a random dog pic from https://random.dog
         """
         url = "https://random.dog/woof.json"
         response = requests.get(url)

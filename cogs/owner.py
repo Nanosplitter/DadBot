@@ -17,7 +17,7 @@ class owner(commands.Cog, name="owner"):
     @commands.command(name="shutdown")
     async def shutdown(self, context):
         """
-        Make the bot shutdown
+        [No Arguments] Make the bot shutdown
         """
         if context.message.author.id in config["owners"]:
             embed = nextcord.Embed(
@@ -38,7 +38,7 @@ class owner(commands.Cog, name="owner"):
     @commands.command(name="say", aliases=["echo"])
     async def say(self, context, *, args):
         """
-        The bot will say anything you want.
+        [Text] The bot will say anything you want.
         """
         if context.message.author.id in config["owners"]:
             await context.message.delete()
@@ -55,7 +55,7 @@ class owner(commands.Cog, name="owner"):
     @commands.command(name="embed")
     async def embed(self, context, *, args):
         """
-        The bot will say anything you want, but within embeds.
+        [Text] The bot will say anything you want, but within embeds.
         """
         if context.message.author.id in config["owners"]:
             embed = nextcord.Embed(
@@ -74,7 +74,7 @@ class owner(commands.Cog, name="owner"):
     @commands.group(name="blacklist")
     async def blacklist(self, context):
         """
-        Lets you add or remove a user from not being able to use the bot.
+        [No Arguments] Gets the blacklist of the bot.
         """
         if context.invoked_subcommand is None:
             embed = nextcord.Embed(
@@ -87,7 +87,7 @@ class owner(commands.Cog, name="owner"):
     @blacklist.command(name="add")
     async def blacklist_add(self, context, member: nextcord.Member):
         """
-        Lets you add a user from not being able to use the bot.
+        [Member] Lets you add a user from not being able to use the bot.
         """
         if context.message.author.id in config["owners"]:
             userID = member.id
@@ -120,7 +120,7 @@ class owner(commands.Cog, name="owner"):
     @blacklist.command(name="remove")
     async def blacklist_remove(self, context, member: nextcord.Member):
         """
-        Lets you remove a user from not being able to use the bot.
+        [Member] Lets you remove a user from not being able to use the bot.
         """
         if context.message.author.id in config["owners"]:
             userID = member.id

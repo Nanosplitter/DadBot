@@ -20,7 +20,7 @@ class Reminders(commands.Cog, name="reminders"):
     @commands.command(name="remindme")
     async def remindme(self, context, *args):
         """
-        Has DadBot remind you at a specific time. 
+        [TextWithDateAndTime] Has DadBot remind you at a specific time.
         """
         mydb = mysql.connector.connect(
             host=config["dbhost"],

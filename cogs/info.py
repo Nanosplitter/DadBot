@@ -17,7 +17,7 @@ class Info(commands.Cog, name="info"):
     @commands.command(name="info", aliases=["botinfo"])
     async def info(self, context):
         """
-        Get some useful (or not) information about the bot.
+        [No Arguments] Get some useful (or not) information about the bot.
         """
         embed = nextcord.Embed(
             description="The server's dad",
@@ -49,7 +49,7 @@ class Info(commands.Cog, name="info"):
     @commands.command(name="serverinfo")
     async def serverinfo(self, context):
         """
-        Get some useful (or not) information about the server.
+        [No Arguments] Get some useful (or not) information about the server.
         """
         server = context.message.guild
         roles = [x.name for x in server.roles]
@@ -95,7 +95,7 @@ class Info(commands.Cog, name="info"):
     @commands.command(name="ping")
     async def ping(self, context):
         """
-        Check if the bot is alive.
+        [No Arguments] Check if the bot is alive.
         """
         embed = nextcord.Embed(
             color=config["success"]
@@ -113,7 +113,7 @@ class Info(commands.Cog, name="info"):
     @commands.command(name="invite")
     async def invite(self, context):
         """
-        Get the invite link of the bot to be able to invite it to another server.
+        [No Arguments] Get the invite link of the bot to be able to invite it to another server.
         """
         await context.send(f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot&permissions=8")
 

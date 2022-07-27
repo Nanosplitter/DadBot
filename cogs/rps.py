@@ -19,7 +19,7 @@ class RPS(commands.Cog, name="rps"):
     @commands.command(name="rps")
     async def rock_paper_scissors(self, context):
         """
-        Play a round of Rock-Paper-Scissors with Dad.
+        [No Arguments] Play a round of Rock-Paper-Scissors with Dad.
         """
         reactions = {
             "🪨": 0,

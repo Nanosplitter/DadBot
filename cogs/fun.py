@@ -29,7 +29,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="dadjoke")
     async def dadjoke(self, context, searchTerm="", *args):
         """
-        Have Dad tell you one of his classics.
+        [(Optional)SearchTerm] Have Dad tell you one of his classics.
         """
         url = "https://icanhazdadjoke.com/search?term=" + searchTerm
         headers = {'Accept': 'application/json'}
@@ -43,7 +43,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="xkcd")
     async def xkcd(self, context, search=""):
         """
-        Retrieve a random or specific xkcd comic, specify a number like "!xkcd 1" to get the first xkcd comic.
+        [(Optional)xkcdNumber] Retrieve a random or specific xkcd comic, specify a number like "!xkcd 1" to get the first xkcd comic.
         """
         r = requests.get("http://xkcd.com/info.0.json")
         search = search if search != "" else str(random.choice(range(1, r.json()['num'])))
@@ -58,7 +58,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="iswanted")
     async def iswanted(self, context, *args):
         """
-        See if someone is on the FBI's most wanted list.
+        [SearchTerm] See if someone is on the FBI's most wanted list.
         """
         name = " ".join(args).strip()
         r = requests.get("https://api.fbi.gov/wanted/v1/list", params={"title": name})
@@ -72,7 +72,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="roastme")
     async def roastme(self, context):
         """
-        Dad's been around the block a few times, give him a try.
+        [No Arguments] Dad's been around the block a few times, give him a try.
         """
 
         url = "https://evilinsult.com/generate_insult.php?lang=en&type=json"
@@ -83,7 +83,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="8ball")
     async def eight_ball(self, context, *args):
         """
-        Ask any question to the bot.
+        [Question] Ask any question to the bot.
         """
         answers = ['It is certain.', 'It is decidedly so.', 'You may rely on it.', 'Without a doubt.',
                    'Yes - definitely.', 'As I see, yes.', 'Most likely.', 'Outlook good.', 'Yes.',
@@ -103,7 +103,7 @@ class Fun(commands.Cog, name="fun"):
     @commands.command(name="bitcoin")
     async def bitcoin(self, context):
         """
-        Get the current price of bitcoin.
+        [No Arguments] Get the current price of bitcoin.
         """
         url = "https://api.coindesk.com/v1/bpi/currentprice/BTC.json"
         # Async HTTP request

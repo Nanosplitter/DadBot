@@ -21,7 +21,7 @@ class Birthday(commands.Cog, name="birthday"):
     @commands.command(name="setbirthday")
     async def setbirthday(self, context, *birthday):
         """
-        Dad always remembers birthdays.
+        [Date] Dad always remembers birthdays.
         """
         mydb = mysql.connector.connect(
             host=config["dbhost"],
@@ -57,6 +57,9 @@ class Birthday(commands.Cog, name="birthday"):
     
     @commands.command(name="todaysbirthdays")
     async def todaysbirthdays(self, context):
+        """
+        [No Arguments] Dad will tell you who has birthdays today.
+        """
         await self.birthdayLoop.checkBirthdays()
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

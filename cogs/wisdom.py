@@ -20,7 +20,7 @@ class Wisdom(commands.Cog, name="wisdom"):
     @commands.command(name="randomfact")
     async def randomfact(self, context):
         """
-        Dad has learned a few things, he'll share.
+        [No Arguments] Dad has learned a few things, he'll share.
         """
         # This will prevent your bot from stopping everything when doing a web request - see: https://nextcordpy.readthedocs.io/en/stable/faq.html#how-do-i-make-a-web-request
         async with aiohttp.ClientSession() as session:
@@ -40,7 +40,7 @@ class Wisdom(commands.Cog, name="wisdom"):
     @commands.command(name="inspire")
     async def inspire(self, context):
         """
-        Get an inspirational poster courtesy of https://inspirobot.me/
+        [No Arguments] Get an inspirational poster courtesy of https://inspirobot.me/
         """
         quote = inspirobot.generate()
         await context.reply(quote.url)
@@ -48,7 +48,7 @@ class Wisdom(commands.Cog, name="wisdom"):
     @commands.command(name="wisdom")
     async def wisdom(self, context):
         """
-        Get some wisdom courtesy of https://inspirobot.me/
+        [No Arguments] Get some wisdom courtesy of https://inspirobot.me/
         """
         flow = inspirobot.flow()  # Generate a flow object
         res = ""
@@ -60,7 +60,7 @@ class Wisdom(commands.Cog, name="wisdom"):
     @commands.command(name="advice")
     async def advice(self, context):
         """
-        Get some fatherly advice.
+        [No Arguments] Get some fatherly advice.
         """
         r = requests.get("https://api.adviceslip.com/advice")
         await context.reply(r.json()['slip']['advice'])

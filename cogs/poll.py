@@ -17,7 +17,7 @@ class Poll(commands.Cog, name="poll"):
     @commands.command(name="poll")
     async def poll(self, context, *args):
         """
-        Create a poll where members can vote.
+        [Question] Create a poll where members can vote.
         """
         poll_title = " ".join(args)
         embed = nextcord.Embed(

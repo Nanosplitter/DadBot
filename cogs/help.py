@@ -17,7 +17,7 @@ class Help(commands.Cog, name="help"):
     @commands.command(name="help")
     async def help(self, context):
         """
-        List all commands from every Cog the bot has loaded.
+        [No Arguments] List all commands from every Cog the bot has loaded.
         """
         prefix = config["bot_prefix"]
         if not isinstance(prefix, str):
@@ -30,7 +30,7 @@ class Help(commands.Cog, name="help"):
                 command_list = [command.name for command in commands]
                 command_description = [command.help for command in commands]
                 help_text = '\n'.join(f'{prefix}{n} - {h}' for n, h in zip(command_list, command_description))
-                embed.add_field(name=i.capitalize(), value=f'```{help_text}```', inline=False)
+                embed.add_field(name=i.capitalize(), value=f'{help_text}', inline=False)
         await context.send(embed=embed)
 
 

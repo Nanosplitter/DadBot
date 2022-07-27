@@ -18,7 +18,7 @@ class moderation(commands.Cog, name="moderation"):
     @commands.has_permissions(kick_members=True)
     async def kick(self, context, member: nextcord.Member, *args):
         """
-        Kick a user out of the server.
+        [Member] Kick a user out of the server.
         """
         if member.guild_permissions.administrator:
             embed = nextcord.Embed(
@@ -59,7 +59,7 @@ class moderation(commands.Cog, name="moderation"):
     @commands.has_permissions(manage_nicknames=True)
     async def nick(self, context, member: nextcord.Member, *, name: str):
         """
-        Change the nickname of a user on a server.
+        [Member NewNickname] Change the nickname of a user on a server.
         """
         try:
             if name.lower() == "!reset":
@@ -82,7 +82,7 @@ class moderation(commands.Cog, name="moderation"):
     @commands.command(name="clean")
     async def clean(self, context, num="1"):
         """
-        Solves many problems. (Limited by nextcord to max out at 333)
+        [No Arguments] Solves many problems. (Limited by nextcord to max out at 333)
         """
         try:
             message = await context.channel.fetch_message(context.message.reference.message_id)
@@ -104,7 +104,7 @@ class moderation(commands.Cog, name="moderation"):
     @commands.has_permissions(ban_members=True)
     async def ban(self, context, member: nextcord.Member, *args):
         """
-        Bans a user from the server.
+        [Member] Bans a user from the server.
         """
         try:
             if member.guild_permissions.administrator:
@@ -140,7 +140,7 @@ class moderation(commands.Cog, name="moderation"):
     @commands.has_permissions(manage_messages=True)
     async def warn(self, context, member: nextcord.Member, *args):
         """
-        Warns a user in their private messages.
+        [Member] Warns a user in their private messages.
         """
         reason = " ".join(args)
         embed = nextcord.Embed(

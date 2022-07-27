@@ -1,5 +1,4 @@
 import os
-import sys
 from numpy import number
 import yaml
 import nextcord
@@ -11,7 +10,6 @@ if "DadBot" not in str(os.getcwd()):
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-# Here we name the cog and create a new class for the cog.
 class Minesweeper(commands.Cog, name="minesweeper"):
     def __init__(self, bot):
         self.bot = bot
@@ -41,25 +39,26 @@ class Minesweeper(commands.Cog, name="minesweeper"):
                         count += 1
         return count
 
-    # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @commands.command(name="minesweeper")
     async def minesweeper(self, context, gridSize, numberOfBombs):
         """
         [gridSize numOfBombs] Play a game of minesweeper!
         """
-        gridSize = int(gridSize)
-        numberOfBombs = int(numberOfBombs)
+        try:
+            gridSize = int(gridSize)
+            numberOfBombs = int(numberOfBombs)
+        except:
+            await context.send("Invalid grid size or number of bombs!")
+            return
 
-        if gridSize > 14:
-            await context.reply("The grid size can't be larger than 14x14! Try again with a smaller grid size.")
+        if gridSize > 9:
+            await context.reply("The grid size can't be larger than 9x9! Try again with a smaller grid size.")
             return
 
         if numberOfBombs > gridSize**2:
             await context.reply("You can't have more bombs than spaces in the grid! Try again with less bombs.")
             return
         
-        
-
         grid = [[0 for i in range(gridSize)] for j in range(gridSize)]
 
         for _ in range(numberOfBombs):
@@ -79,6 +78,5 @@ class Minesweeper(commands.Cog, name="minesweeper"):
         
         await context.reply(self.embedGrid(grid))
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Minesweeper(bot))

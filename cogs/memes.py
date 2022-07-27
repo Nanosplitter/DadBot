@@ -18,7 +18,7 @@ class Memes(commands.Cog, name="memes"):
     @commands.command(name="nobitches")
     async def nobitches(self, context, *text):
         """
-        Make a No Bitches? Megamind meme with custom text
+        [Text] Make a No Bitches? Megamind meme with custom text
         """
         params = {
             "template_id": "370867422", 
@@ -41,7 +41,7 @@ class Memes(commands.Cog, name="memes"):
     @commands.command(name="pastafy")
     async def pastafy(self, context):
         """
-        Turns any message into a copypasta.
+        [No Arguments] Turns any message you reply to into a copypasta.
         """
         try:
             message = await context.channel.fetch_message(context.message.reference.message_id)

@@ -100,7 +100,7 @@ class Hangman(commands.Cog, name="hangman"):
     @commands.command(name="hangman")
     async def hangman(self, context):
         """
-        Play a round of hangman!
+        [No Arguments] Play a round of hangman!
         """
         guessed = []
 

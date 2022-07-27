@@ -17,7 +17,7 @@ class TLDR(commands.Cog, name="tldr"):
     @commands.command(name="tldrchannel")
     async def tldrchannel(self, context, param):
         """
-        Get a TLDR of X number of past messages on the channel.
+        [NumberOfMessages] Get a TLDR of X number of past messages on the channel.
         """
         if param.isnumeric() and int(param) >= 5:
             messages = await context.channel.history(limit=int(param)).flatten()
@@ -33,7 +33,7 @@ class TLDR(commands.Cog, name="tldr"):
     @commands.command(name="tldr")
     async def tldr(self, context, url):
         """
-        Get the invite link of the bot to be able to invite it to another server.
+        [URL] Get the invite link of the bot to be able to invite it to another server.
         """
         try:
             await context.send(embed=summarizer.getSummaryUrl(config, url))

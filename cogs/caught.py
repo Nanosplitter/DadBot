@@ -21,7 +21,7 @@ class Caught(commands.Cog, name="caught"):
         for i in context.guild.members:
             members.append(str(i))
         """
-        See how many times everyone on the server has been caught by DadBot.
+        [No Arguments] See how many times everyone on the server has been caught by DadBot.
         """
         mydb = mysql.connector.connect(
             host=config["dbhost"],

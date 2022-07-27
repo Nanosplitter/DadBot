@@ -122,14 +122,14 @@ class Geo(commands.Cog, name="geo"):
     @commands.command(name="geo")
     async def geo(self, context):
         """
-        Play a round of geo guesser!
+        [No Arguments] Play a round of geo guesser!
         """
         await self.geoplay(context)
     
     @commands.command(name="geosingle")
     async def geosingle(self, context):
         """
-        Play a round of geo guesser by yourself!
+        [No Arguments] Play a round of geo guesser by yourself!
         """
         await self.geoplay(context, single=True)
 

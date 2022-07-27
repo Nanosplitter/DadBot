@@ -113,7 +113,7 @@ class Info(commands.Cog, name="info"):
     @commands.command(name="invite")
     async def invite(self, context):
         """
-        [No Arguments] Get the invite link of the bot to be able to invite it to another server.
+        [No Arguments] Get the invite link of the Dad to be able to invite him to another server.
         """
         await context.send(f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot&permissions=8")
 

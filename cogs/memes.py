@@ -32,7 +32,7 @@ class Memes(commands.Cog, name="memes"):
     @commands.command(name="uwu")
     async def uwu(self, context):
         """
-        UwU
+        UwU - Wepwy to a message to make it into an UwU message. ( ͡o ꒳ ͡o )
         """
         message = await context.channel.fetch_message(context.message.reference.message_id)
         flags = uwuify.SMILEY | uwuify.YU

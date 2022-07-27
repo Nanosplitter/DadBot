@@ -17,12 +17,13 @@ class Caught(commands.Cog, name="caught"):
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @commands.command(name="caught")
     async def caught(self, context):
-        members = []
-        for i in context.guild.members:
-            members.append(str(i))
         """
         [No Arguments] See how many times everyone on the server has been caught by DadBot.
         """
+        members = []
+        for i in context.guild.members:
+            members.append(str(i))
+        
         mydb = mysql.connector.connect(
             host=config["dbhost"],
             user=config["dbuser"],

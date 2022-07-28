@@ -44,10 +44,10 @@ class Colors(commands.Cog, name="colors"):
     @commands.command(name="changecolor")
     async def changecolor(self, context, color):
         """
-        Allows the user to change the color of their nickname. Only usable in some servers.
+        [ColorHexCode] Allows the user to change the color of their nickname. Only usable in some servers.
         """
         try:
-            if context.message.guild.id != 856919397754470420 and context.message.guild.id != 850473081063211048:
+            if context.message.guild.id != 856919397754470420 and context.message.guild.id != 850473081063211048 and context.message.guild.id != 1001665668657193001:
                 return
             
             limit = 4

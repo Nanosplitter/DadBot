@@ -55,7 +55,7 @@ class Colors(commands.Cog, name="colors"):
         rgb = self.hex2rgb(color)
 
         colors = []
-        deltas = [round(delta * u) for u in (0.299, 0.587, 0.114)]
+        deltas = [round(delta / u) for u in (1, 1, 1)]
         for _ in range(loop):
             new_rgb = [random.randint(max(0, x - delta), min(x + delta, 255))
                 for x, delta in zip(rgb, deltas)]
@@ -92,26 +92,29 @@ class Colors(commands.Cog, name="colors"):
                 color=int(color.replace("#", ""), 16)
             )
             
-            delta = 1
-            colors = []
-            contrastRes = [False]
             
-            while not contrastRes[0]:
-                colors = self.similarColors(color, delta, loop=2)
-                contrastRes = self.checkContrastOfColorGroup(colors)
-                delta += 0.01
-                print(delta)
             
-            closestValidColor = contrastRes[1]
+            
             colorButton = Button(label="Closest Color", style=nextcord.ButtonStyle.blurple)
 
             async def color_callback(interaction):
                 if interaction.user == context.author:  # checks that user interacting with button is command sender
+                    delta = 1
+                    colors = []
+                    
+                    contrastRes = [False]
+                    
+                    while not contrastRes[0]:
+                        colors = self.similarColors(color, delta, loop=2)
+                        contrastRes = self.checkContrastOfColorGroup(colors)
+                        delta += 0.05
+                    
+                    closestValidColor = contrastRes[1]
                     topRole = userRoles[-1]  
                     await self.changeRoleColor(closestValidColor, topRole)
                     await interaction.message.edit(embed = nextcord.Embed(
                         title="Success!",
-                        description="Color has been changed! The contrast it has is " + str(round(self.contrast("#36393f", closestValidColor), 4)) + ":1",
+                        description=f"Color has been changed to {closestValidColor.upper()}! The contrast it has is " + str(round(self.contrast("#36393f", closestValidColor), 4)) + ":1\nClick the button to try again.",
                         color=int(closestValidColor.replace("#", ""), 16)
                     ))
             

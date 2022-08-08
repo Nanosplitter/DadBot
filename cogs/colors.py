@@ -55,7 +55,7 @@ class Colors(commands.Cog, name="colors"):
         rgb = self.hex2rgb(color)
 
         colors = []
-        deltas = [round(delta / u) for u in (0.299, 0.587, 0.114)]
+        deltas = [round(delta * u) for u in (0.299, 0.587, 0.114)]
         for _ in range(loop):
             new_rgb = [random.randint(max(0, x - delta), min(x + delta, 255))
                 for x, delta in zip(rgb, deltas)]

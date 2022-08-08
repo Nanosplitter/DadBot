@@ -125,7 +125,6 @@ class Colors(commands.Cog, name="colors"):
 
                 await context.send(embed=embed, view=view)
                 return
-            userRoles = context.message.author.roles
 
             if len(userRoles) > 1:
                 topRole = userRoles[-1]

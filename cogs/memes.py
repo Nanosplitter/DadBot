@@ -4,6 +4,7 @@ import requests
 import yaml
 from nextcord.ext import commands
 import uwuify
+import json
 
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
@@ -14,6 +15,8 @@ with open("config.yaml") as file:
 class Memes(commands.Cog, name="memes"):
     def __init__(self, bot):
         self.bot = bot
+        with open("./resources/emoji-mappings.json", encoding="utf8") as file:
+            self.emoji_mappings = json.load(file)
 
     @commands.command(name="nobitches")
     async def nobitches(self, context, *text):
@@ -43,14 +46,13 @@ class Memes(commands.Cog, name="memes"):
         """
         [No Arguments] Turns any message you reply to into a copypasta.
         """
-        try:
-            message = await context.channel.fetch_message(context.message.reference.message_id)
-            res = ""
-            for word in message.content.split(" "):
-                res += word + (" " + random.choice(self.emoji_mappings[word.lower()]) + " " if word in self.emoji_mappings else " ")
-            await message.reply(res)
-        except:
-            context.send("Something went wrong, you have to reply to a message for me to pastafy it.")
+        
+        message = await context.channel.fetch_message(context.message.reference.message_id)
+        res = ""
+        for word in message.content.split(" "):
+            res += word + (" " + random.choice(self.emoji_mappings[word.lower()]) + " " if word in self.emoji_mappings else " ")
+        await message.reply(res)
+        
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

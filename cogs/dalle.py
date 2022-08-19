@@ -39,7 +39,7 @@ class Dalle(commands.Cog, name="dalle"):
         data = run["result_preview"][0][0]
         files = [nextcord.File(io.BytesIO(base64.b64decode(i)), filename="image.png") for i in data]
         
-        await context.send(files=files)
+        await context.reply(files=files)
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

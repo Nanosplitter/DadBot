@@ -19,10 +19,6 @@ testingServer = 850473081063211048
 class Slash(commands.Cog, name="slash"):
     def __init__(self, bot):
         self.bot = bot
-
-    @nextcord.slash_command(name="ping", description="this pongs the server")
-    async def ping(self, interaction: Interaction):
-        await interaction.response.send_message("Pong")
     
     @nextcord.slash_command(name="zing", description="this zing the server")
     async def zing(self, interaction: Interaction, number: Optional[int] = SlashOption(required=False)):

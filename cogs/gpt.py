@@ -21,7 +21,7 @@ class GPT(commands.Cog, name="gpt"):
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @nextcord.slash_command(name="gpt", description="Generate a writing based on your prompt")
-    async def gpt(self, interaction: Interaction, prompt: str = SlashOption(required=True)):
+    async def gpt(self, interaction: Interaction, prompt: str = SlashOption(description="A prompt for dad to finish using GPT", required=True)):
         """
         [Prompt] Generate a writing based on your prompt
         """

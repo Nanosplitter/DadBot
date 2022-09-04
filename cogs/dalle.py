@@ -25,7 +25,7 @@ class Dalle(commands.Cog, name="dalle"):
         """
         [Prompt] Generate 4 images based on your prompt
         """
-        message = await interaction.response.send_message("Generating images for '" + prompt + "'")
+        message = await interaction.response.send_message("Generating images for '" + prompt + "'...")
         api = PipelineCloud(token=config["pipeline_token"])
         run = api.run_pipeline(
             "pipeline_17ac3021b7674b10a6fbe3cb980ff57d",

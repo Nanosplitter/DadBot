@@ -1,8 +1,11 @@
 import os
 import sys
 import yaml
-from nextcord.ext import commands
 import nextcord
+from typing import Optional
+from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 from pipeline import PipelineCloud
 import io, base64
 
@@ -17,18 +20,18 @@ class GPT(commands.Cog, name="gpt"):
         self.bot = bot
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @commands.command(name="gpt")
-    async def gpt(self, context, *text):
+    @nextcord.slash_command(name="gpt", description="Generate a writing based on your prompt")
+    async def gpt(self, interaction: Interaction, prompt: str = SlashOption(required=True)):
         """
         [Prompt] Generate a writing based on your prompt
         """
-        await context.message.add_reaction("✅")
+        message = await interaction.response.send_message("Generating response for '" + prompt + "'...")
         
         api = PipelineCloud(token=config["pipeline_token"])
         run = api.run_pipeline(
             "pipeline_6908d8fb68974c288c69ef45454c8475",
             [
-                " ".join(text),
+                prompt,
                 {
                     "response_length": 300,  # how many new tokens to generate
                     "include_input": True,  # set to True if you want the response to contain your input
@@ -41,7 +44,7 @@ class GPT(commands.Cog, name="gpt"):
 
         result = run["result_preview"][0][0]
         
-        await context.reply(result)
+        await message.edit(result.replace(prompt, "**" + prompt + "**"))
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

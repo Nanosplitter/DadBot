@@ -2,7 +2,11 @@ import os
 import platform
 import nextcord
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
@@ -14,8 +18,8 @@ class Info(commands.Cog, name="info"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="info", aliases=["botinfo"])
-    async def info(self, context):
+    @nextcord.slash_command(name="info", description="Get some useful (or not) information about the bot.")
+    async def info(self, interaction: Interaction):
         """
         [No Arguments] Get some useful (or not) information about the bot.
         """
@@ -42,16 +46,16 @@ class Info(commands.Cog, name="info"):
             inline=False
         )
         embed.set_footer(
-            text=f"Requested by {context.message.author}"
+            text=f"Requested by {interaction.user}"
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name="serverinfo")
-    async def serverinfo(self, context):
+    @nextcord.slash_command(name="serverinfo", description="Get some useful (or not) information about the server.")
+    async def serverinfo(self, interaction: Interaction):
         """
         [No Arguments] Get some useful (or not) information about the server.
         """
-        server = context.message.guild
+        server = interaction.guild
         roles = [x.name for x in server.roles]
         role_length = len(roles)
         if role_length > 50:
@@ -68,9 +72,11 @@ class Info(commands.Cog, name="info"):
             description=f"{server}",
             color=config["success"]
         )
-        embed.set_thumbnail(
-            url=server.icon_url
-        )
+
+        if server.icon != None:
+            embed.set_thumbnail(
+                url=server.icon.url
+            )
         embed.add_field(
             name="Server ID",
             value=server.id
@@ -90,10 +96,10 @@ class Info(commands.Cog, name="info"):
         embed.set_footer(
             text=f"Created at: {time}"
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(name="ping")
-    async def ping(self, context):
+    @nextcord.slash_command(name="ping", description="Check if the bot is alive.")
+    async def ping(self, interaction: Interaction):
         """
         [No Arguments] Check if the bot is alive.
         """
@@ -106,16 +112,16 @@ class Info(commands.Cog, name="info"):
             inline=True
         )
         embed.set_footer(
-            text=f"Pong request by {context.message.author}"
+            text=f"Pong request by {interaction.user}"
         )
-        await context.send(embed=embed)  
+        await interaction.response.send_message(embed=embed)  
 
-    @commands.command(name="invite")
-    async def invite(self, context):
+    @nextcord.slash_command(name="invite", description="Get the invite link of the Dad to be able to invite him to another server.")
+    async def invite(self, interaction: Interaction):
         """
         [No Arguments] Get the invite link of the Dad to be able to invite him to another server.
         """
-        await context.send(f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot&permissions=8")
+        await interaction.response.send_message(f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot&permissions=8")
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

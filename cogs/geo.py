@@ -6,6 +6,10 @@ import aiofiles
 from discord import Embed
 import requests
 import nextcord
+from typing import Optional
+from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 import urllib.request
 import urllib.parse
 import random
@@ -32,7 +36,7 @@ class Geo(commands.Cog, name="geo"):
             self.geodata = json.load(file)
         self.bot = bot
     
-    async def geoplay(self, context, single=False):
+    async def geoplay(self, interaction, single=False):
         status = "ZERO_RESULTS"
         loc = None
 
@@ -40,7 +44,7 @@ class Geo(commands.Cog, name="geo"):
         rand = random.randint(1, 10000)
 
         rulesEmbed = Embed(title="Welcome to Geo Guesser!", description="You will have one minute to guess the location of the picture. To guess, use ||spoilers|| around your guess as to not show the other players your guess. Just send your guess in this channel! If I can read it, I'll put a ✅ under it and delete it, and if I can't I'll put a ❌. Good luck!")
-        await context.send(embed=rulesEmbed)
+        await interaction.response.send_message(embed=rulesEmbed)
         while(status == "ZERO_RESULTS" or loc is None):
             location = random.choice(self.geodata)
             city = location["name"]
@@ -51,48 +55,44 @@ class Geo(commands.Cog, name="geo"):
 
         urllib.request.urlretrieve(f"https://maps.googleapis.com/maps/api/streetview?radius=3000&source=outdoor&size=1000x1000&location={ urllib.parse.quote(f'{city},{country}') }&fov=100&heading=0&pitch=0&key={ config['maps_api_key'] }", f"geo{rand}.jpg")
 
-        await context.send("", file=nextcord.File(f"geo{rand}.jpg"))
+        await interaction.followup.send("", file=nextcord.File(f"geo{rand}.jpg"))
         os.remove(f"geo{rand}.jpg")
         
         correctLocation = (loc.latitude, loc.longitude)
 
         guesses = dict()
         embed = nextcord.Embed(title=f"Guesses will go here!")
-        embedMessage = await context.send(embed=embed)
+        embedMessage = await interaction.followup.send(embed=embed)
 
         def check(m):
-            if m.author.bot or m.channel != context.channel or not re.search("(\|\|[\S\s]*\|\|)", m.content):
+            if m.author.bot or m.channel != interaction.channel or not re.search("(\|\|[\S\s]*\|\|)", m.content):
                 return
-            try:
-                guessText = m.content.replace("||", "")
-                
-                guess = geolocator.geocode(f'{guessText}')
-                
-                guess = (guess.latitude, guess.longitude)
-                distance = hs.haversine(guess,correctLocation, unit=hs.Unit.MILES)
-                userRoles = m.author.roles
-                color = "white"
-                if len(userRoles) > 1:
-                    topRole = userRoles[-1]
-                    color = str(topRole.color).replace("#", "")
-                    color = "0x" + color
+            guessText = m.content.replace("||", "")
+            
+            guess = geolocator.geocode(f'{guessText}')
+            
+            guess = (guess.latitude, guess.longitude)
+            distance = hs.haversine(guess,correctLocation, unit=hs.Unit.MILES)
+            userRoles = m.author.roles
+            color = "white"
+            if len(userRoles) > 1:
+                topRole = userRoles[-1]
+                color = str(topRole.color).replace("#", "")
+                color = "0x" + color
 
-                guesses["{}".format(m.author.name)] = (distance, guessText, len(guesses.keys()), color)
-                players = sorted(guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2]))
+            guesses["{}".format(m.author.name)] = (distance, guessText, len(guesses.keys()), color)
+            players = sorted(guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2]))
 
-                newEmbed = nextcord.Embed(title=f"Guesses will go here!")
-                for i, author in enumerate(players):
-                    newEmbed.add_field(name=i+1, value=f"{author}", inline=True)
-                loop = asyncio.get_event_loop()
-                loop.create_task(embedMessage.edit(embed=newEmbed))
-                loop.create_task(m.add_reaction("✅"))
-                loop.create_task(m.delete())
-                if single:
-                    return True
-            except:
-                loop = asyncio.get_event_loop()
-                loop.create_task(m.add_reaction("❌"))
-                return
+            newEmbed = nextcord.Embed(title=f"Guesses will go here!")
+            for i, author in enumerate(players):
+                newEmbed.add_field(name=i+1, value=f"{author}", inline=True)
+            loop = asyncio.get_event_loop()
+            loop.create_task(embedMessage.edit(embed=newEmbed))
+            loop.create_task(m.add_reaction("✅"))
+            loop.create_task(m.delete())
+            if single:
+                return True
+
 
         try:
             await self.bot.wait_for("message", timeout=60.0, check=check)
@@ -109,29 +109,26 @@ class Geo(commands.Cog, name="geo"):
             newEmbed.add_field(name=i+1, value=f"{author}: {guesses[author][1]} ({round(guesses[author][0], 2)} miles away)\n[maps link](https://maps.google.com/?q={authorloc.latitude},{authorloc.longitude})", inline=True)
         loop = asyncio.get_event_loop()
         loop.create_task(embedMessage.edit(embed=newEmbed))
-        await context.send(f"Guessing is done!")
-
-        
-        print(f"{mapurl}&key={ config['maps_api_key'] }")
+        await interaction.followup.send(f"Guessing is done!")
         
         urllib.request.urlretrieve(f"{mapurl}&key={ config['maps_api_key'] }", f"answer{rand}.png")
-        await context.send("", file=nextcord.File(f"answer{rand}.png"))
+        await interaction.followup.send("", file=nextcord.File(f"answer{rand}.png"))
         os.remove(f"answer{rand}.png")
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @commands.command(name="geo")
-    async def geo(self, context):
+    @nextcord.slash_command(name="geo", description="Play a round of geo guesser!")
+    async def geo(self, interaction: Interaction):
         """
         [No Arguments] Play a round of geo guesser!
         """
-        await self.geoplay(context)
+        await self.geoplay(interaction)
     
-    @commands.command(name="geosingle")
-    async def geosingle(self, context):
+    @nextcord.slash_command(name="geosingle", description="Play a round of geo guesser by yourself!")
+    async def geosingle(self, interaction: Interaction):
         """
         [No Arguments] Play a round of geo guesser by yourself!
         """
-        await self.geoplay(context, single=True)
+        await self.geoplay(interaction, single=True)
 
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

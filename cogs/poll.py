@@ -2,7 +2,11 @@ import os
 import sys
 import nextcord
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
@@ -14,23 +18,23 @@ class Poll(commands.Cog, name="poll"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="poll")
-    async def poll(self, context, *args):
+    @nextcord.slash_command(name="poll", description="Create a poll where members can vote.")
+    async def poll(self, interaction: Interaction, question: str = SlashOption(description="Question to ask members.", required=True)):
         """
         [Question] Create a poll where members can vote.
         """
-        poll_title = " ".join(args)
         embed = nextcord.Embed(
             title="A new poll has been created!",
-            description=f"{poll_title}",
+            description=f"{question}",
             color=config["success"]
         )
 
         embed.set_footer(
-            text=f"Poll created by: {context.message.author} • React to vote!"
+            text=f"Poll created by: {interaction.user} • React to vote!"
         )
         
-        embed_message = await context.send(embed=embed)
+        embed_message = await interaction.response.send_message(embed=embed)
+        embed_message = await embed_message.fetch()
         await embed_message.add_reaction("👍")
         await embed_message.add_reaction("👎")
         await embed_message.add_reaction("🤷")

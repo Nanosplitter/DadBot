@@ -1,7 +1,11 @@
 import os
 import sys
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 import mysql.connector
 
 if "DadBot" not in str(os.getcwd()):
@@ -15,13 +19,13 @@ class Caught(commands.Cog, name="caught"):
         self.bot = bot
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @commands.command(name="caught")
-    async def caught(self, context):
+    @nextcord.slash_command(name="caught", description="See how many times everyone on the server has been caught by DadBot.")
+    async def caught(self, interaction: Interaction):
         """
         [No Arguments] See how many times everyone on the server has been caught by DadBot.
         """
         members = []
-        for i in context.guild.members:
+        for i in interaction.guild.members:
             members.append(str(i))
         
         mydb = mysql.connector.connect(
@@ -43,7 +47,7 @@ class Caught(commands.Cog, name="caught"):
         res += "```"
         mycursor.close()
         mydb.close()
-        await context.send(res)
+        await interaction.response.send_message(res)
 
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

@@ -8,7 +8,11 @@ import aiohttp
 import nextcord
 import requests
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
@@ -20,37 +24,37 @@ class NewPicture(commands.Cog, name="newpicture"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="newperson")
-    async def newperson(self, context):
+    @nextcord.slash_command(name="newperson", description="Creates a picture of a person that does not exist.(From https://thispersondoesnotexist.com/)")
+    async def newperson(self, interaction: Interaction):
         """
         [No Arguments] Creates a picture of a person that does not exist.(From https://thispersondoesnotexist.com/)
         """
         fileName = str(uuid.uuid1()) + str(random.choice(range(1, 1337))) + ".png"
         await self.save_online_person(fileName)
         file = nextcord.File(fileName, filename="newperson.png")
-        await context.send("", file=file)
+        await interaction.response.send_message("", file=file)
         os.remove(fileName)
 
-    @commands.command(name="newcat")
-    async def newcat(self, context):
+    @nextcord.slash_command(name="newcat", description="Creates a picture of a cat that does not exist.(From https://thiscatdoesnotexist.com/)")
+    async def newcat(self, interaction: Interaction):
         """
         [No Arguments] Creates a picture of a cat that does not exist. (From https://thiscatdoesnotexist.com/)
         """
         fileName = str(uuid.uuid1()) + str(random.choice(range(1, 1337))) + ".png"
         await self.save_online_cat(fileName)
         file = nextcord.File(fileName, filename="newcat.png")
-        await context.send("", file=file)
+        await interaction.response.send_message("", file=file)
         os.remove(fileName)
     
-    @commands.command(name="newdog")
-    async def newdog(self, context):
+    @nextcord.slash_command(name="newdog", description="Creates a picture of a dog that does not exist.(From https://random.dog/)")
+    async def newdog(self, interaction: Interaction):
         """
         [No Arguments] Gets a random dog pic from https://random.dog
         """
         url = "https://random.dog/woof.json"
         response = requests.get(url)
         json = response.json()
-        await context.reply(json["url"])  
+        await interaction.response.send_message(json["url"])  
     
     async def get_online_person(self) -> bytes:
         url = "https://thispersondoesnotexist.com/image"

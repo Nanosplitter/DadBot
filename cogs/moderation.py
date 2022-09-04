@@ -3,7 +3,12 @@ import sys
 import random
 import nextcord
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
+
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
 with open("config.yaml") as file:
@@ -13,150 +18,19 @@ with open("config.yaml") as file:
 class moderation(commands.Cog, name="moderation"):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(name='kick', pass_context=True)
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, context, member: nextcord.Member, *args):
-        """
-        [Member] Kick a user out of the server.
-        """
-        if member.guild_permissions.administrator:
-            embed = nextcord.Embed(
-                title="Error!",
-                description="User has Admin permissions.",
-                color=config["error"]
-            )
-            await context.send(embed=embed)
-        else:
-            try:
-                reason = " ".join(args)
-                await member.kick(reason=reason)
-                embed = nextcord.Embed(
-                    title="User Kicked!",
-                    description=f"**{member}** was kicked by **{context.message.author}**!",
-                    color=config["success"]
-                )
-                embed.add_field(
-                    name="Reason:",
-                    value=reason
-                )
-                await context.send(embed=embed)
-                try:
-                    await member.send(
-                        f"You were kicked by **{context.message.author}**!\nReason: {reason}"
-                    )
-                except:
-                    pass
-            except:
-                embed = nextcord.Embed(
-                    title="Error!",
-                    description="An error occurred while trying to kick the user.",
-                    color=config["success"]
-                )
-                await context.message.channel.send(embed=embed)
-
-    @commands.command(name="nick")
-    @commands.has_permissions(manage_nicknames=True)
-    async def nick(self, context, member: nextcord.Member, *, name: str):
-        """
-        [Member NewNickname] Change the nickname of a user on a server.
-        """
-        try:
-            if name.lower() == "!reset":
-                name = None
-            await member.edit(nick=name)
-            embed = nextcord.Embed(
-                title="Changed Nickname!",
-                description=f"**{member}'s** new nickname is **{name}**!",
-                color=config["success"]
-            )
-            await context.send(embed=embed)
-        except Exception as e:
-            embed = nextcord.Embed(
-                title="Error!",
-                description="An error occurred while trying to change the nickname of the user.",
-                color=config["success"]
-            )
-            await context.message.channel.send(embed=embed)
     
-    @commands.command(name="clean")
-    async def clean(self, context, num="1"):
+    @nextcord.message_command(name="clean", guild_ids=[850473081063211048, 856919397754470420])
+    async def clean(self, interaction: Interaction, message: nextcord.Message):
         """
-        [No Arguments] Solves many problems. (Limited by nextcord to max out at 333)
+        [No Arguments] Solves many problems.
         """
-        try:
-            message = await context.channel.fetch_message(context.message.reference.message_id)
-            reactions = ['🙅', '🙆', '🙇', '🙋', '🙌', '🙍', '🙎', '🙏', '✂', '✈', '✉', '✊', '✋', '✌', '✏', '❄', '❤', '🚀', '🚃', '🚄', '🚅', '🚇', '🚉', '🚌', '🚏', '🚑', '🚒', '🚓', '🚕', '🚗', '🚙', '🚚', '🚢', '🚤', '🚥', '🚧', '🚨', '🚩', '🚪', '🚫', '🚬', '🚲', '🚶', '🚽', '🛀', '⌚', '⌛', '⏰', '⏳', '☁', '☎', '☔', '☕', '♨', '♻', '♿', '⚓', '⚡', '⚽', '⚾', '⛄', '⛅', '⛪', '⛲', '⛳', '⛵', '⛺', '⭐', '⛽', '🃏', '🌀', '🌁', '🌂', '🌃', '🌄', '🌅', '🌆', '🌇', '🌈', '🌉', '🌊', '🌋', '🌏', '🌙', '🌛', '🌟', '🌠', '🌰', '🌱', '🌴', '🌵', '🌷', '🌸', '🌹', '🌺', '🌻', '🌼', '🌽', '🌾', '🌿', '🍀', '🍁', '🍂', '🍃', '🍄', '🍅', '🍆', '🍇', '🍈', '🍉', '🍊', '🍌', '🍍', '🍎', '🍏', '🍑', '🍒', '🍓', '🍔', '🍕', '🍖', '🍗', '🍘', '🍙', '🍚', '🍛', '🍝', '🍞', '🍟', '🍠', '🍡', '🍢', '🍣', '🍤', '🍥', '🍦', '🍧', '🍨', '🍩', '🍪', '🍫', '🍬', '🍭', '🍮', '🍯', '🍰', '🍱', '🍲', '🍳', '🍴', '🍵', '🍶', '🍷', '🍸', '🍹', '🍺', '🍻', '🎀', '🎁', '🎂', '🎃', '🎄', '🎅', '🎆', '🎇', '🎈', '🎉', '🎊', '🎋', '🎌', '🎍', '🎎', '🎏', '🎐', '🎑', '🎒', '🎓', '🎠', '🎡', '🎢', '🎣', '🎤', '🎥', '🎦', '🎧', '🎨', '🎩', '🎪', '🎫', '🎬', '🎭', '🎮', '🎯', '🎰', '🎱', '🎲', '🎳', '🎴', '🎵', '🎶', '🎷', '🎸', '🎹', '🎺',  '🎽', '🎾', '🎿', '🏀', '🏁', '🏂', '🏃', '🏄', '🏆', '🏈', '🏊', '🏠', '🏡', '🏢', '🏣', '🏥', '🏦', '🏧', '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏮', '🏯', '🏰', '🐌', '🐍', '🐎', '🐑', '🐒', '🐔', '🐗', '🐘', '🐙', '🐚', '🐛', '🐜', '🐝', '🐞', '🐟', '🐠', '🐡', '🐢', '🐣', '🐤', '🐥', '🐦', '🐧', '🐨', '🐩', '🐫', '🐬', '🐭', '🐮', '🐯', '🐰', '🐱', '🐲', '🐳', '🐴', '🐵', '🐶', '🐷', '🐸', '🐹', '🐺', '🐻', '🐼', '🐽', '🐾', '👀', '👂', '👃', '👄', '👅', '👆', '👇', '👈', '👉', '👊', '👋', '👌', '👍', '👎', '👏', '👐', '👑', '👒', '👓', '👔', '👕', '👖', '👗', '👘', '👙', '👚', '👛', '👜', '👝', '👞', '👟', '👠', '👡', '👢', '👣',  '👦', '👧', '👨', '👩', '👪', '👫', '👮', '👯', '👰', '👱', '👴', '👶', '👷', '👸', '👹', '👺', '👻', '👼', '👽', '👾', '👿', '💀', '💁', '💂', '💃', '💄', '💅', '💆', '💇', '💈', '💉', '💊', '💋', '💌', '💍', '💎', '💏', '💐', '💑', '💒', '💓', '💔', '💕', '💖', '💗', '💘', '💙', '💚', '💛', '💜', '💝', '💞', '💟', '💠', '💡', '💢', '💣', '💤', '💥', '💦', '💧', '💨', '💩', '💪', '💫', '💬', '💮', '💯', '💰', '💲', '💳', '💵', '💸', '💺', '💻', '💼', '💽', '💾',  '📀', '📃', '📅', '📆', '📈', '📉', '📌', '📍', '📎', '📓', '📔', '📕', '📖', '📞', '📟', '📠', '📡', '📣', '📦', '📧', '📫', '📰', '📱', '📷', '📹', '📺', '📻', '📼', '🔊', '🔋', '🔌', '🔎', '🔐', '🔑', '🔒', '🔓', '🔔', '🔜', '🔥', '🔦', '🔧', '🔨', '🔩', '🔪', '🔫', '🔮', '🗻', '🗼', '🗽', '🗾', '🗿', '😴', '🚁', '🚂', '🚆', '🚈', '🚊', '🚍', '🚎', '🚐', '🚔', '🚖', '🚘', '🚛', '🚜', '🚝', '🚞', '🚟', '🚠', '🚡', '🚣', '🚦', '🚮', '🚵', '🚿', '🛁', '🌍', '🌎', '🌜', '🌝', '🌞', '🌲', '🌳', '🍋', '🍐', '🍼', '🏇', '🏉', '🏤', '🐀', '🐁', '🐂', '🐃', '🐄', '🐅', '🐆', '🐇', '🐈', '🐉', '🐊', '🐋', '🐏', '🐐', '🐓', '🐕', '🐖', '🐪', '👭', '📬', '📭', '📯', '🔬', '🔭']
-            for i in range(20):
-                await message.add_reaction(random.choice(reactions))
-
-        except:
-            num = int(num)
-            if num > 333:
-                num = 333
-            if (context.guild.id == 856919397754470420):
-                res = ["<a:bdk:920426208498421840>"] * num
-            else:
-                res = [":yum:"] * num
-            await context.reply("\n".join(res))      
-
-    @commands.command(name="ban")
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, context, member: nextcord.Member, *args):
-        """
-        [Member] Bans a user from the server.
-        """
-        try:
-            if member.guild_permissions.administrator:
-                embed = nextcord.Embed(
-                    title="Error!",
-                    description="User has Admin permissions.",
-                    color=config["success"]
-                )
-                await context.send(embed=embed)
-            else:
-                reason = " ".join(args)
-                await member.ban(reason=reason)
-                embed = nextcord.Embed(
-                    title="User Banned!",
-                    description=f"**{member}** was banned by **{context.message.author}**!",
-                    color=config["success"]
-                )
-                embed.add_field(
-                    name="Reason:",
-                    value=reason
-                )
-                await context.send(embed=embed)
-                await member.send(f"You were banned by **{context.message.author}**!\nReason: {reason}")
-        except:
-            embed = nextcord.Embed(
-                title="Error!",
-                description="An error occurred while trying to ban the user.",
-                color=config["success"]
-            )
-            await context.send(embed=embed)
-
-    @commands.command(name="warn")
-    @commands.has_permissions(manage_messages=True)
-    async def warn(self, context, member: nextcord.Member, *args):
-        """
-        [Member] Warns a user in their private messages.
-        """
-        reason = " ".join(args)
-        embed = nextcord.Embed(
-            title="User Warned!",
-            description=f"**{member}** was warned by **{context.message.author}**!",
-            color=config["success"]
-        )
-        embed.add_field(
-            name="Reason:",
-            value=reason
-        )
-        await context.send(embed=embed)
-        try:
-            await member.send(f"You were warned by **{context.message.author}**!\nReason: {reason}")
-        except:
-            pass
+        await interaction.response.send_message("<a:bdk:920426208498421840>")
+        
+        reactions = ['🙅', '🙆', '🙇', '🙋', '🙌', '🙍', '🙎', '🙏', '✂', '✈', '✉', '✊', '✋', '✌', '✏', '❄', '❤', '🚀', '🚃', '🚄', '🚅', '🚇', '🚉', '🚌', '🚏', '🚑', '🚒', '🚓', '🚕', '🚗', '🚙', '🚚', '🚢', '🚤', '🚥', '🚧', '🚨', '🚩', '🚪', '🚫', '🚬', '🚲', '🚶', '🚽', '🛀', '⌚', '⌛', '⏰', '⏳', '☁', '☎', '☔', '☕', '♨', '♻', '♿', '⚓', '⚡', '⚽', '⚾', '⛄', '⛅', '⛪', '⛲', '⛳', '⛵', '⛺', '⭐', '⛽', '🃏', '🌀', '🌁', '🌂', '🌃', '🌄', '🌅', '🌆', '🌇', '🌈', '🌉', '🌊', '🌋', '🌏', '🌙', '🌛', '🌟', '🌠', '🌰', '🌱', '🌴', '🌵', '🌷', '🌸', '🌹', '🌺', '🌻', '🌼', '🌽', '🌾', '🌿', '🍀', '🍁', '🍂', '🍃', '🍄', '🍅', '🍆', '🍇', '🍈', '🍉', '🍊', '🍌', '🍍', '🍎', '🍏', '🍑', '🍒', '🍓', '🍔', '🍕', '🍖', '🍗', '🍘', '🍙', '🍚', '🍛', '🍝', '🍞', '🍟', '🍠', '🍡', '🍢', '🍣', '🍤', '🍥', '🍦', '🍧', '🍨', '🍩', '🍪', '🍫', '🍬', '🍭', '🍮', '🍯', '🍰', '🍱', '🍲', '🍳', '🍴', '🍵', '🍶', '🍷', '🍸', '🍹', '🍺', '🍻', '🎀', '🎁', '🎂', '🎃', '🎄', '🎅', '🎆', '🎇', '🎈', '🎉', '🎊', '🎋', '🎌', '🎍', '🎎', '🎏', '🎐', '🎑', '🎒', '🎓', '🎠', '🎡', '🎢', '🎣', '🎤', '🎥', '🎦', '🎧', '🎨', '🎩', '🎪', '🎫', '🎬', '🎭', '🎮', '🎯', '🎰', '🎱', '🎲', '🎳', '🎴', '🎵', '🎶', '🎷', '🎸', '🎹', '🎺',  '🎽', '🎾', '🎿', '🏀', '🏁', '🏂', '🏃', '🏄', '🏆', '🏈', '🏊', '🏠', '🏡', '🏢', '🏣', '🏥', '🏦', '🏧', '🏨', '🏩', '🏪', '🏫', '🏬', '🏭', '🏮', '🏯', '🏰', '🐌', '🐍', '🐎', '🐑', '🐒', '🐔', '🐗', '🐘', '🐙', '🐚', '🐛', '🐜', '🐝', '🐞', '🐟', '🐠', '🐡', '🐢', '🐣', '🐤', '🐥', '🐦', '🐧', '🐨', '🐩', '🐫', '🐬', '🐭', '🐮', '🐯', '🐰', '🐱', '🐲', '🐳', '🐴', '🐵', '🐶', '🐷', '🐸', '🐹', '🐺', '🐻', '🐼', '🐽', '🐾', '👀', '👂', '👃', '👄', '👅', '👆', '👇', '👈', '👉', '👊', '👋', '👌', '👍', '👎', '👏', '👐', '👑', '👒', '👓', '👔', '👕', '👖', '👗', '👘', '👙', '👚', '👛', '👜', '👝', '👞', '👟', '👠', '👡', '👢', '👣',  '👦', '👧', '👨', '👩', '👪', '👫', '👮', '👯', '👰', '👱', '👴', '👶', '👷', '👸', '👹', '👺', '👻', '👼', '👽', '👾', '👿', '💀', '💁', '💂', '💃', '💄', '💅', '💆', '💇', '💈', '💉', '💊', '💋', '💌', '💍', '💎', '💏', '💐', '💑', '💒', '💓', '💔', '💕', '💖', '💗', '💘', '💙', '💚', '💛', '💜', '💝', '💞', '💟', '💠', '💡', '💢', '💣', '💤', '💥', '💦', '💧', '💨', '💩', '💪', '💫', '💬', '💮', '💯', '💰', '💲', '💳', '💵', '💸', '💺', '💻', '💼', '💽', '💾',  '📀', '📃', '📅', '📆', '📈', '📉', '📌', '📍', '📎', '📓', '📔', '📕', '📖', '📞', '📟', '📠', '📡', '📣', '📦', '📧', '📫', '📰', '📱', '📷', '📹', '📺', '📻', '📼', '🔊', '🔋', '🔌', '🔎', '🔐', '🔑', '🔒', '🔓', '🔔', '🔜', '🔥', '🔦', '🔧', '🔨', '🔩', '🔪', '🔫', '🔮', '🗻', '🗼', '🗽', '🗾', '🗿', '😴', '🚁', '🚂', '🚆', '🚈', '🚊', '🚍', '🚎', '🚐', '🚔', '🚖', '🚘', '🚛', '🚜', '🚝', '🚞', '🚟', '🚠', '🚡', '🚣', '🚦', '🚮', '🚵', '🚿', '🛁', '🌍', '🌎', '🌜', '🌝', '🌞', '🌲', '🌳', '🍋', '🍐', '🍼', '🏇', '🏉', '🏤', '🐀', '🐁', '🐂', '🐃', '🐄', '🐅', '🐆', '🐇', '🐈', '🐉', '🐊', '🐋', '🐏', '🐐', '🐓', '🐕', '🐖', '🐪', '👭', '📬', '📭', '📯', '🔬', '🔭']
+        for i in range(20):
+            await message.add_reaction(random.choice(reactions))  
+        
+        
 
 
 def setup(bot):

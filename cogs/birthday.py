@@ -3,7 +3,12 @@ import mysql.connector
 import dateparser as dp
 from dateparser.search import search_dates
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
+
 
 from noncommands import birthdayLoop
 
@@ -18,8 +23,8 @@ class Birthday(commands.Cog, name="birthday"):
         self.bot = bot
         self.birthdayLoop = birthdayLoop.BirthdayLoop(bot)
 
-    @commands.command(name="setbirthday")
-    async def setbirthday(self, context, *birthday):
+    @nextcord.slash_command(name="setbirthday", description="Dad always remembers birthdays.")
+    async def setbirthday(self, interaction: Interaction, birthday: str = SlashOption(description="A date, like 'January 4th'", required=True)):
         """
         [Date] Dad always remembers birthdays.
         """
@@ -30,7 +35,7 @@ class Birthday(commands.Cog, name="birthday"):
             database=config["databasename"],
             autocommit=True
         )
-        timeStr = " ".join(birthday).lower()
+        timeStr = birthday
         time = dp.parse(timeStr, settings={'TIMEZONE': 'US/Eastern', 'RETURN_AS_TIMEZONE_AWARE': True, 'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})
         timeWords = timeStr
         f = '%Y-%m-%d %H:%M:%S'
@@ -55,11 +60,12 @@ class Birthday(commands.Cog, name="birthday"):
         else:
             await context.reply("I can't understand that time, try again but differently")
     
-    @commands.command(name="todaysbirthdays")
-    async def todaysbirthdays(self, context):
+    @nextcord.slash_command(name="todaysbirthdays", description="Get all of the birthdays for today")
+    async def todaysbirthdays(self, interaction: Interaction):
         """
         [No Arguments] Dad will tell you who has birthdays today.
         """
+        await interaction.response.send_message("Checking!")
         await self.birthdayLoop.checkBirthdays()
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

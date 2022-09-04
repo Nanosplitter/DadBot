@@ -2,7 +2,11 @@ import os
 import random
 import requests
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType, Message
+from nextcord.abc import GuildChannel
 import uwuify
 import json
 
@@ -18,8 +22,8 @@ class Memes(commands.Cog, name="memes"):
         with open("./resources/emoji-mappings.json", encoding="utf8") as file:
             self.emoji_mappings = json.load(file)
 
-    @commands.command(name="nobitches")
-    async def nobitches(self, context, *text):
+    @nextcord.slash_command(name="nobitches", description="Make a No Bitches? Megamind meme with custom text")
+    async def nobitches(self, interaction: Interaction, text: str = SlashOption(description="Text to put on the meme", required=True)):
         """
         [Text] Make a No Bitches? Megamind meme with custom text
         """
@@ -27,31 +31,29 @@ class Memes(commands.Cog, name="memes"):
             "template_id": "370867422", 
             "username": "nanosplitter", 
             "password": config["imgflip_pass"],
-            "text0": " ".join(text),
+            "text0": text,
         }
         r = requests.post("https://api.imgflip.com/caption_image", params=params)
-        await context.send(r.json()["data"]["url"])
+        await interaction.response.send_message(r.json()["data"]["url"])
 
-    @commands.command(name="uwu")
-    async def uwu(self, context):
+    @nextcord.message_command(name="uwu")
+    async def uwu(self, interaction: Interaction, message: nextcord.Message):
         """
         UwU - Wepwy to a message to make it into an UwU message. ( ͡o ꒳ ͡o )
         """
-        message = await context.channel.fetch_message(context.message.reference.message_id)
         flags = uwuify.SMILEY | uwuify.YU
-        await context.reply(uwuify.uwu(message.content, flags=flags))
+        await interaction.response.send_message(uwuify.uwu(message.content, flags=flags))
     
-    @commands.command(name="pastafy")
-    async def pastafy(self, context):
+    @nextcord.message_command(name="pastafy")
+    async def pastafy(self, interaction: Interaction, message: nextcord.Message):
         """
         [No Arguments] Turns any message you reply to into a copypasta.
         """
         
-        message = await context.channel.fetch_message(context.message.reference.message_id)
         res = ""
         for word in message.content.split(" "):
             res += word + (" " + random.choice(self.emoji_mappings[word.lower()]) + " " if word in self.emoji_mappings else " ")
-        await message.reply(res)
+        await interaction.response.send_message(res)
         
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

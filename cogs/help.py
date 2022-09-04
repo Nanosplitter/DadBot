@@ -2,6 +2,10 @@ import os
 import sys
 
 import nextcord
+from typing import Optional
+from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 import yaml
 from nextcord.ext import commands
 from nextcord.ui import Button, View
@@ -30,55 +34,13 @@ class Help(commands.Cog, name="help"):
         embed.set_footer(text=f"{index+1}/{max_index}")
         return embed
 
-    @commands.command(name="help")
-    async def help(self, context):
+    @nextcord.slash_command(name="help", description="List all commands from every Cog the bot has loaded.")
+    async def help(self, interaction: Interaction):
         """
-        [No Arguments] List all commands from every Cog the bot has loaded.
+        How do I find out what all the commands are?
         """
-        prefix = config["bot_prefix"]
-        if not isinstance(prefix, str):
-            prefix = prefix[0]
-        embed = nextcord.Embed(title="Help", description="List of available commands:", color=config["success"])
-        cogs = [i for i in self.bot.cogs if i not in ["owner", "template", "moderation"]]
 
-        count = len(cogs)
-        index = 0
-        currEmbed = self.generateEmbedForCog(self.bot.get_cog(cogs[index].lower()), prefix, index, count)
-
-        previous_button = Button(label="<", style=nextcord.ButtonStyle.grey)
-
-        async def previous_callback(interaction):
-            # edit the embed to show the previous result
-            currEmbed = interaction.message.embeds[0].to_dict()
-            index = int(currEmbed["footer"]["text"].split("/")[0]) - 1
-            if (index + 1) < 0:
-                index = count - 1
-            else:
-                index = index - 1
-            newembed = self.generateEmbedForCog(self.bot.get_cog(cogs[index].lower()), prefix, index, count)
-            await interaction.message.edit(embed=newembed)
-        
-        next_button = Button(label=">", style=nextcord.ButtonStyle.blurple)
-
-        async def next_callback(interaction):
-            # edit the embed to show the previous result
-            currEmbed = interaction.message.embeds[0].to_dict()
-            index = int(currEmbed["footer"]["text"].split("/")[0]) - 1
-            if (index + 1) >= count:
-                index = 0
-            else:
-                index = index + 1
-            newembed = self.generateEmbedForCog(self.bot.get_cog(cogs[index].lower()), prefix, index, count)
-            await interaction.message.edit(embed=newembed)
-        
-        previous_button.callback = previous_callback
-        next_button.callback = next_callback
-
-        view = View(timeout=1000)
-        view.add_item(previous_button)
-        view.add_item(next_button)
-
-        await context.send(embed=currEmbed, view=view)
+        await interaction.response.send_message("This bot uses slash commands! Type a `/` into the chat, click my icon, and you should see all the commands I can take!")
 
 
 def setup(bot):

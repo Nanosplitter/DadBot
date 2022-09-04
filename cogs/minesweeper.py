@@ -2,7 +2,10 @@ import os
 from numpy import number
 import yaml
 import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 import random
 
 if "DadBot" not in str(os.getcwd()):
@@ -39,44 +42,38 @@ class Minesweeper(commands.Cog, name="minesweeper"):
                         count += 1
         return count
 
-    @commands.command(name="minesweeper")
-    async def minesweeper(self, context, gridSize, numberOfBombs):
+    @nextcord.slash_command(name="minesweeper", description="Play a game of minesweeper!")
+    async def minesweeper(self, interaction: Interaction, gridsize: int = SlashOption(required=True, min_value=1, max_value=9), bombs: int = SlashOption(required=True, min_value=1, max_value=81)):
         """
         [gridSize numOfBombs] Play a game of minesweeper!
         """
-        try:
-            gridSize = int(gridSize)
-            numberOfBombs = int(numberOfBombs)
-        except:
-            await context.send("Invalid grid size or number of bombs!")
+
+        if gridsize > 9:
+            await interaction.response.send_message("The grid size can't be larger than 9x9! Try again with a smaller grid size.")
             return
 
-        if gridSize > 9:
-            await context.reply("The grid size can't be larger than 9x9! Try again with a smaller grid size.")
-            return
-
-        if numberOfBombs > gridSize**2:
-            await context.reply("You can't have more bombs than spaces in the grid! Try again with less bombs.")
+        if bombs > gridsize**2:
+            await interaction.response.send_message("You can't have more bombs than spaces in the grid! Try again with less bombs.")
             return
         
-        grid = [[0 for i in range(gridSize)] for j in range(gridSize)]
+        grid = [[0 for i in range(gridsize)] for j in range(gridsize)]
 
-        for _ in range(numberOfBombs):
+        for _ in range(bombs):
             while True:
-                randX = random.randint(0, gridSize-1)
-                randY = random.randint(0, gridSize-1)
+                randX = random.randint(0, gridsize-1)
+                randY = random.randint(0, gridsize-1)
 
                 if grid[randX][randY] != "B":
                     break
 
             grid[randX][randY] = "B"
         
-        for x in range(gridSize):
-            for y in range(gridSize):
+        for x in range(gridsize):
+            for y in range(gridsize):
                 if grid[x][y] != "B":
                     grid[x][y] = str(self.countBombs(grid, x, y))
         
-        await context.reply(self.embedGrid(grid))
+        await interaction.response.send_message(self.embedGrid(grid))
 
 def setup(bot):
     bot.add_cog(Minesweeper(bot))

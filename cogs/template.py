@@ -1,7 +1,11 @@
 import os
 import sys
 import yaml
+import nextcord
+from typing import Optional
 from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 
 if "DadBot" not in str(os.getcwd()):
     os.chdir("./DadBot")
@@ -14,7 +18,7 @@ class Template(commands.Cog, name="template"):
         self.bot = bot
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @commands.command(name="testcommand")
+    @nextcord.slash_command(name="template", description="This is a testing command that does nothing.")
     async def testcommand(self, context):
         """
         [No Arguments] This is a testing command that does nothing.

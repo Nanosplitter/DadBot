@@ -2,10 +2,13 @@ from curses import color_content
 import os
 import sys
 import yaml
-from nextcord.ext import commands
 from colour import Color
 from nextcord.ui import Button, View
 import nextcord
+from typing import Optional
+from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 import random
 
 if "DadBot" not in str(os.getcwd()):
@@ -72,18 +75,15 @@ class Colors(commands.Cog, name="colors"):
     async def changeRoleColor(self, color, role):
         await role.edit(colour=nextcord.Colour(int(color.replace("#", ""), 16)))
 
-    @commands.command(name="changecolor")
-    async def changecolor(self, context, color):
+    @nextcord.slash_command(name="changecolor", description="change your role color", guild_ids=[856919397754470420, 850473081063211048, 1001665668657193001])
+    async def changecolor(self, interaction: Interaction, color: str = SlashOption(description="A color hex code, like '#2B5FB3'", required=True)):
         """
         [ColorHexCode] Allows the user to change the color of their nickname. Only usable in some servers.
         """
         try:
-            if context.message.guild.id != 856919397754470420 and context.message.guild.id != 850473081063211048 and context.message.guild.id != 1001665668657193001:
-                return
-            
             limit = 4
             contrast = self.contrast("#36393f", color)
-            userRoles = context.message.author.roles
+            userRoles = interaction.user.roles
 
             if contrast < limit:
                 embed = nextcord.Embed(
@@ -91,14 +91,11 @@ class Colors(commands.Cog, name="colors"):
                     description="Color does not have enough contrast. That color has a contrast ratio of: " + str(round(contrast, 4)) + ":1. It needs to be above 4:1.",
                     color=int(color.replace("#", ""), 16)
                 )
-                
-                
-                
-                
+
                 colorButton = Button(label="Closest Color", style=nextcord.ButtonStyle.blurple)
 
                 async def color_callback(interaction):
-                    if interaction.user == context.author:  # checks that user interacting with button is command sender
+                    if interaction.user == interaction.user:  # checks that user interacting with button is command sender
                         delta = 1
                         colors = []
                         
@@ -118,12 +115,11 @@ class Colors(commands.Cog, name="colors"):
                             color=int(closestValidColor.replace("#", ""), 16)
                         ))
                 
-
                 colorButton.callback = color_callback
                 view = View(timeout=1000)
                 view.add_item(colorButton)
 
-                await context.send(embed=embed, view=view)
+                await interaction.response.send_message(embed=embed, view=view)
                 return
 
             if len(userRoles) > 1:
@@ -134,14 +130,14 @@ class Colors(commands.Cog, name="colors"):
                     description="Color has been changed! The contrast it has is " + str(round(contrast, 4)) + ":1",
                     color=int(color.replace("#", ""), 16)
                 )
-                await context.send(embed=embed)
+                await interaction.response.send_message(embed=embed)
         except:
             embed = nextcord.Embed(
                 title="Error",
                 description="Something went wrong, make sure you are using a 6 digit hex code. (ex: !changecolor #FFFFFF)",
                 color=config["error"]
             )
-            await context.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

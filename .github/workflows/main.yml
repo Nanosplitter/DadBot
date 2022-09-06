@@ -14,8 +14,8 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.2.0
       with:
-        server: ftp://us-dal-bots-03.ploxhost.com
+        server: sftp://us-dal-bots-03.ploxhost.com:2053
         username: i0geejw6.f47a6a0d
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /
+        server-dir: ./
         port: 2053

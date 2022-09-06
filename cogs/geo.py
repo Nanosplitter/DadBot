@@ -22,8 +22,7 @@ geolocator = Nominatim(user_agent="dad-bot")
 
 import yaml
 from nextcord.ext import commands
-if "DadBot" not in str(os.getcwd()):
-    os.chdir("./DadBot")
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 

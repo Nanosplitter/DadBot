@@ -14,8 +14,8 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.2.0
       with:
-        server: na731.pebblehost.com
-        username: pebblehost@colinwilson.dev.251416
+        server: sftp://us-dal-bots-03.ploxhost.com
+        username: i0geejw6.f47a6a0d
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: DadBot/
-        port: 21
+        server-dir: /
+        port: 2053

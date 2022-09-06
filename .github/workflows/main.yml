@@ -1,21 +1,16 @@
-on:
-  push:
-    branches:
-      - main
-name: 🚀 Deploy website on push
+on: push
+name: Publish Website
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v2
-
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@4.2.0
+    - uses: actions/checkout@v2.1.0
       with:
-        server: sftp://us-dal-bots-03.ploxhost.com:2053
-        username: i0geejw6.f47a6a0d
-        password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ./
-        port: 2053
+        fetch-depth: 2
+    - name: FTP-Deploy-Action
+      uses: SamKirkland/FTP-Deploy-Action@3.1.1
+      with:
+        ftp-server: ${{ secrets.FTP_SERVER }}
+        ftp-username: ${{ secrets.FTP_USERNAME }}
+        ftp-password: ${{ secrets.FTP_PASSWORD }}

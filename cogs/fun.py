@@ -18,8 +18,7 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption, ChannelType
 from nextcord.abc import GuildChannel
 
-if "DadBot" not in str(os.getcwd()):
-    os.chdir("./DadBot")
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 

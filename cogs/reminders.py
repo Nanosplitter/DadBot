@@ -7,8 +7,7 @@ import dateparser as dp
 import mysql.connector
 from dateparser.search import search_dates
 
-if "DadBot" not in str(os.getcwd()):
-    os.chdir("./DadBot")
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 

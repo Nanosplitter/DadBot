@@ -16,8 +16,7 @@ import yaml
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot
 
-if "DadBot" not in str(os.getcwd()):
-    os.chdir("./DadBot")
+
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)

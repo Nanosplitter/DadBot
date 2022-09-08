@@ -14,5 +14,5 @@ jobs:
         server: sftp://us-dal-bots-03.ploxhost.com
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        protocol: sftp
+        protocol: ftps
         port: 2053

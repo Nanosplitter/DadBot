@@ -38,10 +38,15 @@ class Dalle(commands.Cog, name="dalle"):
             ],
         )
 
-        data = run["result_preview"][0][0]
-        files = [nextcord.File(io.BytesIO(base64.b64decode(i)), filename="image.png") for i in data]
+
+        print(run["error"])
+        if run["error"] == None:
+            data = run["result_preview"][0][0]
+            files = [nextcord.File(io.BytesIO(base64.b64decode(i)), filename="image.png") for i in data]
+            await message.edit(content="Prompt: '" + prompt + "'", files=files)
+        else:
+            await message.edit(content="There was an error generating images for '" + prompt + "'. This is not your fault, please try again later.")
         
-        await message.edit(content="Prompt: '" + prompt + "'", files=files)
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

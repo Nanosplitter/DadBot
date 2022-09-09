@@ -38,8 +38,6 @@ class Dalle(commands.Cog, name="dalle"):
             ],
         )
 
-
-        print(run["error"])
         if run["error"] == None:
             data = run["result_preview"][0][0]
             files = [nextcord.File(io.BytesIO(base64.b64decode(i)), filename="image.png") for i in data]

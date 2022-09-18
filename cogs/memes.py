@@ -87,6 +87,7 @@ class Memes(commands.Cog, name="memes"):
             "y": ":regional_indicator_y:",
             "z": ":regional_indicator_z:",
             " ": "   ",
+            "0": ":regional_indicator_zero:",
             "1": ":regional_indicator_one:",
             "2": ":regional_indicator_two:",
             "3": ":regional_indicator_three:",

@@ -21,10 +21,10 @@ class Memes(commands.Cog, name="memes"):
         with open("./resources/emoji-mappings.json", encoding="utf8") as file:
             self.emoji_mappings = json.load(file)
 
-    @nextcord.slash_command(name="nobitches", description="Make a No Bitches? Megamind meme with custom text")
-    async def nobitches(self, interaction: Interaction, text: str = SlashOption(description="Text to put on the meme", required=True)):
+    @nextcord.slash_command(name="megamind", description="Make a No B*tches? Megamind meme with custom text")
+    async def megamind(self, interaction: Interaction, text: str = SlashOption(description="Text to put on the meme", required=True)):
         """
-        [Text] Make a No Bitches? Megamind meme with custom text
+        [Text] Make a No B*tches? Megamind meme with custom text
         """
         params = {
             "template_id": "370867422", 

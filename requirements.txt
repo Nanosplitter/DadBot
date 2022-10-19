@@ -25,3 +25,4 @@ geopy
 Nominatim
 haversine
 pipeline-ai
+syllables

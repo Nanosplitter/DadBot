@@ -3,6 +3,8 @@ import yaml
 import sys
 import os
 import cmudict
+import syllables
+import string
 
 cd = cmudict.dict()
 
@@ -10,46 +12,29 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
-def lookup_word(word):
-    return cd.get(word)
-
-def sylcoOneWord(word):
-    count = 0
-    phones = lookup_word(word) # this returns a list of matching phonetic rep's
-    if phones:                   # if the list isn't empty (the word was found)
-        phones0 = phones[0]      #     process the first
-        count = len([p for p in phones0 if p[-1].isdigit()]) # count the vowels
-    return count
-
-def sylco(words):
-    res = sum([sylcoOneWord(re.sub(r'[^\w\s]', '', w).lower()) for w in words.split()])
-    return res
-
-
-
-def popNumSyl(syl, words):
-    res = []
-    while syl > 0 and len(words) > 0:
-        word = words.pop()
-        res.append(word)
-        syl -= sylco(word)
-
-    return (syl == 0, res, words)
 
 class HaikuDetector:
+
     async def checkForHaiku(self, message):
         text = message.content
         words = text.split()[::-1]
-        poem = []
-        if sylco(text) == 17:
-            lines = [5, 7, 5]
-            for syl in lines:
-                res = popNumSyl(syl, words)
-                words = res[2].copy()
-                poem.append(res)
-            if all([i[0] for i in poem]):
-                res = "You're a poet!\n\n"
-                for line in [i[1] for i in poem]:
-                    res += "*" + " ".join(line) + "*\n"
-                res += "\n -" + message.author.mention
-                await message.reply(res)
+        for word in words:
+            pass
+            
+    
+    def getSyllables(self, word):
+        word = word.translate(str.maketrans('', '', string.punctuation))
+        syls = cd[word.lower()]
+
+        if (len(syls) == 0):
+            est = syllables.estimate(word)
+            return est
+        else:
+            sylCount = 0
+            for sound in syls[0]:
+                if sound[-1].isdigit():
+                    sylCount += 1
+            return sylCount
+
+
+        

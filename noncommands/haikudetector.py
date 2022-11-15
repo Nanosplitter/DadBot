@@ -2,11 +2,7 @@ import re
 import yaml
 import sys
 import os
-import cmudict
-import syllables
-import string
-
-cd = cmudict.dict()
+import syllapy
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -15,26 +11,40 @@ with open("config.yaml") as file:
 
 class HaikuDetector:
 
+    # Detect a haiku in the message
     async def checkForHaiku(self, message):
         text = message.content
         words = text.split()[::-1]
+        if len(words) < 3:
+            return False
+        if len(words) > 17:
+            return False
+        
+        line1 = 5
+        line2 = 7
+        line3 = 5
+        line1words = []
+        line2words = []
+        line3words = []
+
         for word in words:
-            pass
-            
-    
-    def getSyllables(self, word):
-        word = word.translate(str.maketrans('', '', string.punctuation))
-        syls = cd[word.lower()]
+            if (syllapy.count(word) == 0):
+                return False
+            if line1 > 0:
+                line1words.append(word)
+                line1 -= syllapy.count(word)
+            elif line2 > 0:
+                line2words.append(word)
+                line2 -= syllapy.count(word)
+            elif line3 > 0:
+                line3words.append(word)
+                line3 -= syllapy.count(word)
+            else:
+                break
 
-        if (len(syls) == 0):
-            est = syllables.estimate(word)
-            return est
-        else:
-            sylCount = 0
-            for sound in syls[0]:
-                if sound[-1].isdigit():
-                    sylCount += 1
-            return sylCount
-
-
+        if line1 == 0 and line2 == 0 and line3 == 0 and len(line1words) + len(line2words) + len(line3words) == len(words):
+            await message.channel.send(f"You're a poet!\n*{' '.join(line1words[::-1])}\n{' '.join(line2words[::-1])}\n{' '.join(line3words[::-1])}*\n- {message.author.mention}")
+            return True
+        return False
+        
         

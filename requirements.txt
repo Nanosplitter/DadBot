@@ -24,4 +24,4 @@ colour
 geopy
 Nominatim
 haversine
-pipeline-ai
+syllapy

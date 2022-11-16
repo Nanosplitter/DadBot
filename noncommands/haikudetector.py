@@ -43,7 +43,7 @@ class HaikuDetector:
                 break
 
         if line1 == 0 and line2 == 0 and line3 == 0 and len(line1words) + len(line2words) + len(line3words) == len(words):
-            await message.channel.send(f"You're a poet!\n*{' '.join(line3words[::-1])}\n{' '.join(line2words[::-1])}\n{' '.join(line1words[::-1])}*\n- {message.author.mention}")
+            await message.channel.send(f"You're a poet!\n\n*{' '.join(line3words[::-1])}\n{' '.join(line2words[::-1])}\n{' '.join(line1words[::-1])}*\n- {message.author.mention}")
             return True
         return False
         

@@ -48,16 +48,16 @@ class Birthday(commands.Cog, name="birthday"):
         if time is not None:
             timeUTC = dp.parse(time.strftime(f), settings={'TIMEZONE': 'US/Eastern', 'TO_TIMEZONE': 'UTC'})
             mycursor = mydb.cursor(buffered=True)
-            mycursor.execute(f"DELETE FROM birthdays WHERE author = '{context.message.author}'")
+            mycursor.execute(f"DELETE FROM birthdays WHERE author = '{interaction.user.name}' AND channel_id = {interaction.channel.id}")
             mydb.commit()
-            mycursor.execute("INSERT INTO birthdays (author, mention, channel_id, birthday) VALUES ('"+ str(context.message.author) +"', '"+ str(context.message.author.mention) +"', '"+ str(context.channel.id) +"', '"+ timeUTC.strftime(f) +"')")
+            mycursor.execute("INSERT INTO birthdays (author, mention, channel_id, birthday) VALUES ('"+ str(interaction.user.name) +"', '"+ str(interaction.user.mention) +"', '"+ str(interaction.channel.id) +"', '"+ timeUTC.strftime(f) +"')")
             print(time)
-            await context.reply("Your Birthday is set for: " + time.strftime(f) + " EST \n\nHere's the time I read: " + timeWords)
+            await interaction.response.send_message("Your Birthday is set for: " + time.strftime(f) + " EST \n\nHere's the time I read: " + timeWords)
             mydb.commit()
             mycursor.close()
             mydb.close()
         else:
-            await context.reply("I can't understand that time, try again but differently")
+            await interaction.response.send_message("I can't understand that time, try again but differently")
     
     @nextcord.slash_command(name="todaysbirthdays", description="Get all of the birthdays for today")
     async def todaysbirthdays(self, interaction: Interaction):

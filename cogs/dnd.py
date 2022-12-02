@@ -125,7 +125,7 @@ class DnD(commands.Cog, name="dnd"):
         if modifier != None and modifier != 0:
             total += modifier
             if  modifier > 0:
-                resString += f" + {modifier}"
+                resString += f" + *{modifier}*"
             else:
                 modifier = str(modifier).replace("-", "")
                 resString += f" - *{modifier}*"

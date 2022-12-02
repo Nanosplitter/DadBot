@@ -134,6 +134,9 @@ class DnD(commands.Cog, name="dnd"):
         if len(resString) > 2000:
             resString = f"Holy moly that's a lot characters. I can't send that. Here's the total instead: **{total}**"
 
+        if len(resString) > 2000:
+            resString = f"Jesus Christ you are dedicated. Congrats, you broke me. Your reward? You don't get the answer to your dice roll."
+
         await interaction.response.send_message(resString)
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

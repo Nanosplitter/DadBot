@@ -23,14 +23,6 @@ with open("config.yaml") as file:
 class DnD(commands.Cog, name="dnd"):
     def __init__(self, bot):
         self.bot = bot
-    
-    @nextcord.slash_command(name="todaysbirthdays", description="Get all of the birthdays for today")
-    async def todaysbirthdays(self, interaction: Interaction):
-        """
-        [No Arguments] Dad will tell you who has birthdays today.
-        """
-        await interaction.response.send_message("Checking!")
-        await self.birthdayLoop.checkBirthdays()
 
     def remove_tags(self, text):
         cleantext = re.sub(CLEANR, '', text)

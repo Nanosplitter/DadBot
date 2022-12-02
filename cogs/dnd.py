@@ -128,8 +128,8 @@ class DnD(commands.Cog, name="dnd"):
                 resString += f" + {modifier}"
             else:
                 modifier = str(modifier).replace("-", "")
-                resString += f" - {modifier}"
-        resString += f" = {total}"
+                resString += f" - *{modifier}*"
+        resString += f" = **{total}**"
 
         if len(resString) > 2000:
             resString = f"Holy moly that's a lot characters. I can't send that. Here's the total instead: **{total}**"

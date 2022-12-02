@@ -1,5 +1,6 @@
 import json
 import os
+import random
 
 import requests
 import mysql.connector
@@ -98,7 +99,44 @@ class DnD(commands.Cog, name="dnd"):
 
         await interaction.response.send_message(embed=embed, view=view)
 
+    @nextcord.slash_command(name="roll", description="Roll some dice")
+    async def roll(self, interaction: Interaction, dice: str = SlashOption(description="Something like 2d6+5", required=True)):
+        dice = dice.lower()
+        dice = dice.replace(" ", "")
 
+        match = re.findall(r"^([+-]?[1-9]\d*|0)?d([+-]?[1-9]\d*|0)([+-][+-]?[1-9]\d*|0)?", dice)
+
+        if len(match) == 0:
+            await interaction.response.send_message("Invalid dice roll, make sure it is something like `3d6+5`, or `2d6`, or `d20`, or `d20+5`", ephemeral=True)
+            return
+        
+        diceNum, diceType, modifier = match[0]
+
+        print(diceNum, diceType, modifier)
+
+        diceNum = int(diceNum) if diceNum else 1
+        diceType = int(diceType)
+        modifier = int(modifier) if modifier else None
+
+        diceRolls = []
+        for i in range(diceNum):
+            diceRolls.append(random.randint(1, diceType))
+        
+        total = sum(diceRolls)
+        resString = f"Rolling {dice}:\n" + "(" + " + ".join([str(i) for i in diceRolls]) + f")"
+        if modifier != None and modifier != 0:
+            total += modifier
+            if  modifier > 0:
+                resString += f" + {modifier}"
+            else:
+                modifier = str(modifier).replace("-", "")
+                resString += f" - {modifier}"
+        resString += f" = {total}"
+
+        if len(resString) > 2000:
+            resString = f"Holy shit that's a lot characters. I can't send that. Here's the total instead: **{total}**"
+
+        await interaction.response.send_message(resString)
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

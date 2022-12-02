@@ -106,13 +106,11 @@ class DnD(commands.Cog, name="dnd"):
 
         match = re.findall(r"^([+-]?[1-9]\d*|0)?d([+-]?[1-9]\d*|0)([+-][+-]?[1-9]\d*|0)?", dice)
 
-        if len(match) == 0:
-            await interaction.response.send_message("Invalid dice roll, make sure it is something like `3d6+5`, or `2d6`, or `d20`, or `d20+5`", ephemeral=True)
+        if len(match) == 0 or "." in dice:
+            await interaction.response.send_message("Invalid dice roll, make sure it has only integers and is something like `3d6+5`, or `2d6`, or `d20`, or `d20+5`", ephemeral=True)
             return
         
         diceNum, diceType, modifier = match[0]
-
-        print(diceNum, diceType, modifier)
 
         diceNum = int(diceNum) if diceNum else 1
         diceType = int(diceType)
@@ -134,7 +132,7 @@ class DnD(commands.Cog, name="dnd"):
         resString += f" = {total}"
 
         if len(resString) > 2000:
-            resString = f"Holy shit that's a lot characters. I can't send that. Here's the total instead: **{total}**"
+            resString = f"Holy moly that's a lot characters. I can't send that. Here's the total instead: **{total}**"
 
         await interaction.response.send_message(resString)
 

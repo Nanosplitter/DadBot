@@ -47,7 +47,7 @@ class OpenAI(commands.Cog, name="openai"):
         await interaction.response.defer()
 
         response = openai.Completion.create(
-            engine="text-babbage-001",
+            engine="text-davinci-003",
             prompt=prompt,
             temperature=0.9,
             max_tokens=300,

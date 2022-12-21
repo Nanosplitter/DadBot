@@ -53,7 +53,6 @@ class OpenAI(commands.Cog, name="openai"):
             frequency_penalty=0.0,
             presence_penalty=0.6
         )
-        print(response)
         
         await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}")
 

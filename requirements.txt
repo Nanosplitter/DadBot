@@ -25,3 +25,4 @@ geopy
 Nominatim
 haversine
 syllapy
+openai

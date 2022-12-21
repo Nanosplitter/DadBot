@@ -31,7 +31,7 @@ class OpenAI(commands.Cog, name="openai"):
                 else:
                     res += f"{i}\n"
 
-            await interaction.response.send_message(res, ephemeral=True)
+            await interaction.response.send_message(res)
             return False
         return True
 

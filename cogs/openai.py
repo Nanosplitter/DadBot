@@ -14,25 +14,17 @@ class OpenAI(commands.Cog, name="openai"):
         self.bot = bot
         openai.api_key = config["openapi_token"]
     
-    def openAiModeration(self, text):
+    async def openAiModeration(self, interaction: Interaction, prompt: str):
         response = openai.Moderation.create(
-            input=text
+            input=prompt
         )
-        return (response["results"][0]["flagged"], response["results"][0]["categories"])
-
-    @nextcord.slash_command(name="gpt", description="Talk to GPT")
-    async def gpt(self, interaction: Interaction, prompt: str):
-        """
-        [prompt] Ask GPT a question.
-        """
-        moderationResults = self.openAiModeration(prompt)
-        flagged = moderationResults[0]
+        flagged = response["results"][0]["flagged"]
         if flagged:
             if len(prompt) < 2000:
                 res = f"Your prompt: '{prompt}' was flagged as inapropriate because of these categories:\n---------------------------\n"
             else:
                 res = "Your prompt was flagged as inapropriate because of these categories:\n---------------------------\n"
-            flaggedCategories = moderationResults[1]
+            flaggedCategories = response["results"][0]["categories"]
             for i in flaggedCategories:
                 if flaggedCategories[i]:
                     res += f"-----------> **{i}**\n"
@@ -40,6 +32,16 @@ class OpenAI(commands.Cog, name="openai"):
                     res += f"{i}\n"
 
             await interaction.response.send_message(res, ephemeral=True)
+            return False
+        return True
+
+    @nextcord.slash_command(name="dadroid", description="Talk to Dad")
+    async def dadroid(self, interaction: Interaction, prompt: str):
+        """
+        [prompt] Ask dadroid a question.
+        """
+        isValidPrompt = await self.openAiModeration(interaction, prompt)
+        if not isValidPrompt:
             return
         
         await interaction.response.defer()

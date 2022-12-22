@@ -3,6 +3,8 @@ import openai
 import yaml
 import json
 import nextcord
+import io
+import base64
 from nextcord import Interaction
 from nextcord.ext import commands
 
@@ -57,6 +59,30 @@ class OpenAI(commands.Cog, name="openai"):
         )
         
         await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}")
+    
+    @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
+    async def dalle(self, interaction: Interaction, prompt: str):
+        """
+        [prompt] Create a DALL-E 2 image.
+        """
+        isValidPrompt = await self.openAiModeration(interaction, prompt)
+        if not isValidPrompt:
+            return
+        
+        await interaction.response.defer()
+
+        if len(prompt) > 1000:
+            await interaction.followup.send("Prompt must be less than 1000 characters.")
+            return
+
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+            response_format="url"
+        )
+        
+        await interaction.followup.send(response['data'][0]['url'])
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

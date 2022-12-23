@@ -5,7 +5,7 @@ import json
 import nextcord
 import io
 import base64
-from nextcord import Interaction
+from nextcord import Interaction, Embed
 from nextcord.ext import commands
 
 with open("config.yaml") as file:
@@ -65,6 +65,7 @@ class OpenAI(commands.Cog, name="openai"):
         """
         [prompt] Create a DALL-E 2 image.
         """
+        print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
         isValidPrompt = await self.openAiModeration(interaction, prompt)
         if not isValidPrompt:
             return
@@ -81,8 +82,9 @@ class OpenAI(commands.Cog, name="openai"):
             size="1024x1024",
             response_format="url"
         )
-        
-        await interaction.followup.send(response['data'][0]['url'])
+        embed = Embed(title=f'Prompt: "{prompt}"')
+        embed.set_image(url=response['data'][0]['url'])
+        await interaction.followup.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

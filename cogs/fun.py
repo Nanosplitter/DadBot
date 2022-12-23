@@ -15,8 +15,7 @@ import json
 import nextcord
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction, SlashOption, Embed
 
 
 with open("config.yaml") as file:
@@ -57,6 +56,19 @@ class Fun(commands.Cog, name="fun"):
             await interaction.response.send_message(r.json()['img'])
         except:
             await interaction.response.send_message("I can't find that xkcd comic, try another.")
+
+    @nextcord.slash_command(name="apod", description="Get the astonomy picture of the day from NASA.")
+    async def apod(self, interaction: Interaction):
+        """
+        Get the NASA picture of the day
+        """
+
+        c = self.bot.get_channel(interaction.channel_id)
+        response = requests.get("https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb")
+        print(response.json())
+        embed = Embed(title="Astronomy Picture of the Day", description=response.json()["explanation"])
+        embed.set_image(url=response.json()["hdurl"])
+        await interaction.response.send_message(embed=embed)
     
     @nextcord.slash_command(name="iswanted", description="See if someone is on the FBI's most wanted list.")
     async def iswanted(self, interaction: Interaction, name: Optional[str] = SlashOption(description="The name of the person you want to check", required=True)):

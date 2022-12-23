@@ -3,13 +3,11 @@ import os
 import re
 import sys
 import aiofiles
-from discord import Embed
 import requests
 import nextcord
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction, Embed
 import urllib.request
 import urllib.parse
 import random

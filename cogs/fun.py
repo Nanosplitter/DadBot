@@ -62,10 +62,7 @@ class Fun(commands.Cog, name="fun"):
         """
         Get the NASA picture of the day
         """
-
-        c = self.bot.get_channel(interaction.channel_id)
         response = requests.get("https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb")
-        print(response.json())
         embed = Embed(title="Astronomy Picture of the Day", description=response.json()["explanation"])
         embed.set_image(url=response.json()["hdurl"])
         await interaction.response.send_message(embed=embed)

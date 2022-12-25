@@ -20,6 +20,7 @@ class OpenAI(commands.Cog, name="openai"):
         response = openai.Moderation.create(
             input=prompt
         )
+        
         flagged = response["results"][0]["flagged"]
         if flagged:
             if len(prompt) < 2000:
@@ -76,12 +77,17 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send("Prompt must be less than 1000 characters.")
             return
 
-        response = openai.Image.create(
-            prompt=prompt,
-            n=1,
-            size="1024x1024",
-            response_format="url"
-        )
+        try:
+            response = openai.Image.create(
+                prompt=prompt,
+                n=1,
+                size="1024x1024",
+                response_format="url"
+            )
+        except:
+            embed = Embed(title=f'Prompt: "{prompt}"', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
+            await interaction.followup.send(embed=embed)
+            return
         embed = Embed(title=f'Prompt: "{prompt}"')
         embed.set_image(url=response['data'][0]['url'])
         await interaction.followup.send(embed=embed)

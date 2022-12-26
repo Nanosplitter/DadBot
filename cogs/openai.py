@@ -34,7 +34,7 @@ class OpenAI(commands.Cog, name="openai"):
                 else:
                     res += f"{i}\n"
 
-            await interaction.response.send_message(res)
+            await interaction.followup.send(res)
             return False
         return True
 
@@ -43,11 +43,12 @@ class OpenAI(commands.Cog, name="openai"):
         """
         [prompt] Ask dadroid a question.
         """
+        await interaction.response.defer()
+
         isValidPrompt = await self.openAiModeration(interaction, prompt)
         if not isValidPrompt:
             return
         
-        await interaction.response.defer()
 
         response = openai.Completion.create(
             engine="text-davinci-003",
@@ -67,11 +68,12 @@ class OpenAI(commands.Cog, name="openai"):
         [prompt] Create a DALL-E 2 image.
         """
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
+
+        await interaction.response.defer()
+
         isValidPrompt = await self.openAiModeration(interaction, prompt)
         if not isValidPrompt:
             return
-        
-        await interaction.response.defer()
 
         if len(prompt) > 1000:
             await interaction.followup.send("Prompt must be less than 1000 characters.")

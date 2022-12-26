@@ -16,8 +16,6 @@ import yaml
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot
 
-
-
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -41,13 +39,11 @@ async def on_ready():
     print("-------------------")
     status_task.start()
 
-
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
     statuses = ["with your mom"]
     await bot.change_presence(activity=nextcord.Game(random.choice(statuses)))
-
 
 # Removes the default help command of nextcord.py to be able to create our custom help command.
 bot.remove_command("help")
@@ -62,7 +58,6 @@ if __name__ == "__main__":
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 print(f"Failed to load extension {extension}\n{exception}")
-
 
 # The code in this event is executed every time someone sends a message, with or without the prefix
 @bot.event
@@ -81,7 +76,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
     
-
 # The code in this event is executed every time a command has been *successfully* executed
 @bot.event
 async def on_command_completion(ctx):

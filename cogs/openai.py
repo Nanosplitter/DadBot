@@ -78,13 +78,13 @@ class OpenAI(commands.Cog, name="openai"):
         if len(prompt) > 1000:
             await interaction.followup.send("Prompt must be less than 1000 characters.")
             return
-
+        
         try:
             response = openai.Image.create(
                 prompt=prompt,
                 n=1,
                 size="1024x1024",
-                response_format="url"
+                response_format="b64_json"
             )
         except:
             if (len(prompt) > 200):
@@ -96,8 +96,12 @@ class OpenAI(commands.Cog, name="openai"):
             embed = Embed(title=f'DALLE Image', description=f'Prompt: "{prompt}"')
         else:
             embed = Embed(title=f'Prompt: "{prompt}"')
-        embed.set_image(url=response['data'][0]['url'])
-        await interaction.followup.send(embed=embed)
+        
+        imageData = f"{response['data'][0]['b64_json']}"
+        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
+        # embed.set_image(file=file)
+        embed.set_image(url="attachment://image.png")
+        await interaction.followup.send(file=file, embed=embed)
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

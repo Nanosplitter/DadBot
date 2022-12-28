@@ -5,10 +5,12 @@ import yaml
 import nextcord
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType, Message
+from nextcord import Interaction, SlashOption, SelectOption
 from nextcord.abc import GuildChannel
+from nextcord.ui import Button, View, Modal, TextInput, StringSelect
 import uwuify
 import json
+import time
 
 
 with open("config.yaml") as file:
@@ -18,6 +20,8 @@ with open("config.yaml") as file:
 class Memes(commands.Cog, name="memes"):
     def __init__(self, bot):
         self.bot = bot
+        self.message_id = None
+        self.meme_options = dict()
         with open("./resources/emoji-mappings.json", encoding="utf8") as file:
             self.emoji_mappings = json.load(file)
 
@@ -106,6 +110,99 @@ class Memes(commands.Cog, name="memes"):
         res = [f"{emoji_mappings[letter]}" if letter in emoji_mappings else letter for letter in text.lower()]
 
         await interaction.response.send_message("".join(res))
+    
+    class MemeMaker(nextcord.ui.Modal):
+        def __init__(self, number_of_boxes, meme):
+            super().__init__("Meme Maker")  # Modal title
+            self.meme = meme
+            self.number_of_boxes = number_of_boxes
+            self.text_inputs = []
+            for i in range(self.number_of_boxes):
+                text_input = TextInput(label=f"Input {i + 1}", placeholder=f"Input {i + 1}", max_length=500, required=False)
+                self.text_inputs.append(text_input)
+                self.add_item(text_input)
+        
+        async def callback(self, interaction: Interaction):
+            values = []
+            for item in self.text_inputs:
+                value = item.value
+                if value == "":
+                    value = " "
+                values.append(value)
+            
+            params = {
+                "template_id": self.meme["id"], 
+                "username": "nanosplitter", 
+                "password": config["imgflip_pass"]
+            }
+            for i in range(len(values)):
+                params[f"boxes[{i}][text]"] = values[i]
+            
+            r = requests.post("https://api.imgflip.com/caption_image", params=params)
+            if r.status_code != 200:
+                await interaction.send("Error making meme")
+                return
+            embed = nextcord.Embed(title=f"Meme Maker", description=f"Made by {interaction.user.mention}")
+            embed.set_image(url=r.json()["data"]["url"])
+            await interaction.send(embed=embed)
+    
+    @nextcord.slash_command(name="meme", description="Make a meme with custom text", guild_ids=[850473081063211048])
+    async def meme(self, interaction: Interaction, search: str = SlashOption(description="What meme to make", required=True)):
+        """
+        [Text] Make a meme with custom text
+        """
+        selected_meme = None
+        for meme in self.meme_options["memes"]:
+            if search.lower() == meme["name"].lower():
+                selected_meme = meme
+        
+        if selected_meme is None:
+            await interaction.response.send_message("No meme found with that name", ephemeral=True)
+            return
+
+        params = {
+            "template_id": selected_meme["id"], 
+            "username": "nanosplitter", 
+            "password": config["imgflip_pass"],
+        }
+
+        for i in range(selected_meme["box_count"]):
+            params[f"boxes[{i}][text]"] = f"input{i + 1}"
+        
+        r = requests.post("https://api.imgflip.com/caption_image", params=params)
+        if r.status_code == 200:
+            make_meme_button = Button(label="Make meme!", style=nextcord.ButtonStyle.blurple)
+
+            async def make_meme_button_callback(interaction):
+                modal = self.MemeMaker(selected_meme["box_count"], selected_meme)
+            
+                await interaction.response.send_modal(modal)
+
+            make_meme_button.callback = make_meme_button_callback
+
+            view = View(timeout=1000)
+            view.add_item(make_meme_button)
+            await interaction.response.send_message(r.json()["data"]["url"], view=view, ephemeral=True)
+        else:
+            await interaction.response.send_message("Error creating meme", ephemeral=True)
+        
+    
+    @meme.on_autocomplete("search")
+    async def meme_autocomplete(self, interaction: Interaction, search: str):
+        """
+        [Text] Make a meme with custom text
+        """
+        if "memes" not in self.meme_options.keys() or self.meme_options["last_cache"] + 500 < time.time():
+            response = requests.get("https://api.imgflip.com/get_memes")
+            self.meme_options["memes"] = response.json()["data"]["memes"]
+            self.meme_options["last_cache"] = time.time()
+
+        meme_names = []
+        for meme in self.meme_options["memes"]:
+            if search.lower() in meme["name"].lower():
+                meme_names.append(meme["name"])
+        
+        await interaction.response.send_autocomplete(meme_names[:25])
                 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

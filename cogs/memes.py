@@ -112,19 +112,39 @@ class Memes(commands.Cog, name="memes"):
         await interaction.response.send_message("".join(res))
     
     class MemeMaker(nextcord.ui.Modal):
-        def __init__(self, number_of_boxes):
+        def __init__(self, number_of_boxes, meme):
             super().__init__("Meme Maker")  # Modal title
+            self.meme = meme
             self.number_of_boxes = number_of_boxes
             self.text_inputs = []
             for i in range(self.number_of_boxes):
-                text_input = TextInput(label=f"Input {i + 1}", placeholder=f"Input {i + 1}")
+                text_input = TextInput(label=f"Input {i + 1}", placeholder=f"Input {i + 1}", max_length=500, required=False)
                 self.text_inputs.append(text_input)
                 self.add_item(text_input)
         
         async def callback(self, interaction: Interaction):
+            values = []
             for item in self.text_inputs:
-                await interaction.send(item.value)
-
+                value = item.value
+                if value == "":
+                    value = " "
+                values.append(value)
+            
+            params = {
+                "template_id": self.meme["id"], 
+                "username": "nanosplitter", 
+                "password": config["imgflip_pass"]
+            }
+            for i in range(len(values)):
+                params[f"boxes[{i}][text]"] = values[i]
+            
+            r = requests.post("https://api.imgflip.com/caption_image", params=params)
+            if r.status_code != 200:
+                await interaction.send("Error making meme")
+                return
+            embed = nextcord.Embed(title=f"Meme Maker", description=f"Made by {interaction.user.mention}")
+            embed.set_image(url=r.json()["data"]["url"])
+            await interaction.send(embed=embed)
     
     @nextcord.slash_command(name="meme", description="Make a meme with custom text", guild_ids=[850473081063211048])
     async def meme(self, interaction: Interaction, search: str = SlashOption(description="What meme to make", required=True)):
@@ -137,12 +157,8 @@ class Memes(commands.Cog, name="memes"):
                 selected_meme = meme
         
         if selected_meme is None:
-            await interaction.response.send_message("No meme found with that name")
+            await interaction.response.send_message("No meme found with that name", ephemeral=True)
             return
-        
-        print(selected_meme)
-        #modal = self.Pet()
-        #await interaction.response.send_modal(modal)
 
         params = {
             "template_id": selected_meme["id"], 
@@ -158,7 +174,7 @@ class Memes(commands.Cog, name="memes"):
             make_meme_button = Button(label="Make meme!", style=nextcord.ButtonStyle.blurple)
 
             async def make_meme_button_callback(interaction):
-                modal = self.MemeMaker(selected_meme["box_count"])
+                modal = self.MemeMaker(selected_meme["box_count"], selected_meme)
             
                 await interaction.response.send_modal(modal)
 

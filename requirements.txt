@@ -1,7 +1,6 @@
 aiohttp
 asyncio
-nextcord
-nextcord.py[voice]
+nextcord==2.3.2
 pyyaml
 pandas
 mysql-connector

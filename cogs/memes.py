@@ -146,7 +146,7 @@ class Memes(commands.Cog, name="memes"):
             embed.set_image(url=r.json()["data"]["url"])
             await interaction.send(embed=embed)
     
-    @nextcord.slash_command(name="meme", description="Make a meme with custom text", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="meme", description="Make a meme with custom text")
     async def meme(self, interaction: Interaction, search: str = SlashOption(description="What meme to make", required=True)):
         """
         [Text] Make a meme with custom text

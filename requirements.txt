@@ -11,6 +11,7 @@ aiofiles
 inspiro
 trafilatura
 sklearn
+scikit-learn
 nltk
 schedule
 apscheduler

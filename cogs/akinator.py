@@ -48,44 +48,19 @@ class Akinator(commands.Cog, name="akinator"):
 
         # Create the callbacks for the buttons
         async def yes_callback(interaction: Interaction):
-            answer = await aki.answer(Answer.Yes)
-            aki_embed.description = answer
-            if aki.progression >= 80:
-                await win()
-            else:
-                await interaction.response.edit_message(embed=aki_embed) 
+            await answer_button_callback(interaction, aki_embed, Answer.Yes)
 
         async def no_callback(interaction: Interaction):
-            answer = await aki.answer(Answer.No)
-            aki_embed.description = answer
-            if aki.progression >= 80:
-                await win()
-            else:
-                await interaction.response.edit_message(embed=aki_embed)    
+            await answer_button_callback(interaction, aki_embed, Answer.No)  
 
         async def dont_know_callback(interaction: Interaction):
-            answer = await aki.answer(Answer.Idk)
-            aki_embed.description = answer
-            if aki.progression >= 80:
-                await win()
-            else:
-                await interaction.response.edit_message(embed=aki_embed)     
+            await answer_button_callback(interaction, aki_embed, Answer.Idk)  
 
         async def probably_callback(interaction: Interaction):
-            answer = await aki.answer(Answer.Probably)
-            aki_embed.description = answer
-            if aki.progression >= 80:
-                await win()
-            else:
-                await interaction.response.edit_message(embed=aki_embed) 
+            await answer_button_callback(interaction, aki_embed, Answer.Probably)
                
         async def probably_not_callback(interaction: Interaction):
-            answer = await aki.answer(Answer.ProbablyNot)
-            aki_embed.description = answer
-            if aki.progression >= 80:
-                await win()
-            else:
-                await interaction.response.edit_message(embed=aki_embed)    
+            await answer_button_callback(interaction, aki_embed, Answer.ProbablyNot)  
 
         async def back_callback(interaction: Interaction):
             try:
@@ -97,6 +72,14 @@ class Akinator(commands.Cog, name="akinator"):
 
         async def cancel_callback(interaction: Interaction):
             await interaction.response.edit_message(content="Game cancelled!", embed=None, view=None)
+        
+        async def answer_button_callback(interaction, aki_embed, answer):
+            new_question = await aki.answer(answer)
+            aki_embed.description = new_question
+            if aki.progression >= 80:
+                await win()
+            else:
+                await interaction.response.edit_message(embed=aki_embed)
         
         # Make function to check for win
         async def win():
@@ -122,6 +105,7 @@ class Akinator(commands.Cog, name="akinator"):
         view.timeout = 10000
 
         await interaction.followup.send(embed=aki_embed, view=view)
+
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

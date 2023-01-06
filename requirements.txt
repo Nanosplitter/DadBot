@@ -27,3 +27,4 @@ haversine
 syllapy
 openai
 googletrans==4.0.0rc1
+akinator.py

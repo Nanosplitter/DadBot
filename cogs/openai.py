@@ -5,7 +5,7 @@ import json
 import nextcord
 import io
 import base64
-from nextcord import Interaction, Embed
+from nextcord import Interaction, Embed, Attachment, SlashOption
 from nextcord.ext import commands
 
 with open("config.yaml") as file:
@@ -63,11 +63,14 @@ class OpenAI(commands.Cog, name="openai"):
         await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}")
     
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
-    async def dalle(self, interaction: Interaction, prompt: str):
+    async def dalle(self, interaction: Interaction, prompt: str, image_to_edit: Attachment = SlashOption(description="An image to edit", required=False)):
         """
         [prompt] Create a DALL-E 2 image.
         """
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
+        file = await image_to_edit.to_file()
+        file_path = file.fp
+        print(file_path)
 
         await interaction.response.defer()
 
@@ -79,19 +82,21 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send("Prompt must be less than 1000 characters.")
             return
         
-        try:
-            response = openai.Image.create(
-                prompt=prompt,
-                n=1,
-                size="1024x1024",
-                response_format="b64_json"
-            )
-        except:
-            if (len(prompt) > 200):
-                embed = Embed(title=f'Prompt: "{prompt[:200]}..."', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
-            embed = Embed(title=f'Prompt: "{prompt}"', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
-            await interaction.followup.send(embed=embed)
-            return
+        # try:
+        response = openai.Image.create_edit(
+            image=file_path.read(),
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+            response_format="b64_json"
+        )
+        print(response)
+        # except:
+        #     if (len(prompt) > 200):
+        #         embed = Embed(title=f'Prompt: "{prompt[:200]}..."', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
+        #     embed = Embed(title=f'Prompt: "{prompt}"', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
+        #     await interaction.followup.send(embed=embed)
+        #     return
         if len(prompt) > 200:
             embed = Embed(title=f'DALLE Image', description=f'Prompt: "{prompt}"')
         else:

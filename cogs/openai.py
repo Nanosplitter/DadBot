@@ -7,6 +7,9 @@ import io
 import base64
 from nextcord import Interaction, Embed, Attachment, SlashOption
 from nextcord.ext import commands
+import uuid
+
+from PIL import Image
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -72,6 +75,19 @@ class OpenAI(commands.Cog, name="openai"):
         file_path = file.fp
         print(file_path)
 
+
+        img = Image.open(file_path)
+        img = img.resize((1024, 1024))
+
+        # Create a 1024x1024 image with transparent background
+        mask = Image.new('RGBA', (1024, 1024), (255, 255, 255, 0))
+
+        mask.save("mask.png")
+
+        uuid_for_image = str(uuid.uuid4())
+
+        img.save(f"image_to_edit_{uuid_for_image}.png")
+
         await interaction.response.defer()
 
         isValidPrompt = await self.openAiModeration(interaction, prompt)
@@ -83,14 +99,12 @@ class OpenAI(commands.Cog, name="openai"):
             return
         
         # try:
-        response = openai.Image.create_edit(
-            image=file_path.read(),
-            prompt=prompt,
+        response = openai.Image.create_variation(
+            image=open(f"image_to_edit_{uuid_for_image}.png", "rb"),
             n=1,
             size="1024x1024",
             response_format="b64_json"
         )
-        print(response)
         # except:
         #     if (len(prompt) > 200):
         #         embed = Embed(title=f'Prompt: "{prompt[:200]}..."', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
@@ -107,6 +121,8 @@ class OpenAI(commands.Cog, name="openai"):
         # embed.set_image(file=file)
         embed.set_image(url="attachment://image.png")
         await interaction.followup.send(file=file, embed=embed)
+        await interaction.followup.send("Og Image:", file=nextcord.File(f"image_to_edit_{uuid_for_image}.png"))
+        os.remove(f"image_to_edit_{uuid_for_image}.png")
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

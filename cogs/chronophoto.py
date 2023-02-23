@@ -118,7 +118,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
         await interaction.followup.send("Click the button to make a guess!", view=view)
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @nextcord.slash_command(name="chrono", description="Play a round of chronophoto!", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="chrono", description="Play a round of chronophoto!")
     async def chrono(self, interaction: Interaction):
         """
         [No Arguments] Play a round of Chronophoto!

@@ -83,7 +83,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
 
         file = nextcord.File(io.BytesIO(pictureData.content), "image.png")
         
-        rulesEmbed = Embed(title="Welcome to Chronophoto!", description="The game will end 20 seconds after the last guess. To guess, click the button. Good luck!")
+        rulesEmbed = Embed(title="Welcome to Chronophoto!", description="The game will end 20 seconds after the last guess. To guess, click the button. All pictures will be taken anytime between 1900 and today. Good luck!")
         rulesEmbed.set_image(url="attachment://image.png")
         
         await interaction.response.send_message(file=file, embed=rulesEmbed)

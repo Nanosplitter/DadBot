@@ -73,8 +73,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
         yearString = random.choice(list(urls.keys()))
         
         correctYear = int(yearString)
-        print(correctYear)
-        
+
         urlYearList = urls[yearString]
         
         

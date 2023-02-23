@@ -1,4 +1,5 @@
 from io import BytesIO
+import io
 import os
 import re
 import sys
@@ -15,14 +16,17 @@ import json
 from  geopy.geocoders import Nominatim
 import haversine as hs
 import asyncio
+import pyshorteners
+import base64
+from nextcord.ui import Button, View, Modal, TextInput, StringSelect
 
-geolocator = Nominatim(user_agent="dad-bot")
 
 import yaml
 from nextcord.ext import commands
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
+    urlShortener = pyshorteners.Shortener()
 
 
 # Here we name the cog and create a new class for the cog.
@@ -32,102 +36,95 @@ class Chronophoto(commands.Cog, name="chronophoto"):
         with open("./resources/geodata.json") as file:
             self.geodata = json.load(file)
         self.bot = bot
+        self.guesses = dict()
     
-    async def chronoplay(self, interaction, single=False):
-        status = "ZERO_RESULTS"
-        loc = None
-
-        # get a random number between 1 and 100
-        rand = random.randint(1, 10000)
-
-        rulesEmbed = Embed(title="Welcome to Geo Guesser!", description="You will have one minute to guess the location of the picture. To guess, use ||spoilers|| around your guess as to not show the other players your guess. Just send your guess in this channel! If I can read it, I'll put a ✅ under it and delete it, and if I can't I'll put a ❌. Good luck!")
-        await interaction.response.send_message(embed=rulesEmbed)
-        while(status == "ZERO_RESULTS" or loc is None):
-            location = random.choice(self.geodata)
-            city = location["name"]
-            country = location["country"]
-            r = requests.get(f"https://maps.googleapis.com/maps/api/streetview/metadata?radius=3000&source=outdoor&size=1000x1000&location={ urllib.parse.quote(f'{city},{country}') }&key={ config['maps_api_key'] }")
-            loc = geolocator.geocode(f'{city},{country}')
-            status = r.json()["status"]
-
-        urllib.request.urlretrieve(f"https://maps.googleapis.com/maps/api/streetview?radius=3000&source=outdoor&size=1000x1000&location={ urllib.parse.quote(f'{city},{country}') }&fov=100&heading=0&pitch=0&key={ config['maps_api_key'] }", f"geo{rand}.jpg")
-
-        await interaction.followup.send("", file=nextcord.File(f"geo{rand}.jpg"))
-        os.remove(f"geo{rand}.jpg")
+    class ChronoSubmitter(nextcord.ui.Modal):
+        def __init__(self, message_to_edit, correctYear, outer_instance):
+            super().__init__("Chronophoto Guess")  # Modal title
+            self.outer_instance = outer_instance
+            self.correctYear = correctYear
+            outer_instance.message_to_edit = message_to_edit
+            text_input = TextInput(label="Year", placeholder=f"e.g. 1960", max_length=4, required=True)
+            self.add_item(text_input)
         
-        correctLocation = (loc.latitude, loc.longitude)
-
-        guesses = dict()
-        embed = nextcord.Embed(title=f"Guesses will go here!")
-        embedMessage = await interaction.followup.send(embed=embed)
-
-        def check(m):
-            if m.author.bot or m.channel != interaction.channel or not re.search("(\|\|[\S\s]*\|\|)", m.content):
-                return
-            guessText = m.content.replace("||", "")
+        async def callback(self, interaction: Interaction):
+            guess = self.children[0].value
+            distance = abs(self.correctYear - int(guess))
+            name = interaction.user.nick
+            if name is None:
+                name = interaction.user.name
             
-            guess = geolocator.geocode(f'{guessText}')
+            self.outer_instance.guesses["{}".format(name)] = (distance, guess, len(self.outer_instance.guesses.keys()))
             
-            guess = (guess.latitude, guess.longitude)
-            distance = hs.haversine(guess,correctLocation, unit=hs.Unit.MILES)
-            userRoles = m.author.roles
-            color = "white"
-            if len(userRoles) > 1:
-                topRole = userRoles[-1]
-                color = str(topRole.color).replace("#", "")
-                color = "0x" + color
-
-            guesses["{}".format(m.author.name)] = (distance, guessText, len(guesses.keys()), color)
-            players = sorted(guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2]))
-
+            players = sorted(self.outer_instance.guesses.keys(), key=lambda x: (self.outer_instance.guesses[x][0], self.outer_instance.guesses[x][2]))
+            
             newEmbed = nextcord.Embed(title=f"Guesses will go here!")
             for i, author in enumerate(players):
                 newEmbed.add_field(name=i+1, value=f"{author}", inline=True)
             loop = asyncio.get_event_loop()
-            loop.create_task(embedMessage.edit(embed=newEmbed))
-            loop.create_task(m.add_reaction("✅"))
-            loop.create_task(m.delete())
-            if single:
-                return True
-
-
-        try:
-            await self.bot.wait_for("message", timeout=60.0, check=check)
-        except:
-            pass
-        newEmbed = nextcord.Embed(title=f"The correct location was {city}, {country}!\n(https://maps.google.com/?q={correctLocation[0]},{correctLocation[1]})")
-        players = sorted(guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2]))
-
-        mapurl = f"https://maps.googleapis.com/maps/api/staticmap?size=640x640&scale=3&markers=color:green%7Clabel:CORRECT%7C{correctLocation[0]},{correctLocation[1]}|"
-
-        for i, author in enumerate(players):
-            authorloc = geolocator.geocode(f'{guesses[author][1]}')
-            mapurl += f"&markers=size:small%7Ccolor:{guesses[author][3]}%7C{authorloc.latitude},{authorloc.longitude}|"
-            newEmbed.add_field(name=i+1, value=f"{author}: {guesses[author][1]} ({round(guesses[author][0], 2)} miles away)\n[maps link](https://maps.google.com/?q={authorloc.latitude},{authorloc.longitude})", inline=True)
-        loop = asyncio.get_event_loop()
-        loop.create_task(embedMessage.edit(embed=newEmbed))
-        await interaction.followup.send(f"Guessing is done!")
+            loop.create_task(self.outer_instance.message_to_edit.edit(embed=newEmbed))
+    
+    async def chronoplay(self, interaction, single=False):
+        self.guesses = dict()
+        r = requests.get("https://www.chronophoto.app/badSneakers.txt")
         
-        urllib.request.urlretrieve(f"{mapurl}&key={ config['maps_api_key'] }", f"answer{rand}.png")
-        await interaction.followup.send("", file=nextcord.File(f"answer{rand}.png"))
-        os.remove(f"answer{rand}.png")
+        urls = json.loads(r.text)
+
+        yearString = random.choice(list(urls.keys()))
+        
+        correctYear = int(yearString)
+        print(correctYear)
+        
+        urlYearList = urls[yearString]
+        
+        
+        url = "http://" + random.choice(urlYearList)
+        
+        pictureData = requests.get(url)
+
+        file = nextcord.File(io.BytesIO(pictureData.content), "image.png")
+        
+        rulesEmbed = Embed(title="Welcome to Chronophoto!", description="The game will end 20 seconds after the last guess. To guess, click the button. Good luck!")
+        rulesEmbed.set_image(url="attachment://image.png")
+        
+        await interaction.response.send_message(file=file, embed=rulesEmbed)
+        
+        embed = nextcord.Embed(title=f"Guesses will go here!")
+        message_to_edit = await interaction.followup.send(embed=embed)
+        
+        make_guess_button = Button(label="Make guess!", style=nextcord.ButtonStyle.blurple)
+
+        async def make_guess_button_callback(interaction):
+            modal = self.ChronoSubmitter(message_to_edit, correctYear, self)
+        
+            await interaction.response.send_modal(modal)
+
+        make_guess_button.callback = make_guess_button_callback
+        
+        async def view_timeout_callback():
+            players = sorted(self.guesses.keys(), key=lambda x: (self.guesses[x][0], self.guesses[x][2]))
+            
+            newEmbed = nextcord.Embed(title=f"The correct year was {correctYear}!")
+            for i, author in enumerate(players):
+                newEmbed.add_field(name=i+1, value=f"{author}: {self.guesses[author][1]}", inline=True)
+            loop = asyncio.get_event_loop()
+            loop.create_task(message_to_edit.edit(embed=newEmbed))
+            await interaction.followup.send(f"Guessing is done!")
+
+        view = View(timeout=20)
+        view.on_timeout = view_timeout_callback
+        view.add_item(make_guess_button)
+
+        await interaction.followup.send("Click the button to make a guess!", view=view)
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
-    @nextcord.slash_command(name="chrono", description="Play a round of chronophoto!")
+    @nextcord.slash_command(name="chrono", description="Play a round of chronophoto!", guild_ids=[850473081063211048])
     async def chrono(self, interaction: Interaction):
         """
         [No Arguments] Play a round of Chronophoto!
         """
         await self.chronoplay(interaction)
     
-    @nextcord.slash_command(name="chronosingle", description="Play a round of chronophoto by yourself!")
-    async def chronosingle(self, interaction: Interaction):
-        """
-        [No Arguments] Play a round of chronophoto by yourself!
-        """
-        await self.chronoplay(interaction, single=True)
-
-
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Chronophoto(bot))

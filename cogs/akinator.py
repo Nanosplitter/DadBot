@@ -85,6 +85,9 @@ class Akinator(commands.Cog, name="akinator"):
         async def win():
             if aki.progression >= 80:
                 guess = await aki.win()
+                if guess is None:
+                    await interaction.response.send_message("I don't know who you're thinking of!", ephemeral=True)
+                    return
                 win_embed = nextcord.Embed(
                     title="I think I got it!",
                     description = f"**{guess.name}**: {guess.description}"

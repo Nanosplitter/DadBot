@@ -48,10 +48,23 @@ class Birthday(commands.Cog, name="birthday"):
         if time is not None:
             timeUTC = dp.parse(time.strftime(f), settings={'TIMEZONE': 'US/Eastern', 'TO_TIMEZONE': 'UTC'})
             mycursor = mydb.cursor(buffered=True)
+            
+            if timeUTC is None:
+                await interaction.response.send_message("Sorry, I can't understand that time, try again but differently")
+                return
+            
+            if interaction.user is None:
+                await interaction.response.send_message("Sorry, I can't find your user information.")
+                return
+
+            if interaction.channel is None:
+                await interaction.response.send_message("Sorry, I can't find your channel information.")
+                return
+            
             mycursor.execute(f"DELETE FROM birthdays WHERE author = '{interaction.user.name}' AND channel_id = {interaction.channel.id}")
             mydb.commit()
+            
             mycursor.execute("INSERT INTO birthdays (author, mention, channel_id, birthday) VALUES ('"+ str(interaction.user.name) +"', '"+ str(interaction.user.mention) +"', '"+ str(interaction.channel.id) +"', '"+ timeUTC.strftime(f) +"')")
-            print(time)
             await interaction.response.send_message("Your Birthday is set for: " + time.strftime(f) + " EST \n\nHere's the time I read: " + timeWords)
             mydb.commit()
             mycursor.close()

@@ -33,6 +33,9 @@ class Fun(commands.Cog, name="fun"):
         """
         [(Optional)SearchTerm] Have Dad tell you one of his classics.
         """
+        if searchterm is None:
+            searchterm = ""
+        
         url = "https://icanhazdadjoke.com/search?term=" + searchterm
         headers = {'Accept': 'application/json'}
         r = requests.get(url, headers=headers)
@@ -48,7 +51,7 @@ class Fun(commands.Cog, name="fun"):
         [(Optional)xkcdNumber] Retrieve a random or specific xkcd comic
         """
         r = requests.get("http://xkcd.com/info.0.json")
-        comicnumber = comicnumber if comicnumber != "" else str(random.choice(range(1, r.json()['num'])))
+        comicnumber = comicnumber if comicnumber != "" else str(random.choice(range(1, r.json()['num']))) # type: ignore
 
         r = requests.get("http://xkcd.com/" + str(comicnumber) + "/info.0.json")
 
@@ -76,6 +79,13 @@ class Fun(commands.Cog, name="fun"):
 
         try:
             url = random.choice(r.json()['items'])["files"][0]['url']
+            if url is None:
+                url = ""
+                
+            if name is None:
+                await interaction.response.send_message("No one with that name is currently wanted by the FBI")
+                return
+            
             await interaction.response.send_message(name + " might be wanted by the FBI:\n" + url)
         except:
             await interaction.response.send_message("No one with that name is currently wanted by the FBI")

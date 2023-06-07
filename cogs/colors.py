@@ -81,7 +81,11 @@ class Colors(commands.Cog, name="colors"):
         try:
             limit = 4
             contrast = self.contrast("#36393f", color)
-            userRoles = interaction.user.roles
+            if interaction.user is None:
+                await interaction.response.send_message("Sorry, I can't find your user information. Please try again later.")
+                return
+            
+            userRoles = interaction.user.roles # type: ignore
 
             if contrast < limit:
                 embed = nextcord.Embed(
@@ -109,8 +113,8 @@ class Colors(commands.Cog, name="colors"):
                         await self.changeRoleColor(closestValidColor, topRole)
                         await interaction.message.edit(embed = nextcord.Embed(
                             title="Success!",
-                            description=f"Color has been changed to {closestValidColor.upper()}! The contrast it has is " + str(round(self.contrast("#36393f", closestValidColor), 4)) + ":1\nClick the button to try again.",
-                            color=int(closestValidColor.replace("#", ""), 16)
+                            description=f"Color has been changed to {closestValidColor.upper()}! The contrast it has is " + str(round(self.contrast("#36393f", closestValidColor), 4)) + ":1\nClick the button to try again.", # type: ignore
+                            color=int(closestValidColor.replace("#", ""), 16) # type: ignore
                         ))
                 
                 colorButton.callback = color_callback

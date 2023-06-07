@@ -48,11 +48,14 @@ class Chronophoto(commands.Cog, name="chronophoto"):
             self.add_item(text_input)
         
         async def callback(self, interaction: Interaction):
-            guess = self.children[0].value
+            guess = self.children[0].value # type: ignore
             distance = abs(self.correctYear - int(guess))
-            name = interaction.user.nick
+            name = interaction.user.nick # type: ignore
             if name is None:
-                name = interaction.user.name
+                if interaction.user is None:
+                    name = "Unknown"
+                else:
+                    name = interaction.user.name
             
             self.outer_instance.guesses["{}".format(name)] = (distance, guess, len(self.outer_instance.guesses.keys()))
             

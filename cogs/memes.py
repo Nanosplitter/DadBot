@@ -139,7 +139,7 @@ class Memes(commands.Cog, name="memes"):
                 params[f"boxes[{i}][text]"] = values[i]
             
             r = requests.post("https://api.imgflip.com/caption_image", params=params)
-            if r.status_code != 200:
+            if r.status_code != 200 or interaction.user is None:
                 await interaction.send("Error making meme")
                 return
             embed = nextcord.Embed(title=f"Meme Maker", description=f"Made by {interaction.user.mention}")

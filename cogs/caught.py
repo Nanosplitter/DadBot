@@ -24,6 +24,11 @@ class Caught(commands.Cog, name="caught"):
         [No Arguments] See how many times everyone on the server has been caught by DadBot.
         """
         members = []
+        
+        if interaction.guild is None:
+            await interaction.response.send_message("Sorry, I can't find your server information.")
+            return
+        
         for i in interaction.guild.members:
             members.append(str(i))
         
@@ -36,11 +41,17 @@ class Caught(commands.Cog, name="caught"):
         mycursor = mydb.cursor(buffered=True)
 
         mycursor.execute("SELECT * FROM caught ORDER BY count DESC")
+        
+        rows = mycursor.fetchall()
+        
+        if rows is None:
+            await interaction.response.send_message("No one has been caught yet!")
+            return
 
         res = "```\n"
         res += "{:38s} {:s}\n".format("Username", "Caught Count")
         res += ("-"*51) + "\n"
-        for m in mycursor:
+        for m in rows:
             if m[1] in members:
                 res += "{:38s} {:d}\n".format(m[1], int(m[2]))
         res += "```"

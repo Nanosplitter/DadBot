@@ -50,12 +50,12 @@ class Geo(commands.Cog, name="geo"):
             loc = geolocator.geocode(f'{city},{country}')
             status = r.json()["status"]
 
-        urllib.request.urlretrieve(f"https://maps.googleapis.com/maps/api/streetview?radius=3000&source=outdoor&size=1000x1000&location={ urllib.parse.quote(f'{city},{country}') }&fov=100&heading=0&pitch=0&key={ config['maps_api_key'] }", f"geo{rand}.jpg")
+        urllib.request.urlretrieve(f"https://maps.googleapis.com/maps/api/streetview?radius=3000&source=outdoor&size=1000x1000&location={ urllib.parse.quote(f'{city},{country}') }&fov=100&heading=0&pitch=0&key={ config['maps_api_key'] }", f"geo{rand}.jpg") # type: ignore
 
         await interaction.followup.send("", file=nextcord.File(f"geo{rand}.jpg"))
         os.remove(f"geo{rand}.jpg")
         
-        correctLocation = (loc.latitude, loc.longitude)
+        correctLocation = (loc.latitude, loc.longitude) # type: ignore
 
         guesses = dict()
         embed = nextcord.Embed(title=f"Guesses will go here!")
@@ -68,7 +68,7 @@ class Geo(commands.Cog, name="geo"):
             
             guess = geolocator.geocode(f'{guessText}')
             
-            guess = (guess.latitude, guess.longitude)
+            guess = (guess.latitude, guess.longitude) # type: ignore
             distance = hs.haversine(guess,correctLocation, unit=hs.Unit.MILES)
             userRoles = m.author.roles
             color = "white"
@@ -95,15 +95,15 @@ class Geo(commands.Cog, name="geo"):
             await self.bot.wait_for("message", timeout=60.0, check=check)
         except:
             pass
-        newEmbed = nextcord.Embed(title=f"The correct location was {city}, {country}!\n(https://maps.google.com/?q={correctLocation[0]},{correctLocation[1]})")
+        newEmbed = nextcord.Embed(title=f"The correct location was {city}, {country}!\n(https://maps.google.com/?q={correctLocation[0]},{correctLocation[1]})") # type: ignore
         players = sorted(guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2]))
 
         mapurl = f"https://maps.googleapis.com/maps/api/staticmap?size=640x640&scale=3&markers=color:green%7Clabel:CORRECT%7C{correctLocation[0]},{correctLocation[1]}|"
 
         for i, author in enumerate(players):
             authorloc = geolocator.geocode(f'{guesses[author][1]}')
-            mapurl += f"&markers=size:small%7Ccolor:{guesses[author][3]}%7C{authorloc.latitude},{authorloc.longitude}|"
-            newEmbed.add_field(name=i+1, value=f"{author}: {guesses[author][1]} ({round(guesses[author][0], 2)} miles away)\n[maps link](https://maps.google.com/?q={authorloc.latitude},{authorloc.longitude})", inline=True)
+            mapurl += f"&markers=size:small%7Ccolor:{guesses[author][3]}%7C{authorloc.latitude},{authorloc.longitude}|" # type: ignore
+            newEmbed.add_field(name=i+1, value=f"{author}: {guesses[author][1]} ({round(guesses[author][0], 2)} miles away)\n[maps link](https://maps.google.com/?q={authorloc.latitude},{authorloc.longitude})", inline=True) # type: ignore
         loop = asyncio.get_event_loop()
         loop.create_task(embedMessage.edit(embed=newEmbed))
         await interaction.followup.send(f"Guessing is done!")

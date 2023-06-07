@@ -65,12 +65,12 @@ class Minesweeper(commands.Cog, name="minesweeper"):
                 if grid[randX][randY] != "B":
                     break
 
-            grid[randX][randY] = "B"
+            grid[randX][randY] = "B" # type: ignore
         
         for x in range(gridsize):
             for y in range(gridsize):
                 if grid[x][y] != "B":
-                    grid[x][y] = str(self.countBombs(grid, x, y))
+                    grid[x][y] = str(self.countBombs(grid, x, y)) # type: ignore
         
         await interaction.response.send_message(self.embedGrid(grid))
 

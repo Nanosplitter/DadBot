@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "Run Bot",
+      "type": "python",
+      "request": "launch",
+      "program": "bot.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

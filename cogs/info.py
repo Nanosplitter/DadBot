@@ -55,6 +55,9 @@ class Info(commands.Cog, name="info"):
         [No Arguments] Get some useful (or not) information about the server.
         """
         server = interaction.guild
+        if server is None:
+            await interaction.response.send_message("Sorry, I can't find your server information.")
+            return
         roles = [x.name for x in server.roles]
         role_length = len(roles)
         if role_length > 50:

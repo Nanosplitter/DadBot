@@ -118,6 +118,9 @@ class Hangman(commands.Cog, name="hangman"):
             
             guessed.append(m.content.lower())
             
+            if msg is None:
+                return
+            
             loop.create_task(msg.edit(content=self.buildMessage(answer, guessed)))
             loop.create_task(m.delete())
 

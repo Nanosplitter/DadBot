@@ -70,6 +70,17 @@ class Colors(commands.Cog, name="colors"):
                 return [True, color]
         return [False]
     
+    def generateRandomColor(self): 
+        randomColor = hex(random.randint(0, 16777216)) # generate random integer
+        randomColor = randomColor[2:]
+
+        if (len(randomColor) < 6):
+            randomColor = '0' * (6-len(randomColor)) + randomColor
+
+        randomColor = "#" + randomColor
+
+        return randomColor
+    
     async def changeRoleColor(self, color, role):
         await role.edit(colour=nextcord.Colour(int(color.replace("#", ""), 16)))
 
@@ -80,12 +91,23 @@ class Colors(commands.Cog, name="colors"):
         """
         try:
             limit = 4
+            
+            if color.lower() == "random":
+                while True:
+                    randomColor = self.generateRandomColor()
+                    contrast = self.contrast("#36393f", randomColor)
+                    if contrast > limit:
+                        color = randomColor
+                        break
+            
             contrast = self.contrast("#36393f", color)
             if interaction.user is None:
                 await interaction.response.send_message("Sorry, I can't find your user information. Please try again later.")
                 return
             
             userRoles = interaction.user.roles # type: ignore
+            
+            
 
             if contrast < limit:
                 embed = nextcord.Embed(
@@ -95,6 +117,8 @@ class Colors(commands.Cog, name="colors"):
                 )
 
                 colorButton = Button(label="Closest Color", style=nextcord.ButtonStyle.blurple)
+                
+                randomButton = Button(label="Random Color", style=nextcord.ButtonStyle.blurple)
 
                 async def color_callback(interaction):
                     if interaction.user == interaction.user:  # checks that user interacting with button is command sender
@@ -117,9 +141,30 @@ class Colors(commands.Cog, name="colors"):
                             color=int(closestValidColor.replace("#", ""), 16) # type: ignore
                         ))
                 
+                async def random_callback(interaction):
+                    if interaction.user == interaction.user:
+                        contrast = 0
+                        
+                        while contrast < limit:
+                            randomColor = self.generateRandomColor()
+                            contrast = self.contrast("#36393f", randomColor)
+                            
+                        color = randomColor
+                        topRole = userRoles[-1]
+                        await self.changeRoleColor(color, topRole)
+                        await interaction.message.edit(embed = nextcord.Embed(
+                            title="Success!",
+                            description=f"Color has been changed to {color.upper()}! The contrast it has is " + str(round(self.contrast("#36393f", color), 4)) + ":1\nClick the button to try again.", # type: ignore
+                            color=int(color.replace("#", ""), 16) # type: ignore
+                        ))
+                        
+                
                 colorButton.callback = color_callback
+                randomButton.callback = random_callback
+
                 view = View(timeout=1000)
                 view.add_item(colorButton)
+                view.add_item(randomButton)
 
                 await interaction.response.send_message(embed=embed, view=view)
                 return
@@ -133,7 +178,8 @@ class Colors(commands.Cog, name="colors"):
                     color=int(color.replace("#", ""), 16)
                 )
                 await interaction.response.send_message(embed=embed)
-        except:
+        except Exception as e:
+            print(e)
             embed = nextcord.Embed(
                 title="Error",
                 description="Something went wrong, make sure you are using a 6 digit hex code. (ex: !changecolor #FFFFFF)",

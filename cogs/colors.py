@@ -144,6 +144,7 @@ class Colors(commands.Cog, name="colors"):
                 async def random_callback(interaction):
                     if interaction.user == interaction.user:
                         contrast = 0
+                        randomColor = "#000000"
                         
                         while contrast < limit:
                             randomColor = self.generateRandomColor()

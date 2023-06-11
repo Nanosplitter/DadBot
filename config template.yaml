@@ -14,3 +14,7 @@ error: 0xE02B2B
 success: 0x42F56C
 warning: 0xF59E42
 info: 0x4299F5
+maps_api_key: "MAPS_API_KEY"
+imgflip_pass: "IMGFLIP_PASSWORD"
+pipeline_token: "PIPELINE_TOKEN"
+openapi_token: "OPENAPI_TOKEN"

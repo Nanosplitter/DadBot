@@ -21,13 +21,13 @@ class OpenAI(commands.Cog, name="openai"):
             input=prompt
         )
         
-        flagged = response["results"][0]["flagged"]
+        flagged = response["results"][0]["flagged"] # type: ignore
         if flagged:
             if len(prompt) < 2000:
                 res = f"Your prompt: '{prompt}' was flagged as inapropriate because of these categories:\n---------------------------\n"
             else:
                 res = "Your prompt was flagged as inapropriate because of these categories:\n---------------------------\n"
-            flaggedCategories = response["results"][0]["categories"]
+            flaggedCategories = response["results"][0]["categories"] # type: ignore
             for i in flaggedCategories:
                 if flaggedCategories[i]:
                     res += f"-----------> **{i}**\n"
@@ -60,7 +60,7 @@ class OpenAI(commands.Cog, name="openai"):
             presence_penalty=0.6
         )
         
-        await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}")
+        await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}") # type: ignore
     
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
     async def dalle(self, interaction: Interaction, prompt: str):
@@ -97,7 +97,7 @@ class OpenAI(commands.Cog, name="openai"):
         else:
             embed = Embed(title=f'Prompt: "{prompt}"')
         
-        imageData = f"{response['data'][0]['b64_json']}"
+        imageData = f"{response['data'][0]['b64_json']}" # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         # embed.set_image(file=file)
         embed.set_image(url="attachment://image.png")

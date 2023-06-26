@@ -31,7 +31,7 @@ class Info(commands.Cog, name="info"):
         )
         embed.add_field(
             name="Owner:",
-            value="Nanosplitter#4549",
+            value="nanosplitter",
             inline=True
         )
         embed.add_field(

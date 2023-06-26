@@ -23,7 +23,7 @@ class Steps(commands.Cog, name="steps"):
     def __init__(self, bot):
         self.bot = bot
     
-    @nextcord.slash_command(name="logsteps", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="logsteps")
     async def logsteps(self, interaction: Interaction):
         
         stepEmbed = await buildStepEmbed(self, interaction)

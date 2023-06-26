@@ -15,3 +15,7 @@ class Scooby:
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)
         await c.send("***PRAISE***")
+    
+    async def logSteps(self):
+        c = self.bot.get_channel(1095050641157673021)
+        await c.send("Time for someone to run `/logsteps`")

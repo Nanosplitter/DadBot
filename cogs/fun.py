@@ -65,10 +65,24 @@ class Fun(commands.Cog, name="fun"):
         """
         Get the NASA picture of the day
         """
+        await interaction.response.defer()
+        self.bot.logger.info("Getting NASA picture of the day")
         response = requests.get("https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb")
+
+        if response.status_code != 200 or len(response.json()) == 0:
+            await interaction.followup.send("NASA APOD is currently down, please try again later")
+            self.bot.logger.error("NASA APOD is down")
+            return
+        
+        if response.json()["media_type"] == "video":
+            embed = Embed(title="Astronomy Picture of the Day", description=response.json()["explanation"])
+            embed.set_image(url=response.json()["thumbnail_url"])
+            await interaction.followup.send(embed=embed)
+            return
+
         embed = Embed(title="Astronomy Picture of the Day", description=response.json()["explanation"])
         embed.set_image(url=response.json()["hdurl"])
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
     
     @nextcord.slash_command(name="iswanted", description="See if someone is on the FBI's most wanted list.")
     async def iswanted(self, interaction: Interaction, name: Optional[str] = SlashOption(description="The name of the person you want to check", required=True)):

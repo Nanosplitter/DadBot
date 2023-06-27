@@ -23,24 +23,44 @@ class Steps(commands.Cog, name="steps"):
     def __init__(self, bot):
         self.bot = bot
     
-    @nextcord.slash_command(name="logsteps")
-    async def logsteps(self, interaction: Interaction):
+    @nextcord.slash_command(name="steps", description="Get the current steps leaderboard.")
+    async def steps(self, interaction: Interaction):
         
         stepEmbed = await buildStepEmbed(self, interaction)
 
-        log_steps_button = Button(label="Log Steps", style=nextcord.ButtonStyle.blurple)
+        # log_steps_button = Button(label="Log Steps", style=nextcord.ButtonStyle.blurple)
 
-        modal = self.StepLoggerModal(self.bot)
+        # modal = self.StepLoggerModal(self.bot)
 
-        async def make_meme_button_callback(interaction):
-            await interaction.response.send_modal(modal)
+        # async def make_meme_button_callback(interaction):
+        #     await interaction.response.send_modal(modal)
 
-        log_steps_button.callback = make_meme_button_callback
+        # log_steps_button.callback = make_meme_button_callback
 
-        view = View(timeout=None)
-        view.add_item(log_steps_button)
+        # view = View(timeout=None)
+        # view.add_item(log_steps_button)
                 
-        modal.stepMessage = await interaction.response.send_message(embed=stepEmbed, view=view)
+        await interaction.response.send_message(embed=stepEmbed)
+    
+    @nextcord.slash_command(name="logsteps", description="Log your steps for the day.")
+    async def logsteps(self, interaction: Interaction, steps: Optional[int] = SlashOption(description="Your total steps for the day", required=True)):
+        mydb = mysql.connector.connect(
+                host=config["dbhost"],
+                user=config["dbuser"],
+                password=config["dbpassword"],
+                database=config["databasename"]
+            )
+        
+        mycursor = mydb.cursor(buffered=True)
+
+        mycursor.execute(f"INSERT INTO steplogs SET server_id = {interaction.guild.id}, user = '{interaction.user}', steps = {steps}, submit_time = NOW()")
+
+        mydb.commit()
+        mycursor.close()
+        mydb.close()
+
+        await interaction.response.send_message(f"{interaction.user.mention} logged {steps:,} steps!")
+
     
     
     class StepLoggerModal(nextcord.ui.Modal):

@@ -61,6 +61,30 @@ class OpenAI(commands.Cog, name="openai"):
         )
         
         await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}") # type: ignore
+
+    
+    @nextcord.slash_command(name="chat", description="Chat with Dad")
+    async def chat(self, interaction: Interaction):
+        """
+        [No Arguments] Chat with Dad.
+        """
+
+        partial_message = await interaction.response.send_message("Hey there! Let's chat!")
+
+        message = await partial_message.fetch()
+
+        try:
+            if interaction.user is None:
+                await message.delete()
+                await interaction.followup.send("I can't fetch your user data. Please try again.", ephemeral=True)
+                return
+            await message.create_thread(name=f"{interaction.user.display_name}'s Chat with Dad", auto_archive_duration=60)
+        except Exception as e:
+            self.bot.logger.error(f"Error starting thread: {e}")
+            await message.delete()
+            await interaction.followup.send("I can't start a thread here! Make sure you're running this command in a channel.", ephemeral=True)
+    
+
     
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
     async def dalle(self, interaction: Interaction, prompt: str):

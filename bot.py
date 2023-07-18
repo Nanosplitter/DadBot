@@ -12,6 +12,7 @@ from noncommands import imchecker
 from noncommands import reminderLoop
 from noncommands import birthdayLoop
 from noncommands import scooby
+from noncommands import chat
 
 import nextcord
 import yaml
@@ -82,6 +83,7 @@ reminderChecker = reminderLoop.ReminderLoop()
 birthdayChecker = birthdayLoop.BirthdayLoop(bot)
 haikuDetector = haikudetector.HaikuDetector()
 scooby = scooby.Scooby(bot)
+chat = chat.Chat(bot)
 
 
 
@@ -118,6 +120,8 @@ async def on_message(message: nextcord.Message) -> None:
     if not re.search("(\|\|[\S\s]*\|\|)", message.content):
         await imChecker.checkIm(message)
         await haikuDetector.checkForHaiku(message)
+        await chat.respond(message)
+
     
     await bot.process_commands(message)
 

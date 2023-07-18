@@ -74,9 +74,13 @@ class OpenAI(commands.Cog, name="openai"):
         message = await partial_message.fetch()
 
         try:
-            if interaction.user is None:
+            if not interaction.user:
                 await message.delete()
                 await interaction.followup.send("I can't fetch your user data. Please try again.", ephemeral=True)
+                return
+            if not interaction.channel:
+                await message.delete()
+                await interaction.followup.send("I can't start a thread here! Make sure you're running this command in a channel.", ephemeral=True)
                 return
             await message.create_thread(name=f"{interaction.user.display_name}'s Chat with Dad", auto_archive_duration=60)
         except Exception as e:

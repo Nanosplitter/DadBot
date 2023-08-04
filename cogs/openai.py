@@ -1,12 +1,15 @@
 import os
+from typing import Optional
 import openai
 import yaml
 import json
 import nextcord
 import io
 import base64
-from nextcord import Interaction, Embed
+from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
+
+from noncommands.chatsplit import chatsplit
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -39,28 +42,28 @@ class OpenAI(commands.Cog, name="openai"):
         return True
 
     @nextcord.slash_command(name="dadroid", description="Talk to Dad")
-    async def dadroid(self, interaction: Interaction, prompt: str):
+    async def dadroid(self, interaction: Interaction, prompt: str, system_prompt: Optional[str] = SlashOption(description="The prompt to tell dad his 'job' when answering", default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.", required=False)):
         """
         [prompt] Ask dadroid a question.
         """
         await interaction.response.defer()
 
         isValidPrompt = await self.openAiModeration(interaction, prompt)
-        if not isValidPrompt:
+        isValidSystemPrompt = await self.openAiModeration(interaction, system_prompt)
+        if not isValidPrompt or not isValidSystemPrompt:
+            await interaction.followup.send("Either your prompt or system prompt was flagged as inapropriate.")
             return
-        
 
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            temperature=0.9,
-            max_tokens=300,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6
-        )
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
+
+        response = f"**{prompt}**{chatCompletion.choices[0].message.content}"
+
+        messages = chatsplit(response)
+
+        print(messages)
         
-        await interaction.followup.send(f"**{prompt}**{response['choices'][0]['text']}") # type: ignore
+        for message in messages:
+            await interaction.followup.send(message)
 
     
     @nextcord.slash_command(name="chat", description="Chat with Dad")

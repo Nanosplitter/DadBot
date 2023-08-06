@@ -65,12 +65,15 @@ class OpenAI(commands.Cog, name="openai"):
 
     
     @nextcord.slash_command(name="chat", description="Chat with Dad")
-    async def chat(self, interaction: Interaction):
+    async def chat(self, interaction: Interaction, system_prompt: Optional[str] = SlashOption(description="The prompt to tell dad his 'job' when answering", required=False)):
         """
         [No Arguments] Chat with Dad.
         """
 
-        partial_message = await interaction.response.send_message("Hey there! Let's chat!")
+        if system_prompt is None:
+            partial_message = await interaction.response.send_message("Hey there! Let's chat!")
+        else:
+            partial_message = await interaction.response.send_message(f"Hey there! Let's chat!\n\nCustom System Prompt: [{system_prompt}]")
 
         message = await partial_message.fetch()
 

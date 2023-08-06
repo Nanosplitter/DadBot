@@ -28,11 +28,13 @@ class Chat:
         if "Chat with Dad" not in thread.name:
             return
         
+        await thread.trigger_typing()
+        
         messages = await thread.history(limit=20).flatten()
 
         messages.reverse()
 
-        chatMessages = [{"role": "system", "content": "You are DadBot, a chatbot to act like a father and to have fun with the people you chat with."}]
+        chatMessages = [{"role": "system", "content": "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation."}]
 
         for message in messages:
             if message.author == self.bot.user:

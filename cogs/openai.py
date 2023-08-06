@@ -56,11 +56,9 @@ class OpenAI(commands.Cog, name="openai"):
 
         chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
 
-        response = f"**{prompt}**{chatCompletion.choices[0].message.content}"
+        response = f"**{prompt}**\n\n{chatCompletion.choices[0].message.content}"
 
         messages = chatsplit(response)
-
-        print(messages)
         
         for message in messages:
             await interaction.followup.send(message)

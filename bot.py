@@ -94,7 +94,7 @@ async def on_ready() -> None:
         sys.exit("Bot has no user!")
     
     bot.logger.info(f"Logged in as {bot.user.name}")
-    bot.logger.info(f"discord.py API version: {nextcord.__version__}")
+    bot.logger.info(f"nextcord version: {nextcord.__version__}")
     bot.logger.info(f"Python version: {platform.python_version()}")
     bot.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
     bot.logger.info("-------------------")

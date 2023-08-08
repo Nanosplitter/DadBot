@@ -16,7 +16,7 @@ class Chat:
     def __init__(self, bot):
         self.bot = bot
 
-    async def respond(self, message) -> None:
+    async def respond2(self, message) -> None:
         if not isinstance(message.channel, Thread):
             return
 
@@ -63,6 +63,23 @@ class Chat:
 
         for message in messages:
             await thread.send(message)
+
+
+    async def respond(self, message) -> None:
+        if not isinstance(message.channel, Thread):
+            return
+
+        if message.author == self.bot.user or message.author.bot:
+            return
+        
+        thread = message.channel
+        
+        messages = await thread.history(limit=20, oldest_first=True).flatten()
+
+        for message in messages:
+            print(message.content)
+
+        
 
 def get_substring_between_brackets(input_string):
     start_index = input_string.find("[")

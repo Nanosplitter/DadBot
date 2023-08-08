@@ -1,6 +1,6 @@
 aiohttp
 asyncio
-nextcord==2.3.2
+nextcord
 pyyaml
 pandas
 mysql-connector

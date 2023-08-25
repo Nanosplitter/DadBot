@@ -29,10 +29,10 @@ class TLDR(commands.Cog, name="tldr"):
 
         messages = await interaction.channel.history(limit=number).flatten()
         
-        chats = [{"role": "system", "content": "You are a summarizing machine. You are going to be given a number of messages from a discord server, then you are going to summarize the general conversation that has been happening."}]
+        chats = [{"role": "system", "content": "You are a summarizing machine. You are going to be given a number of messages from a discord server, then you are going to summarize the general conversation in a concise way that has been happening."}]
         for m in messages:
             chats.append({"role": "user", "content": f"[{m.author.display_name}]: {m.content}"})
-        chats.append({"role": "user", "content": "Please summarize the previous messages to catch the user up on what has been happening. Also, refer to the users by their names instead of 'user'."})
+        chats.append({"role": "user", "content": "Please summarize the previous messages in a concise way to catch the user up on what has been happening."})
 
         chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chats)
         response = chatCompletion.choices[0].message.content

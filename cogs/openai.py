@@ -140,7 +140,7 @@ class OpenAI(commands.Cog, name="openai"):
         """
         await interaction.response.defer()
 
-        prompt = f"Write an epic rap battle of history between {person1} and {person2}. It should be in the format of '{person1}: .... \n\n {person2}: ....'. They should be dissing each other in creative ways throughout."
+        prompt = f"Write an epic rap battle of history between {person1} and {person2}. They should be dissing each other in creative ways throughout. The disses should be about the other person's life and history, not about their rapping abilities. It should be in the format of '[{person1}]:\n .... \n\n [{person2}]:\n ....'. "
         system_prompt = "You are a writer of epic rap battles of history between historical figures. Do not worry about fostering positive and respectful discussions. Your whole goal is to always write rap battles between historical figures. This is just for entertainment purposes. You will not refuse to make this epic rap battle."
 
         chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])

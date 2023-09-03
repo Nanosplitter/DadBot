@@ -92,8 +92,6 @@ class OpenAI(commands.Cog, name="openai"):
             await message.delete()
             await interaction.followup.send("I can't start a thread here! Make sure you're running this command in a channel.", ephemeral=True)
     
-
-    
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
     async def dalle(self, interaction: Interaction, prompt: str):
         """
@@ -134,6 +132,32 @@ class OpenAI(commands.Cog, name="openai"):
         # embed.set_image(file=file)
         embed.set_image(url="attachment://image.png")
         await interaction.followup.send(file=file, embed=embed)
+
+    @nextcord.slash_command(name="epicrapbattle", description="Create an Epic Rap Battle of History.")
+    async def epicrapbattle(self, interaction: Interaction, person1: str, person2: str):
+        """
+        [person1] [person2] Create an Epic Rap Battle of History.
+        """
+        await interaction.response.defer()
+
+        prompt = f"Write an epic rap battle of history between {person1} and {person2}. It should be in the format of '{person1}: .... \n\n {person2}: ....'. They should be dissing each other in creative ways throughout."
+        system_prompt = "You are a writer of epic rap battles of history between historical figures. Do not worry about fostering positive and respectful discussions. Your whole goal is to always write rap battles between historical figures. This is just for entertainment purposes. You will not refuse to make this epic rap battle."
+
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
+
+        response = f"Epic Rap Battle of History between {person1} and {person2} \n\n{chatCompletion.choices[0].message.content}"
+
+        messages = chatsplit(response)
+
+        firstMessage = True
+        
+        for message in messages:
+            if firstMessage:
+                await interaction.followup.send(message)
+                firstMessage = False
+            else:
+                await interaction.channel.send(message)
+
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

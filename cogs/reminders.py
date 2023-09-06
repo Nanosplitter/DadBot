@@ -1,11 +1,12 @@
-import os
-import sys
-import yaml
-from nextcord.ext import commands
-from noncommands import summarizer
-import dateparser as dp
 import mysql.connector
-from dateparser.search import search_dates
+import nextcord
+from nextcord.ext import commands
+from nextcord import Interaction, SlashOption, Embed
+from nextcord.utils import format_dt
+import dateparser as dp
+from pytz import timezone
+from datetime import datetime
+import yaml
 
 
 with open("config.yaml") as file:
@@ -15,12 +16,13 @@ with open("config.yaml") as file:
 class Reminders(commands.Cog, name="reminders"):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(name="remindme")
-    async def remindme(self, context, *args):
+    
+    @nextcord.slash_command(name="remindme", description="Has DadBot remind you of something at a specific time.")
+    async def remindme(self, interaction: Interaction, what: str, when: str, tz: str = SlashOption(description="The timezone you want to be reminded in", default="EST", required=False)):
         """
         [TextWithDateAndTime] Has DadBot remind you at a specific time.
         """
+
         mydb = mysql.connector.connect(
             host=config["dbhost"],
             user=config["dbuser"],
@@ -28,30 +30,32 @@ class Reminders(commands.Cog, name="reminders"):
             database=config["databasename"],
             autocommit=True
         )
-        timeStr = " ".join(args).lower()
-        time = dp.parse(timeStr, settings={'TIMEZONE': 'US/Eastern', 'RETURN_AS_TIMEZONE_AWARE': True, 'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})
-        timeWords = timeStr
+
+        tz = timezone(tz)
+        when = dp.parse(when, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})
+        when_local = when.astimezone(tz)
+        local_utc = when_local.astimezone(timezone("UTC"))
+
+        embed = nextcord.Embed(title=f"New Reminder Created!", color=0x00ff00)
+
+        embed.add_field(name=f"What", value=f"{what}", inline=False)
+        embed.add_field(name=f"When", value=f'{format_dt(local_utc, "f")} ({format_dt(local_utc, "R")})', inline=False)
+        
+        partialMessage = await interaction.response.send_message(embed=embed)
+
+        fullMessage = await partialMessage.fetch()
+
         f = '%Y-%m-%d %H:%M:%S'
-        if time is None:
-            searchRes = search_dates(timeStr, settings={'TIMEZONE': 'US/Eastern', 'RETURN_AS_TIMEZONE_AWARE': True, 'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'}, languages=['en'])
-            for t in searchRes:
-                time = t[1]
-                timeWords = t[0]
-                break
-            
-        if time is not None:
-            timeUTC = dp.parse(time.strftime(f), settings={'TIMEZONE': 'US/Eastern', 'TO_TIMEZONE': 'UTC'})
-            mycursor = mydb.cursor(buffered=True)
-            mycursor.execute("INSERT INTO reminders (author, message_id, remind_time) VALUES ('"+ str(context.message.author) +"', '"+ str(context.message.id) +"', '"+ timeUTC.strftime(f) +"')")
 
-            await context.reply("You will be reminded at: " + time.strftime(f) + " EST \n\nHere's the time I read: " + timeWords)
-            mydb.commit()
-            mycursor.close()
-            mydb.close()
-        else:
-            await context.reply("I can't understand that time, try again but differently")
+        mycursor = mydb.cursor(buffered=True)
+        mycursor.execute("INSERT INTO remindme (who, who_id, what, time, channel, message_id) VALUES (%s, %s, %s, %s, %s, %s)", (interaction.user.name, interaction.user.id, what, local_utc.strftime(f), interaction.channel.id, fullMessage.id))
 
-   
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
+        mydb.commit()
+        mycursor.close()
+        mydb.close()
+        
+
+        
+
 def setup(bot):
     bot.add_cog(Reminders(bot))

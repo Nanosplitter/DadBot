@@ -42,7 +42,7 @@ class Chat:
 
         prompt = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation."
 
-        if "Custom System Prompt" in firstMessageContent:
+        if "Custom Personality" in firstMessageContent:
             prompt = get_substring_between_brackets(firstMessageContent)
 
         chatMessages = [{"role": "system", "content": prompt}]

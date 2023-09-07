@@ -42,19 +42,19 @@ class OpenAI(commands.Cog, name="openai"):
         return True
 
     @nextcord.slash_command(name="dadroid", description="Talk to Dad")
-    async def dadroid(self, interaction: Interaction, prompt: str, system_prompt: Optional[str] = SlashOption(description="The prompt to tell dad his 'job' when answering", default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.", required=False)):
+    async def dadroid(self, interaction: Interaction, prompt: str, personality: Optional[str] = SlashOption(description="The personality dad should have when answering", default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.", required=False)):
         """
         [prompt] Ask dadroid a question.
         """
         await interaction.response.defer()
 
         isValidPrompt = await self.openAiModeration(interaction, prompt)
-        isValidSystemPrompt = await self.openAiModeration(interaction, system_prompt)
+        isValidSystemPrompt = await self.openAiModeration(interaction, personality)
         if not isValidPrompt or not isValidSystemPrompt:
             await interaction.followup.send("Either your prompt or system prompt was flagged as inapropriate.")
             return
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}])
 
         response = f"**{prompt}**\n\n{chatCompletion.choices[0].message.content}"
 
@@ -65,15 +65,15 @@ class OpenAI(commands.Cog, name="openai"):
 
     
     @nextcord.slash_command(name="chat", description="Chat with Dad")
-    async def chat(self, interaction: Interaction, system_prompt: Optional[str] = SlashOption(description="The prompt to tell dad his 'job' when answering", required=False)):
+    async def chat(self, interaction: Interaction, personality: Optional[str] = SlashOption(description="The personality or 'job' dad should have in this conversation", required=False)):
         """
         [No Arguments] Chat with Dad.
         """
 
-        if system_prompt is None:
+        if personality is None:
             partial_message = await interaction.response.send_message("Hey there! Let's chat!")
         else:
-            partial_message = await interaction.response.send_message(f"Hey there! Let's chat!\n\nCustom System Prompt: [{system_prompt}]")
+            partial_message = await interaction.response.send_message(f"Hey there! Let's chat!\n\nCustom Personality: [{personality}]")
 
         message = await partial_message.fetch()
 

@@ -2,6 +2,9 @@ import yaml
 import sys
 import os
 import mysql.connector
+import nextcord
+from nextcord.utils import format_dt
+import pytz
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -21,13 +24,7 @@ class ReminderLoop:
         mycursor.execute("SELECT * FROM remindme WHERE time <= UTC_TIMESTAMP();")
 
         for m in mycursor:
-
-            print(m)
-
             channel = bot.get_channel(int(m[5]))
-            print
-
-            print(channel)
 
             if channel is None:
                 continue
@@ -41,7 +38,12 @@ class ReminderLoop:
             except:
                 continue
             try:
-                await msg.reply(f"Hey <@{m[2]}>, you asked me to remind you of this:\n\n{m[3]}")
+                embed = nextcord.Embed(title=m[3], color=0x00ff00)
+                time = m[4]
+                time = time.replace(tzinfo=pytz.utc)
+
+                embed.add_field(name=f"When", value=f'{format_dt(time, "f")} ({format_dt(time, "R")})', inline=False)
+                await msg.reply(f"Hey <@{m[2]}>, you asked me to remind you of [this]({msg.jump_url}):", embed=embed)
                 break
             except:
                 pass

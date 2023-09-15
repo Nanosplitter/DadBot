@@ -35,7 +35,7 @@ class Reminders(commands.Cog, name="reminders"):
         when_dt = dp.parse(when, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': tz, 'RETURN_AS_TIMEZONE_AWARE': True})
         local_utc = when_dt.astimezone(timezone("UTC"))
 
-        embed = nextcord.Embed(title=f"New Reminder Created!", color=0x00ff00)
+        embed = nextcord.Embed(title=f":hammer: New Reminder Created! :hammer:", color=0x00ff00)
 
         embed.add_field(name=f"What", value=f"{what}", inline=False)
         embed.add_field(name=f"When", value=f'{format_dt(local_utc, "f")} ({format_dt(local_utc, "R")})', inline=False)
@@ -84,7 +84,7 @@ class Reminders(commands.Cog, name="reminders"):
     
         embeds = []
         for x in myresult:
-            embed = nextcord.Embed(title=f"{x[3]}", color=0x00ff00)
+            embed = nextcord.Embed(title=f"{x[3]}")
 
             time = x[4]
             time = time.replace(tzinfo=pytz.utc)

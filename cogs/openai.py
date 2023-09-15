@@ -60,8 +60,14 @@ class OpenAI(commands.Cog, name="openai"):
 
         messages = chatsplit(response)
         
+        firstMessage = True
+        
         for message in messages:
-            await interaction.followup.send(message)
+            if firstMessage:
+                await interaction.followup.send(message)
+                firstMessage = False
+            else:
+                await interaction.channel.send(message)
 
     
     @nextcord.slash_command(name="chat", description="Chat with Dad")
@@ -146,6 +152,34 @@ class OpenAI(commands.Cog, name="openai"):
         chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
 
         response = f"Epic Rap Battle of History between {person1} and {person2} \n\n{chatCompletion.choices[0].message.content}"
+
+        messages = chatsplit(response)
+
+        firstMessage = True
+        
+        for message in messages:
+            if firstMessage:
+                await interaction.followup.send(message)
+                firstMessage = False
+            else:
+                await interaction.channel.send(message)
+    
+    @nextcord.slash_command(name="geoteller", description="Get some cool information about a place")
+    async def geoteller(self, interaction: Interaction, place: str):
+        """
+        [place] Get some cool information about a place.
+        """
+        await interaction.response.defer()
+
+        isValidPrompt = await self.openAiModeration(interaction, place)
+        if not isValidPrompt:
+            return
+
+        prompt = f"Give me some cool information and history about {place}. Try to keep the response relatively short, but make sure it's interesting and informative."
+
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+
+        response = chatCompletion.choices[0].message.content
 
         messages = chatsplit(response)
 

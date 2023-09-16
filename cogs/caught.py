@@ -58,6 +58,42 @@ class Caught(commands.Cog, name="caught"):
         mycursor.close()
         mydb.close()
         await interaction.response.send_message(res)
+    
+    @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.")
+    async def fixcaught(self, interaction: Interaction, oldname: str):
+        """
+        [oldname] Fix your username in dad's caught system. Put your old username and descriminator (e.g. DadBot#0001) in the first argument.
+        """
+        tableName = "caught"
+        if interaction.guild is None:
+            await interaction.response.send_message("Sorry, I can't find your server information.")
+            return
+        
+        mydb = mysql.connector.connect(
+            host=config["dbhost"],
+            user=config["dbuser"],
+            password=config["dbpassword"],
+            database=config["databasename"]
+        )
+        mycursor = mydb.cursor(buffered=True)
+
+        mycursor.execute(f"SELECT count FROM {tableName} WHERE user = %s", (oldname,))
+        
+        rows = mycursor.fetchall()
+        
+        if rows is None:
+            await interaction.response.send_message("No record of your old username was found. Please make sure you typed it correctly.")
+            return
+        
+        oldCount = rows[0][0]
+        
+        mycursor.execute(f"UPDATE {tableName} SET count = count + {oldCount} WHERE user = '{str(interaction.user)}'")
+        mycursor.execute(f"UPDATE {tableName} SET user_id = {interaction.user.id} WHERE user = '{str(interaction.user)}'")
+        
+        mydb.commit()
+        mycursor.close()
+        mydb.close()
+        await interaction.response.send_message("Your username has been updated in Dad's caught system.")
 
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

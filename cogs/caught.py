@@ -139,10 +139,18 @@ class Caught(commands.Cog, name="caught"):
             return
         
         oldCount = rows[0][0]
-        
-        mycursor.execute(f"UPDATE {self.table} SET count = count + {oldCount} WHERE user = '{str(interaction.user)}'")
-        mycursor.execute(f"UPDATE {self.table} SET user_id = {interaction.user.id} WHERE user = '{str(interaction.user)}'")
 
+        mycursor.execute(f"SELECT * FROM {self.table} WHERE user = '{interaction.user}'")
+        hascolumn = False
+        for m in mycursor:
+            hascolumn = True
+        
+        if hascolumn:
+            mycursor.execute(f"UPDATE {self.table} SET count = count + {oldCount} WHERE user = '{str(interaction.user)}'")
+            mycursor.execute(f"UPDATE {self.table} SET user_id = {interaction.user.id} WHERE user = '{str(interaction.user)}'")
+        else:
+            mycursor.execute(f"INSERT INTO {self.table} (user_id, user, count) VALUES ('{interaction.user.id}', '{str(interaction.user)}', {oldCount})")
+        
         mycursor.execute(f"DELETE FROM {self.table} WHERE user = '{oldname}'")
 
         self.bot.logger.info(f"User {interaction.user} updated their username from {oldname} to {str(interaction.user)}")
@@ -167,7 +175,7 @@ class Caught(commands.Cog, name="caught"):
             )
             mycursor = mydb.cursor(buffered=True)
 
-            mycursor.execute("SELECT user FROM caught ORDER BY count DESC")
+            mycursor.execute(f"SELECT user FROM {self.table} ORDER BY count DESC")
 
             rows = mycursor.fetchall()
 

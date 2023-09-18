@@ -15,6 +15,7 @@ class ImChecker:
     def __init__(self):
         self.imList = [" im ", " i'm ", " Im ", " I'm ", " IM ", " I'M ", " i am ", " I am ", " I AM ", " lm ", " l'm ", " lM ", " l'M ", " l am ", " l AM "]
         self.confusables = Confusables('./resources/likeness.txt')
+        self.table = "caught"
 
     async def checkIm(self, message):
         for string in self.imList:
@@ -35,15 +36,15 @@ class ImChecker:
                 )
                 mycursor = mydb.cursor(buffered=True)
 
-                mycursor.execute("SELECT * FROM caught WHERE user = '" + str(message.author) + "'")
+                mycursor.execute(f"SELECT * FROM {self.table} WHERE user_id = '{message.author.id}'")
                 hascolumn = False
                 for m in mycursor:
                     hascolumn = True
 
                 if not hascolumn:
-                    mycursor.execute("INSERT INTO caught (user, count) VALUES ('"+ str(message.author) +"', 1)")
+                    mycursor.execute(f"INSERT INTO {self.table} (user_id, user, count) VALUES ('{message.author.id}', '{message.author}', 1)")
                 else:
-                    mycursor.execute("UPDATE caught SET count = count + 1 WHERE user = '" + str(message.author) + "'")
+                    mycursor.execute(f"UPDATE {self.table} SET count = count + 1 WHERE user_id = '{message.author.id}'")
 
                 mydb.commit()
                 mycursor.close()

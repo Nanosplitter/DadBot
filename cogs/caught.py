@@ -89,7 +89,26 @@ class Caught(commands.Cog, name="caught"):
         if len(embeds) == 0:
             await interaction.response.send_message("No one has been caught yet! \nTry running `/fixcaughtids` if you expected stuff to show up here.")
             return
-        await interaction.response.send_message(embeds=embeds)
+
+        firstMessage = True
+
+        # embeds can only be sent in groups of 10 or less, split into multiple messages if needed
+        embed_group = []
+        for embed in embeds:
+            embed_group.append(embed)
+            if len(embed_group) == 9:
+                if firstMessage:
+                    await interaction.response.send_message(embeds=embed_group)
+                    firstMessage = False
+                else:
+                    await interaction.channel.send(embeds=embed_group)
+                embed_group = []
+
+        if len(embed_group) > 0:
+            if firstMessage:
+                await interaction.response.send_message(embeds=embed_group)
+            else:
+                await interaction.channel.send(embeds=embed_group)
     
     @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.")
     async def fixcaught(self, interaction: Interaction, oldname: str):

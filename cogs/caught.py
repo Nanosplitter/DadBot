@@ -77,6 +77,9 @@ class Caught(commands.Cog, name="caught"):
                 else:
                     embed = nextcord.Embed(title="")
 
+                if member.display_name != name:
+                    name = f"{member.display_name } ({name})"
+
                 formatted_string = f"{name}\n{caught:2d} times"
 
                 embed.set_author(name=formatted_string, icon_url=member.display_avatar.url)

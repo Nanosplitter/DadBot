@@ -91,7 +91,7 @@ class Caught(commands.Cog, name="caught"):
             return
         await interaction.response.send_message(embeds=embeds)
     
-    @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.")
     async def fixcaught(self, interaction: Interaction, oldname: str):
         """
         [oldname] Fix your username in dad's caught system. Put your old username and descriminator (e.g. DadBot#0001) in the first argument.
@@ -168,7 +168,7 @@ class Caught(commands.Cog, name="caught"):
             
         await interaction.response.send_autocomplete(old_names[:25])
     
-    @nextcord.slash_command(name="fixcaughtids", description="Fix the caught IDs for users in the database", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="fixcaughtids", description="Fix the caught IDs for users in the database")
     async def fixcaughtids(self, interaction: Interaction):
         """
         [No Arguments] Fix the caught IDs for users in the database

@@ -192,6 +192,30 @@ class OpenAI(commands.Cog, name="openai"):
             else:
                 await interaction.channel.send(message)
 
+    @nextcord.slash_command(name="closedopinion", description="Generate a new closed opinion on programming", guild_ids=[850473081063211048])
+    async def closedopinion(self, interaction: Interaction, subject: str):
+        """
+        [subject] Generate a new closed opinion on programming.
+        """
+        await interaction.response.defer()
+
+        prompt = "Your job is to generate more illogical statements like this, it should be a statement most responsible and logical people would disagree with: \"I have a closed opinion on [subject] in programming: If you [subject] for programming, you're a bad programmer\n There is no \"But I only [non-controversial version or use of subject]\" [bad retort that insults anyone who does or uses subject].' An example is 'I have a closed opinion on AI in programming: If you use AI for programming, you're a bad programmer\n There is no \"But but I use it for simple things\" if it's simple then do it yourself' The function should give the subject the user input to chatGPT and respond back with a new closed opinion on that subject"
+
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": prompt}, {"role": "user", "content": subject}])
+
+        response = chatCompletion.choices[0].message.content
+
+        messages = chatsplit(response)
+
+        firstMessage = True
+
+        for message in messages:
+            if firstMessage:
+                await interaction.followup.send(message)
+                firstMessage = False
+            else:
+                await interaction.channel.send(message)
+
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

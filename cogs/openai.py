@@ -192,7 +192,7 @@ class OpenAI(commands.Cog, name="openai"):
             else:
                 await interaction.channel.send(message)
 
-    @nextcord.slash_command(name="closedopinion", description="Generate a new closed opinion on programming", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="closedopinion", description="Generate a new closed opinion on programming")
     async def closedopinion(self, interaction: Interaction, subject: str):
         """
         [subject] Generate a new closed opinion on programming.

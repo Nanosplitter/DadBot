@@ -215,6 +215,34 @@ class OpenAI(commands.Cog, name="openai"):
                 firstMessage = False
             else:
                 await interaction.channel.send(message)
+    
+    @nextcord.message_command(name="redditor")
+    async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
+        """
+        Have dad respond like a redditor.
+        """
+        await interaction.response.defer()
+
+        system_prompt = "Your goal is to respond to a message as if you are a stereotypical redditor who is a know-it-all, sarcastic, charismatic asshole on the internet, and a shy loser off the internet. Take yourself very seriously and act like you know everything. You are a redditor."
+
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": source_message.content}])
+
+        response = chatCompletion.choices[0].message.content
+
+        messages = chatsplit(response)
+
+        firstMessage = True
+
+        await interaction.followup.send("*tips fedora*")
+
+        for message in messages:
+            if firstMessage:
+                await source_message.reply(message)
+                firstMessage = False
+            else:
+                await interaction.channel.send(message)
+    
+
 
 
 def setup(bot):

@@ -142,7 +142,11 @@ class Memes(commands.Cog, name="memes"):
             if r.status_code != 200 or interaction.user is None:
                 await interaction.send("Error making meme")
                 return
-            embed = nextcord.Embed(title=f"Meme Maker", description=f"Made by {interaction.user.mention}")
+            
+            member = nextcord.utils.get(interaction.guild.members, name=interaction.user.name)
+
+            embed = nextcord.Embed()
+            embed.set_author(name=f"New meme from {interaction.user.nick}", icon_url=f"{member.display_avatar.url}")
             embed.set_image(url=r.json()["data"]["url"])
             await interaction.channel.send(embed=embed)
     

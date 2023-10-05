@@ -28,10 +28,10 @@ def processCodeBlock(text: str, chunks: List[str]) -> None:
     language = text[:text.index("\n")]
     text = text[text.index("\n") + 1:]
 
-    while len(text) > 1994:
-        index = text[:1994].rfind("\n")
+    while len(text) > 1990:
+        index = text[:1990].rfind("\n")
         if index == -1:
-            index = 1994
+            index = 1990
 
         chunks.append(f"```{language}\n{text[:index]}```")
         text = text[index:]

@@ -35,4 +35,4 @@ def processCodeBlock(text: str, chunks: List[str]) -> None:
 
         chunks.append(f"```{language}\n{text[:index]}```")
         text = text[index:]
-    chunks.append(f"```{language}{text}```")
+    chunks.append(f"```{language}\n{text}```")

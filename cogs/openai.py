@@ -54,21 +54,38 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send("Either your prompt or system prompt was flagged as inapropriate.")
             return
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}])
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}], stream=True)
 
-        response = f"**{prompt}**\n\n{chatCompletion.choices[0].message.content}"
+        response = f"**{prompt}**\n\n"
 
-        messages = chatsplit(response)
-        
         firstMessage = True
-        
-        for message in messages:
-            if firstMessage:
-                await interaction.followup.send(message)
-                firstMessage = False
-            else:
-                await interaction.channel.send(message)
 
+        discord_messages = []
+
+        totalChunks = 0
+
+        for chunk in chatCompletion:
+            if not chunk.choices[0].finish_reason == "stop":
+                response += chunk.choices[0].delta.content
+            if totalChunks % 100 == 0 or chunk.choices[0].finish_reason == "stop":
+                messages = chatsplit(response)
+
+                messagesSent = 0
+
+                for discord_message in discord_messages:
+                    await discord_message.edit(content=messages[messagesSent])
+                    messagesSent += 1
+                
+                if messagesSent < len(messages):
+                    for message in messages[messagesSent:]:
+                        if firstMessage:
+                            discord_messages.append(await interaction.followup.send(message))
+                            firstMessage = False
+                        else:
+                            discord_messages.append(await interaction.channel.send(message))
+                        
+                        messagesSent += 1
+            totalChunks += 1
     
     @nextcord.slash_command(name="chat", description="Chat with Dad")
     async def chat(self, interaction: Interaction, personality: Optional[str] = SlashOption(description="The personality or 'job' dad should have in this conversation", required=False)):

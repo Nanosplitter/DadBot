@@ -55,14 +55,31 @@ class Chat:
             else:
                 chatMessages.append({"role": "user", "content": message.clean_content})
         
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chatMessages)
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chatMessages, stream=True)
 
-        response = chatCompletion.choices[0].message.content
+        response = ""
 
-        messages = chatsplit(response)
+        discord_messages = []
 
-        for message in messages:
-            await thread.send(message)
+        totalChunks = 0
+
+        for chunk in chatCompletion:
+            if not chunk.choices[0].finish_reason == "stop":
+                response += chunk.choices[0].delta.content
+            if totalChunks % 100 == 0 or chunk.choices[0].finish_reason == "stop":
+                messages = chatsplit(response)
+
+                messagesSent = 0
+
+                for discord_message in discord_messages:
+                    await discord_message.edit(content=messages[messagesSent])
+                    messagesSent += 1
+                
+                if messagesSent < len(messages):
+                    for message in messages[messagesSent:]:
+                        discord_messages.append(await thread.send(message))
+                        messagesSent += 1
+            totalChunks += 1
 
 def get_substring_between_brackets(input_string):
     start_index = input_string.find("[")

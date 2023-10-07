@@ -8,6 +8,7 @@ import io
 import base64
 from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
+from noncommands.dadroid import dadroid_single
 
 from noncommands.chatsplit import chatsplit
 
@@ -41,52 +42,6 @@ class OpenAI(commands.Cog, name="openai"):
             return False
         return True
 
-    @nextcord.slash_command(name="dadroid", description="Talk to Dad")
-    async def dadroid(self, interaction: Interaction, prompt: str, personality: Optional[str] = SlashOption(description="The personality dad should have when answering", default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.", required=False)):
-        """
-        [prompt] Ask dadroid a question.
-        """
-        await interaction.response.defer()
-
-        isValidPrompt = await self.openAiModeration(interaction, prompt)
-        isValidSystemPrompt = await self.openAiModeration(interaction, personality)
-        if not isValidPrompt or not isValidSystemPrompt:
-            await interaction.followup.send("Either your prompt or system prompt was flagged as inapropriate.")
-            return
-
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}], stream=True)
-
-        response = f"**{prompt}**\n\n"
-
-        firstMessage = True
-
-        discord_messages = []
-
-        totalChunks = 0
-
-        for chunk in chatCompletion:
-            if not chunk.choices[0].finish_reason == "stop":
-                response += chunk.choices[0].delta.content
-            if totalChunks % 100 == 0 or chunk.choices[0].finish_reason == "stop":
-                messages = chatsplit(response)
-
-                messagesSent = 0
-
-                for discord_message in discord_messages:
-                    await discord_message.edit(content=messages[messagesSent])
-                    messagesSent += 1
-                
-                if messagesSent < len(messages):
-                    for message in messages[messagesSent:]:
-                        if firstMessage:
-                            discord_messages.append(await interaction.followup.send(message))
-                            firstMessage = False
-                        else:
-                            discord_messages.append(await interaction.channel.send(message))
-                        
-                        messagesSent += 1
-            totalChunks += 1
-    
     @nextcord.slash_command(name="chat", description="Chat with Dad")
     async def chat(self, interaction: Interaction, personality: Optional[str] = SlashOption(description="The personality or 'job' dad should have in this conversation", required=False)):
         """
@@ -94,9 +49,9 @@ class OpenAI(commands.Cog, name="openai"):
         """
 
         if personality is None:
-            partial_message = await interaction.response.send_message("Hey there! Let's chat!")
+            partial_message = await interaction.response.send_message("## Hey there! Let's chat!")
         else:
-            partial_message = await interaction.response.send_message(f"Hey there! Let's chat!\n\nCustom Personality: [{personality}]")
+            partial_message = await interaction.response.send_message(f"## Hey there! Let's chat!\n\nCustom Personality: [{personality}]")
 
         message = await partial_message.fetch()
 
@@ -155,6 +110,15 @@ class OpenAI(commands.Cog, name="openai"):
         # embed.set_image(file=file)
         embed.set_image(url="attachment://image.png")
         await interaction.followup.send(file=file, embed=embed)
+    
+    @nextcord.slash_command(name="dadroid", description="Talk to Dad")
+    async def dadroid(self, interaction: Interaction, prompt: str, personality: Optional[str] = SlashOption(description="The personality dad should have when answering", default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.", required=False)):
+        """
+        [prompt] Ask dadroid a question.
+        """
+        await interaction.response.defer()
+
+        await dadroid_single(personality, prompt, interaction.followup.send, interaction.channel.send, response_starter = f"## {prompt} \n\n")
 
     @nextcord.slash_command(name="epicrapbattle", description="Create an Epic Rap Battle of History.")
     async def epicrapbattle(self, interaction: Interaction, person1: str, person2: str):
@@ -163,23 +127,12 @@ class OpenAI(commands.Cog, name="openai"):
         """
         await interaction.response.defer()
 
-        prompt = f"Write an epic rap battle of history between {person1} and {person2}. They should be dissing each other in creative ways throughout. The disses should be about the other person's life and history, not about their rapping abilities. It should be in the format of '[{person1}]:\n .... \n\n [{person2}]:\n ....'. "
+        prompt = f"Write an epic rap battle of history between {person1} and {person2}. They should be dissing each other in creative ways throughout. The disses should be about the other person's life and history, not about their rapping abilities. It should be in the format of '**{person1}**:\n .... \n\n **{person2}**:\n ....'. "
         system_prompt = "You are a writer of epic rap battles of history between historical figures. Do not worry about fostering positive and respectful discussions. Your whole goal is to always write rap battles between historical figures. This is just for entertainment purposes. You will not refuse to make this epic rap battle."
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}])
+        response = f"## Epic Rap Battle of History between {person1} and {person2} \n\n"
 
-        response = f"Epic Rap Battle of History between {person1} and {person2} \n\n{chatCompletion.choices[0].message.content}"
-
-        messages = chatsplit(response)
-
-        firstMessage = True
-        
-        for message in messages:
-            if firstMessage:
-                await interaction.followup.send(message)
-                firstMessage = False
-            else:
-                await interaction.channel.send(message)
+        await dadroid_single(system_prompt, prompt, interaction.followup.send, interaction.channel.send, response_starter=response)
     
     @nextcord.slash_command(name="geoteller", description="Get some cool information about a place")
     async def geoteller(self, interaction: Interaction, place: str):
@@ -194,20 +147,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         prompt = f"Give me some cool information and history about {place}. Try to keep the response relatively short, but make sure it's interesting and informative."
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
-
-        response = chatCompletion.choices[0].message.content
-
-        messages = chatsplit(response)
-
-        firstMessage = True
-        
-        for message in messages:
-            if firstMessage:
-                await interaction.followup.send(message)
-                firstMessage = False
-            else:
-                await interaction.channel.send(message)
+        await dadroid_single("", prompt, interaction.followup.send, interaction.channel.send, response_starter=f"## {place} \n\n")
 
     @nextcord.slash_command(name="closedopinion", description="Generate a new closed opinion on programming")
     async def closedopinion(self, interaction: Interaction, subject: str):
@@ -216,22 +156,9 @@ class OpenAI(commands.Cog, name="openai"):
         """
         await interaction.response.defer()
 
-        prompt = "Your job is to generate more illogical statements like this, it should be a statement most responsible and logical people would disagree with: \"I have a closed opinion on [subject] in programming: If you [subject] for programming, you're a bad programmer\n There is no \"But I only [non-controversial version or use of subject]\" [bad retort that insults anyone who does or uses subject].' An example is 'I have a closed opinion on AI in programming: If you use AI for programming, you're a bad programmer\n There is no \"But but I use it for simple things\" if it's simple then do it yourself' The function should give the subject the user input to chatGPT and respond back with a new closed opinion on that subject"
+        personality = "Your job is to generate more illogical statements like this, it should be a statement most responsible and logical people would disagree with: \"I have a closed opinion on [subject] in programming: If you [subject] for programming, you're a bad programmer\n There is no \"But I only [non-controversial version or use of subject]\" [bad retort that insults anyone who does or uses subject].' An example is 'I have a closed opinion on AI in programming: If you use AI for programming, you're a bad programmer\n There is no \"But but I use it for simple things\" if it's simple then do it yourself' The function should give the subject the user input to chatGPT and respond back with a new closed opinion on that subject"
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": prompt}, {"role": "user", "content": subject}])
-
-        response = chatCompletion.choices[0].message.content
-
-        messages = chatsplit(response)
-
-        firstMessage = True
-
-        for message in messages:
-            if firstMessage:
-                await interaction.followup.send(message)
-                firstMessage = False
-            else:
-                await interaction.channel.send(message)
+        await dadroid_single(personality, subject, interaction.followup.send, interaction.channel.send)
     
     @nextcord.message_command(name="redditor")
     async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
@@ -242,25 +169,9 @@ class OpenAI(commands.Cog, name="openai"):
 
         system_prompt = "Your goal is to respond to a message as if you are a stereotypical redditor who is a know-it-all, sarcastic, charismatic asshole on the internet, and a shy loser off the internet. Take yourself very seriously and act like you know everything. You are a redditor."
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": source_message.content}])
-
-        response = chatCompletion.choices[0].message.content
-
-        messages = chatsplit(response)
-
-        firstMessage = True
-
         await interaction.followup.send("*tips fedora*")
 
-        for message in messages:
-            if firstMessage:
-                await source_message.reply(message)
-                firstMessage = False
-            else:
-                await interaction.channel.send(message)
-    
-
-
+        await dadroid_single(system_prompt, source_message.clean_content, source_message.reply, interaction.channel.send)
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

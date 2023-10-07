@@ -8,6 +8,7 @@ import random
 from nextcord import Thread, MessageType
 import openai
 from noncommands.chatsplit import chatsplit
+from noncommands.dadroid import dadroid_multiple
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -40,12 +41,12 @@ class Chat:
         
         firstMessageContent = firstMessage[0].system_content
 
-        prompt = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation."
+        personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation."
 
         if "Custom Personality" in firstMessageContent:
-            prompt = get_substring_between_brackets(firstMessageContent)
+            personality = get_substring_between_brackets(firstMessageContent)
 
-        chatMessages = [{"role": "system", "content": prompt}]
+        chatMessages = []
 
         for message in messages:
             if message.type == MessageType.thread_starter_message:
@@ -55,31 +56,8 @@ class Chat:
             else:
                 chatMessages.append({"role": "user", "content": message.clean_content})
         
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chatMessages, stream=True)
-
-        response = ""
-
-        discord_messages = []
-
-        totalChunks = 0
-
-        for chunk in chatCompletion:
-            if not chunk.choices[0].finish_reason == "stop":
-                response += chunk.choices[0].delta.content
-            if totalChunks % 100 == 0 or chunk.choices[0].finish_reason == "stop":
-                messages = chatsplit(response)
-
-                messagesSent = 0
-
-                for discord_message in discord_messages:
-                    await discord_message.edit(content=messages[messagesSent])
-                    messagesSent += 1
-                
-                if messagesSent < len(messages):
-                    for message in messages[messagesSent:]:
-                        discord_messages.append(await thread.send(message))
-                        messagesSent += 1
-            totalChunks += 1
+        await dadroid_multiple(personality, chatMessages, thread.send, thread.send)
+        
 
 def get_substring_between_brackets(input_string):
     start_index = input_string.find("[")

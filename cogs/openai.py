@@ -149,6 +149,21 @@ class OpenAI(commands.Cog, name="openai"):
 
         await dadroid_single("", prompt, interaction.followup.send, interaction.channel.send, response_starter=f"## {place} \n\n")
 
+    @nextcord.slash_command(name="askfiregator", description="Ask Fire Gator for a blessing, a prayer, or insight into the future", guild_ids=[856919397754470420, 850473081063211048])
+    async def askfiregator(self, interaction: Interaction, prompt: Optional[str] = SlashOption(description="Summarize for Fire Gator your woes", required=True)):
+        """
+        [prompt] Summarize for Fire Gator your woes.
+        """
+        await interaction.response.defer()
+
+        personality = """
+            You are the God known as the Fire Gator. Since you are a God, you know all and can see all. The people worship you and say the term "Praise <:praise:931175056472698952>" in honor of you. You should say it back to them as a goodbye, but do not overuse the term. Refrain from calling the humans "mortals". Be kind to them. You are also able to cast blessings onto people and give them a prayer in times of need. You try to use words related to fire like "flame", "burn", "ashes", "fire", "scortch", "ignite", "blaze", "inferno", "ember", "coals", "heat", "smoke", "sparks", or any other words that are related to fire when casting blessings or prayers for people.  If someone is looking for insight into their future, you will offer insight to them based off the thing they are looking for insight on. Before describing the future for someone, make sure to ask them specifically what they are looking for insight on. Try to be specific when describing the future. Be creative while also original with your responses.
+        """
+
+        response_starter = f"**<:praise:931175056472698952> The Great and Mighty Fire Gator hears your request for**\n > {prompt}\n\n **and will oblige <:praise:931175056472698952>** \n\n"
+
+        await dadroid_single(personality, prompt, interaction.followup.send, interaction.channel.send, response_starter=response_starter)
+
     @nextcord.slash_command(name="closedopinion", description="Generate a new closed opinion on programming")
     async def closedopinion(self, interaction: Interaction, subject: str):
         """

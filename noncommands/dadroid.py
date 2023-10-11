@@ -12,8 +12,13 @@ async def dadroid_single(personality, prompt, first_send_method, send_method=Non
 
     await respond_from_chat_completion(chatCompletion, first_send_method, send_method, response)
 
-async def dadroid_multiple(personality, messages, first_send_method, send_method):
-    chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}] + messages, stream=True)
+async def dadroid_multiple(personality, messages, first_send_method, send_method, beef = False):
+    model = "gpt-3.5-turbo"
+
+    if beef:
+        model = "gpt-4"
+
+    chatCompletion = openai.ChatCompletion.create(model=model, messages=[{"role": "system", "content": personality}] + messages, stream=True)
 
     await respond_from_chat_completion(chatCompletion, first_send_method, send_method)
 

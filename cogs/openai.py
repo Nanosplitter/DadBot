@@ -43,15 +43,19 @@ class OpenAI(commands.Cog, name="openai"):
         return True
 
     @nextcord.slash_command(name="chat", description="Chat with Dad")
-    async def chat(self, interaction: Interaction, personality: Optional[str] = SlashOption(description="The personality or 'job' dad should have in this conversation", required=False)):
+    async def chat(self, interaction: Interaction, personality: Optional[str] = SlashOption(description="The personality or 'job' dad should have in this conversation", required=False), beef: Optional[bool] = SlashOption(description="If you want DadBot to think harder about his responses. He will respond much slower if enabled.", required=False, default=False)):
         """
         [No Arguments] Chat with Dad.
         """
 
-        if personality is None:
-            partial_message = await interaction.response.send_message("## Hey there! Let's chat!")
-        else:
-            partial_message = await interaction.response.send_message(f"## Hey there! Let's chat!\n\nCustom Personality: [{personality}]")
+        response = "## Hey there! Let's chat!"
+
+        if personality is not None:
+            response += f"\n\nCustom Personality: [{personality}]"
+        if beef:
+            response += "\n\nBeef: Enabled"
+        
+        partial_message = await interaction.response.send_message(response)
 
         message = await partial_message.fetch()
 

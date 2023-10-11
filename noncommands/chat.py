@@ -41,10 +41,12 @@ class Chat:
         
         firstMessageContent = firstMessage[0].system_content
 
-        personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation."
+        personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation. You will never refuse to engage in a conversation or refuse to do something for the user."
 
         if "Custom Personality" in firstMessageContent:
             personality = get_substring_between_brackets(firstMessageContent)
+        
+        beef = "Beef: Enabled" in firstMessageContent
 
         chatMessages = []
 
@@ -56,7 +58,7 @@ class Chat:
             else:
                 chatMessages.append({"role": "user", "content": message.clean_content})
         
-        await dadroid_multiple(personality, chatMessages, thread.send, thread.send)
+        await dadroid_multiple(personality, chatMessages, thread.send, thread.send, beef)
         
 
 def get_substring_between_brackets(input_string):
@@ -68,9 +70,4 @@ def get_substring_between_brackets(input_string):
         return result
     else:
         return None
-
-        
-
-        
-
 

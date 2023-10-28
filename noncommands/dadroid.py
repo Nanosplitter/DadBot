@@ -3,12 +3,13 @@ from noncommands.chatsplit import chatsplit
 import openai
 import time
 
-async def dadroid_single(personality, prompt, first_send_method, send_method=None, response_starter=""):
-    chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}], stream=True)
+async def dadroid_single(personality, prompt, first_send_method, send_method=None, response_starter="", chats = []):
+    if len(chats) > 0:
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chats, stream=True)
+    else:
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "system", "content": personality}, {"role": "user", "content": prompt}], stream=True)
 
     response = response_starter
-
-    
 
     await respond_from_chat_completion(chatCompletion, first_send_method, send_method, response)
 

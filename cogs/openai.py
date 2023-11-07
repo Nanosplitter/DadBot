@@ -74,8 +74,8 @@ class OpenAI(commands.Cog, name="openai"):
             await message.delete()
             await interaction.followup.send("I can't start a thread here! Make sure you're running this command in a channel.", ephemeral=True)
     
-    @nextcord.slash_command(name="dalle", description="Create a DALL-E 2 image.")
-    async def dalle(self, interaction: Interaction, prompt: str):
+    @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.", guild_ids=[850473081063211048])
+    async def dalle(self, interaction: Interaction, prompt: str, style: Optional[str] = SlashOption(description="The style of image to generate, vivid will make more dramatic images.", choices=["vivid", "natural"], default="vivid", required=False)):
         """
         [prompt] Create a DALL-E 2 image.
         """
@@ -93,9 +93,12 @@ class OpenAI(commands.Cog, name="openai"):
         
         try:
             response = openai.Image.create(
+                model="dall-e-3",
                 prompt=prompt,
+                style=style,
                 n=1,
                 size="1024x1024",
+                quality="standard",
                 response_format="b64_json"
             )
         except:

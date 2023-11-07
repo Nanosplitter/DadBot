@@ -87,8 +87,8 @@ class OpenAI(commands.Cog, name="openai"):
         if not isValidPrompt:
             return
 
-        if len(prompt) > 1000:
-            await interaction.followup.send("Prompt must be less than 1000 characters.")
+        if len(prompt) > 4000:
+            await interaction.followup.send("Prompt must be less than 4000 characters.")
             return
         
         try:
@@ -112,6 +112,46 @@ class OpenAI(commands.Cog, name="openai"):
         else:
             embed = Embed(title=f'Prompt: "{prompt}"')
         
+        imageData = f"{response['data'][0]['b64_json']}" # type: ignore
+        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
+        # embed.set_image(file=file)
+        embed.set_image(url="attachment://image.png")
+        await interaction.followup.send(file=file, embed=embed)
+    
+    @nextcord.slash_command(name="beefydalle", description="Create a BEEFY DALL-E 3 image.", guild_ids=[856919397754470420, 850473081063211048])
+    async def beefydalle(self, interaction: Interaction, prompt: str, style: Optional[str] = SlashOption(description="The style of image to generate, vivid will make more dramatic images.", choices=["vivid", "natural"], default="vivid", required=False), size: Optional[str] = SlashOption(description="The size of the image to generate.", choices=["1024x1024", "1792x1024"], default="1024x1024", required=False), quality: Optional[str] = SlashOption(description="The quality of the image to generate.", choices=["standard", "hd"], default="standard", required=False)):
+        """
+        [prompt] Create a BEEFY DALL-E 3 image.
+        """
+        print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
+
+        await interaction.response.defer()
+
+        if len(prompt) > 4000:
+            await interaction.followup.send("Prompt must be less than 4000 characters.")
+            return
+        
+        try:
+            response = openai.Image.create(
+                model="dall-e-3",
+                prompt=prompt,
+                style=style,
+                n=1,
+                size=size,
+                quality=quality,
+                response_format="b64_json"
+            )
+        except:
+            if (len(prompt) > 200):
+                embed = Embed(title=f'Prompt: "{prompt[:200]}..."', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
+            embed = Embed(title=f'Prompt: "{prompt}"', description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.")
+            await interaction.followup.send(embed=embed)
+            return
+        if len(prompt) > 200:
+            embed = Embed(title=f'DALLE Image', description=f'Prompt: "{prompt}"')
+        else:
+            embed = Embed(title=f'Prompt: "{prompt}"')
+
         imageData = f"{response['data'][0]['b64_json']}" # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         # embed.set_image(file=file)

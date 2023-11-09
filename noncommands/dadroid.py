@@ -40,11 +40,10 @@ async def respond_from_chat_completion(chatCompletion, first_send_method, send_m
     last_time_sent =  time.time_ns() // 1_000_000
 
     for chunk in chatCompletion:
-        print(chunk)
-        if not chunk.choices[0].finish_details == "stop" and hasattr(chunk.choices[0].delta, "content"):
+        if not chunk.choices[0].finish_reason == "stop":
             response += chunk.choices[0].delta.content
-        
-        if last_time_sent + 100 <= (time.time_ns() // 1_000_000) or chunk.choices[0].finish_details == "stop":
+
+        if last_time_sent + 100 <= (time.time_ns() // 1_000_000) or chunk.choices[0].finish_reason == "stop":
             messages = chatsplit(response)
 
             messagesSent = 0

@@ -50,13 +50,37 @@ class Chat:
 
         chatMessages = []
 
-        for message in messages:
-            if message.type == MessageType.thread_starter_message:
-                pass
-            if message.author == self.bot.user:
-                chatMessages.append({"role": "assistant", "content": message.clean_content})
-            else:
-                chatMessages.append({"role": "user", "content": message.clean_content})
+        if beef:
+            for message in messages:
+                if message.type == MessageType.thread_starter_message:
+                    pass
+                if message.author == self.bot.user:
+                    chatMessages.append({
+                        "role": "assistant",
+                        "content": [
+                            {"type": "text", "text": message.clean_content},
+                        ],
+                    })
+                else:
+                    content = []
+                    for attachment in message.attachments:
+                        content.append({"type": "image_url", "image_url": {"url": attachment.url, "detail": "high"}})
+                    
+                    content.append({"type": "text", "text": message.clean_content})
+
+                    chatMessages.append({
+                        "role": "user",
+                        "content": content,
+                    })
+        else:
+
+            for message in messages:
+                if message.type == MessageType.thread_starter_message:
+                    pass
+                if message.author == self.bot.user:
+                    chatMessages.append({"role": "assistant", "content": message.clean_content})
+                else:
+                    chatMessages.append({"role": "user", "content": message.clean_content})
         
         await dadroid_multiple(personality, chatMessages, thread.send, thread.send, beef)
         

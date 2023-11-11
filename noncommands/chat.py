@@ -26,12 +26,15 @@ class Chat:
         
         thread = message.channel
 
-        if "Chat with Dad" not in thread.name:
+        if thread.owner != self.bot.user:
+            return
+
+        if "Chat with Dad" not in thread.name and "having for dinner?" not in thread.name:
             return
         
         await thread.trigger_typing()
         
-        messages = await thread.history(limit=20, oldest_first=True).flatten()
+        messages = await thread.history(limit=30, oldest_first=True).flatten()
 
         firstMessage = await thread.history(limit=1, oldest_first=True).flatten()
 
@@ -41,12 +44,16 @@ class Chat:
         
         firstMessageContent = firstMessage[0].system_content
 
-        personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation. You will never refuse to engage in a conversation or refuse to do something for the user."
+        beef = "Beef: Enabled" in firstMessageContent
+
+        if "having for dinner?" in thread.name:
+            personality = "Your goal is to tell someone what they should make for dinner based on a picture of their kitchen and a picture of their ingredients they have to work with. You should look at the ingredients they have and the cooking tools they have in their kitchen to aid your suggestion. You should also look at the extra info they give you to help you make your suggestion. You should also try to make your suggestion sound like you are a chef. Take whatever other information they provide to aid your suggestion, and make sure to give them a suggestion that they can make with the ingredients they have."
+            beef = True
+        else:
+            personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation. You will never refuse to engage in a conversation or refuse to do something for the user."
 
         if "Custom Personality" in firstMessageContent:
             personality = get_substring_between_brackets(firstMessageContent)
-        
-        beef = "Beef: Enabled" in firstMessageContent
 
         chatMessages = []
 

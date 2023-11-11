@@ -423,7 +423,12 @@ class OpenAI(commands.Cog, name="openai"):
                 },
                 {
                     "role": "user",
-                    "content": [{"type": "image_url", "image_url": {"url": image.url, "detail": "high"}}],
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": image.url, "detail": "high"},
+                        }
+                    ],
                 },
             ],
             max_tokens=300,
@@ -432,23 +437,124 @@ class OpenAI(commands.Cog, name="openai"):
         apodContent = chatCompletion.choices[0].message.content
 
         # Ask gpt3.5 to come up with a title for the APOD
-        titleCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
+        titleCompletion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
                 {
-                    "role": "system", 
-                    "content": "Your goal is to take this NASA APOD description and create a title. You should only respond with 1-5 words as a title to this. Do not respond with anything else. Just the title based on the content. Please also do not include quotes around the whole title."},
+                    "role": "system",
+                    "content": "Your goal is to take this NASA APOD description and create a title. You should only respond with 1-5 words as a title to this. Do not respond with anything else. Just the title based on the content. Please also do not include quotes around the whole title.",
+                },
                 {
                     "role": "user",
                     "content": apodContent,
                 },
-            ], stream=False)
+            ],
+            stream=False,
+        )
 
         title = titleCompletion.choices[0].message.content
-        embed = Embed(title=title, description=chatCompletion.choices[0].message.content)
+        embed = Embed(
+            title=title, description=chatCompletion.choices[0].message.content
+        )
 
         embed.set_image(url=image.url)
 
         await interaction.followup.send(embed=embed)
 
+    @nextcord.slash_command(
+        "whatsfordinner",
+        description="Based on some photos of your kitchen and fridge, I'll tell you what you should make for dinner.",
+    )
+    async def whatsfordinner(
+        self,
+        interaction: Interaction,
+        kitchen: nextcord.Attachment,
+        ingredients: nextcord.Attachment,
+        extra_info: Optional[str] = SlashOption(
+            description="Any extra info to tell me about what you want for dinner",
+            required=False,
+            default="This is my kitchen and ingredients. I want to make something for dinner with these ingredients.",
+        ),
+    ):
+        """
+        [kitchen] [ingredients] Based on some photos of your kitchen and ingredients, I'll tell you what you should make for dinner.
+        """
+
+        response = "## Yes Chef! Let's get cooking!"
+
+        partial_message = await interaction.response.send_message(response)
+
+        message = await partial_message.fetch()
+
+        thread = None
+
+        try:
+            if not interaction.user:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't fetch your user data. Please try again.", ephemeral=True
+                )
+                return
+            if not interaction.channel:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't start a thread here! Make sure you're running this command in a channel.",
+                    ephemeral=True,
+                )
+                return
+            thread = await message.create_thread(
+                name=f"What's {interaction.user.display_name} having for dinner?",
+                auto_archive_duration=60,
+            )
+        except Exception as e:
+            self.bot.logger.error(f"Error starting thread: {e}")
+            await message.delete()
+            await interaction.followup.send(
+                "I can't start a thread here! Make sure you're running this command in a channel.",
+                ephemeral=True,
+            )
+            return
+
+
+        await thread.trigger_typing()
+        chatCompletion = openai.ChatCompletion.create(
+            model="gpt-4-vision-preview",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Your goal is to tell someone what they should make for dinner based on a picture of their kitchen and a picture of their ingredients they have to work with. You should look at the ingredients they have and the cooking tools they have in their kitchen to aid your suggestion. You should also look at the extra info they give you to help you make your suggestion. You should also try to make your suggestion sound like you are a chef.",
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": kitchen.url, "detail": "high"},
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": ingredients.url, "detail": "high"},
+                        },
+                        {
+                            "type": "text",
+                            "text": extra_info,
+                        },
+                    ],
+                },
+            ],
+            max_tokens=1024,
+        )
+
+        await thread.send(kitchen.url)
+        await thread.send(ingredients.url)
+        await thread.send(">>> " + extra_info)
+
+        response = "## My meal suggestion: \n\n" + chatCompletion.choices[0].message.content
+
+        messages = chatsplit(response)
+
+        for message in messages:
+            await thread.send(message)
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

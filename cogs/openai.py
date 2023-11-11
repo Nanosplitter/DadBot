@@ -423,7 +423,7 @@ class OpenAI(commands.Cog, name="openai"):
                 },
                 {
                     "role": "user",
-                    "content": [{"type": "image_url", "image_url": {"url": image.url}}],
+                    "content": [{"type": "image_url", "image_url": {"url": image.url, "detail": "high"}}],
                 },
             ],
             max_tokens=300,

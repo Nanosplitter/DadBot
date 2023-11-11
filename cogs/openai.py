@@ -438,7 +438,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         # Ask gpt3.5 to come up with a title for the APOD
         titleCompletion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-1106",
             messages=[
                 {
                     "role": "system",

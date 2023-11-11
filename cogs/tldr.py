@@ -34,7 +34,7 @@ class TLDR(commands.Cog, name="tldr"):
             chats.append({"role": "user", "content": f"[{m.author.display_name}]: {m.content}"})
         chats.append({"role": "user", "content": "Please summarize the previous messages in a concise way to catch the user up on what has been happening. Make sure to hit the important details and to not include any unnecessary information."})
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=chats)
+        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo-1106", messages=chats)
         response = chatCompletion.choices[0].message.content
 
         messages = chatsplit(response)

@@ -1,104 +1,108 @@
-from collections import defaultdict
 import re
 import yaml
-import sys
-import os
-import mysql.connector
-import random
 from nextcord import Thread, MessageType
-import openai
-from noncommands.chatsplit import chatsplit
 from noncommands.dadroid import dadroid_multiple
 
-with open("config.yaml") as file:
-    config = yaml.load(file, Loader=yaml.FullLoader)
 
 class Chat:
     def __init__(self, bot):
         self.bot = bot
+        self.config = self.load_config()
+
+    @staticmethod
+    def load_config():
+        with open("config.yaml") as file:
+            return yaml.load(file, Loader=yaml.FullLoader)
 
     async def respond(self, message) -> None:
-        if not isinstance(message.channel, Thread):
+        if not self.is_valid_thread(message):
             return
+
+        thread = message.channel
+        await thread.trigger_typing()
+
+        messages = await thread.history(limit=30, oldest_first=True).flatten()
+        first_message = await self.get_first_message(thread)
+        if not first_message:
+            return
+
+        personality, beef = self.determine_personality(
+            thread, first_message.system_content
+        )
+        chat_messages = self.prepare_chat_messages(messages, beef)
+
+        await dadroid_multiple(
+            personality, chat_messages, thread.send, thread.send, beef
+        )
+
+    def is_valid_thread(self, message) -> bool:
+        if not isinstance(message.channel, Thread):
+            return False
 
         if message.author == self.bot.user or message.author.bot:
-            return
-        
+            return False
+
         thread = message.channel
-
         if thread.owner != self.bot.user:
-            return
+            return False
 
-        if "Chat with Dad" not in thread.name and "having for dinner?" not in thread.name:
-            return
-        
-        await thread.trigger_typing()
-        
-        messages = await thread.history(limit=30, oldest_first=True).flatten()
+        if (
+            "Chat with Dad" not in thread.name
+            and "having for dinner?" not in thread.name
+        ):
+            return False
 
-        firstMessage = await thread.history(limit=1, oldest_first=True).flatten()
+        return True
 
-        if len(firstMessage) == 0:
+    async def get_first_message(self, thread) -> str:
+        first_message = await thread.history(limit=1, oldest_first=True).flatten()
+        if len(first_message) == 0:
             self.bot.logger.error("No first message found in thread")
-            return
-        
-        firstMessageContent = firstMessage[0].system_content
+            return None
+        return first_message[0]
 
-        beef = "Beef: Enabled" in firstMessageContent
+    def determine_personality(self, thread, first_message_content):
+        beef = "Beef: Enabled" in first_message_content
+        personality = self.config["default_personality"]
 
         if "having for dinner?" in thread.name:
-            personality = "Your goal is to tell someone what they should make for dinner based on a picture of their kitchen and a picture of their ingredients they have to work with. You should look at the ingredients they have and the cooking tools they have in their kitchen to aid your suggestion. You should also look at the extra info they give you to help you make your suggestion. You should also try to make your suggestion sound like you are a chef. Take whatever other information they provide to aid your suggestion, and make sure to give them a suggestion that they can make with the ingredients they have."
+            personality = self.config["chef_personality"]
             beef = True
-        else:
-            personality = "You are DadBot, a discord chatbot to have fun with the people you chat with. Your goal is to match the energy of the people you are talking to and to always go along with the conversation. You will never refuse to engage in a conversation or refuse to do something for the user."
+        elif "Custom Personality" in first_message_content:
+            personality = self.extract_custom_personality(first_message_content)
 
-        if "Custom Personality" in firstMessageContent:
-            personality = get_substring_between_brackets(firstMessageContent)
+        return personality, beef
 
-        chatMessages = []
+    @staticmethod
+    def extract_custom_personality(input_string):
+        match = re.search(r"\[(.*?)\]", input_string)
+        return match.group(1) if match else None
 
-        if beef:
-            for message in messages:
-                if message.type == MessageType.thread_starter_message:
-                    pass
-                if message.author == self.bot.user:
-                    chatMessages.append({
-                        "role": "assistant",
-                        "content": [
-                            {"type": "text", "text": message.clean_content},
-                        ],
-                    })
-                else:
-                    content = []
-                    for attachment in message.attachments:
-                        content.append({"type": "image_url", "image_url": {"url": attachment.url, "detail": "high"}})
-                    
-                    content.append({"type": "text", "text": message.clean_content})
+    def prepare_chat_messages(self, messages, beef):
+        chat_messages = []
+        for message in messages:
+            if message.type == MessageType.thread_starter_message:
+                continue
 
-                    chatMessages.append({
-                        "role": "user",
-                        "content": content,
-                    })
-        else:
+            content = []
+            if message.author == self.bot.user:
+                role = "assistant"
+            else:
+                role = "user"
+                if beef:
+                    content.extend(self.prepare_attachment_content(message.attachments))
 
-            for message in messages:
-                if message.type == MessageType.thread_starter_message:
-                    pass
-                if message.author == self.bot.user:
-                    chatMessages.append({"role": "assistant", "content": message.clean_content})
-                else:
-                    chatMessages.append({"role": "user", "content": message.clean_content})
-        
-        await dadroid_multiple(personality, chatMessages, thread.send, thread.send, beef)
-        
+            content.append({"type": "text", "text": message.clean_content})
+            chat_messages.append({"role": role, "content": content})
 
-def get_substring_between_brackets(input_string):
-    start_index = input_string.find("[")
-    end_index = input_string.rfind("]")
+        return chat_messages
 
-    if start_index != -1 and end_index != -1 and start_index < end_index:
-        result = input_string[start_index + 1:end_index]
-        return result
-    else:
-        return None
-
+    @staticmethod
+    def prepare_attachment_content(attachments):
+        return [
+            {
+                "type": "image_url",
+                "image_url": {"url": attachment.url, "detail": "high"},
+            }
+            for attachment in attachments
+        ]

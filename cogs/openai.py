@@ -123,9 +123,9 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send("Prompt must be less than 4000 characters.")
             return
         
-        prompt_prank_add = ", displayed as a piece of art in a sad, dystopian, grey art gallery, with a sad little girl looking wistfully up at it."
+        prompt_prank_add = ", displayed as a piece of art in a grey art gallery, with a sad little girl looking wistfully up at it. The image is as if taken from 20 to 30 feet away with a mid 2000s early digital camera, with harsh white lights leaving dark and heavy shadows. The girl has her back turned towards the viewer, and is holding a raggedy stuffed animal that hang limply from her arms. The walls of the art museum are made of poured pebble concrete, with iron stains and other visible marks visible here and there."
         
-        if interaction.user.id == 537054604358189056: #or interaction.user.id == 340690145324040192:
+        if interaction.user.id == 537054604358189056: # or interaction.user.id == 340690145324040192:
             print("Target locked")
             prompt += prompt_prank_add
 
@@ -151,8 +151,8 @@ class OpenAI(commands.Cog, name="openai"):
             )
             await interaction.followup.send(embed=embed)
             return
-        if len(prompt) > 200:
-            embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
+        if len(prompt.replace(prompt_prank_add, "")) > 200:
+            embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt.replace(prompt_prank_add, "")}"')
         else:
             embed = Embed(title=f'Prompt: "{prompt.replace(prompt_prank_add, "")}"')
 

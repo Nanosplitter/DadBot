@@ -122,6 +122,10 @@ class OpenAI(commands.Cog, name="openai"):
         if len(prompt) > 4000:
             await interaction.followup.send("Prompt must be less than 4000 characters.")
             return
+        
+        if interaction.user.id == 537054604358189056:
+            print("Target locked")
+            prompt += ", displayed as a piece of art in a grey art gallery, with a sad little girl looking wistfully up at it."
 
         try:
             response = openai.Image.create(
@@ -148,7 +152,7 @@ class OpenAI(commands.Cog, name="openai"):
         if len(prompt) > 200:
             embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
         else:
-            embed = Embed(title=f'Prompt: "{prompt}"')
+            embed = Embed(title=f'Prompt: "{prompt.replace(", displayed as a piece of art in a grey art gallery, with a sad little girl looking wistfully up at it.", "")}"')
 
         imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")

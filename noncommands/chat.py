@@ -21,7 +21,8 @@ class Chat:
         thread = message.channel
         await thread.trigger_typing()
 
-        messages = await thread.history(limit=30, oldest_first=True).flatten()
+        messages = await thread.history(limit=30, oldest_first=False).flatten()
+        messages.reverse()
         first_message = await self.get_first_message(thread)
         if not first_message:
             return
@@ -29,7 +30,11 @@ class Chat:
         personality, beef = self.determine_personality(
             thread, first_message.system_content
         )
-        chat_messages = self.prepare_chat_messages(messages, beef)
+
+        chat_messages, hasImages = self.prepare_chat_messages(messages)
+
+        if hasImages:
+            beef = True
 
         await dadroid_multiple(
             personality, chat_messages, thread.send, thread.send, beef
@@ -78,24 +83,27 @@ class Chat:
         match = re.search(r"\[(.*?)\]", input_string)
         return match.group(1) if match else None
 
-    def prepare_chat_messages(self, messages, beef):
+    def prepare_chat_messages(self, messages):
         chat_messages = []
+        hasImages = False
         for message in messages:
             if message.type == MessageType.thread_starter_message:
                 continue
+
+            if message.attachments:
+                hasImages = True
 
             content = []
             if message.author == self.bot.user:
                 role = "assistant"
             else:
                 role = "user"
-                if beef:
-                    content.extend(self.prepare_attachment_content(message.attachments))
+                content.extend(self.prepare_attachment_content(message.attachments))
 
             content.append({"type": "text", "text": message.clean_content})
             chat_messages.append({"role": role, "content": content})
 
-        return chat_messages
+        return chat_messages, hasImages
 
     @staticmethod
     def prepare_attachment_content(attachments):

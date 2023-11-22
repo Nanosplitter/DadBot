@@ -109,7 +109,7 @@ class OpenAI(commands.Cog, name="openai"):
         ),
     ):
         """
-        [prompt] Create a DALL-E 2 image.
+        [prompt] Create a DALL-E 3 image.
         """
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
 
@@ -145,16 +145,10 @@ class OpenAI(commands.Cog, name="openai"):
             )
             await interaction.followup.send(embed=embed)
             return
-        if len(prompt) > 200:
-            embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
-        else:
-            embed = Embed(title=f'Prompt: "{prompt}"')
 
         imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        # embed.set_image(file=file)
-        embed.set_image(url="attachment://image.png")
-        await interaction.followup.send(file=file, embed=embed)
+        await interaction.followup.send(f'**{prompt}**\n[style: {style}]', file=file)
 
     @nextcord.slash_command(
         name="beefydalle",
@@ -225,8 +219,9 @@ class OpenAI(commands.Cog, name="openai"):
         imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         # embed.set_image(file=file)
-        embed.set_image(url="attachment://image.png")
-        await interaction.followup.send(file=file, embed=embed)
+        imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
+        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
+        await interaction.followup.send(f'**{prompt}**\n[style: {style}] [size: {size}] [quality: {quality}]', file=file)
 
     @nextcord.slash_command(name="dadroid", description="Talk to Dad")
     async def dadroid(

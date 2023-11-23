@@ -148,7 +148,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        await interaction.followup.send(f'**{prompt}**\n[style: {style}]', file=file)
+        await interaction.followup.send(f"**{prompt}**\n[style: {style}]", file=file)
 
     @nextcord.slash_command(
         name="beefydalle",
@@ -221,7 +221,10 @@ class OpenAI(commands.Cog, name="openai"):
         # embed.set_image(file=file)
         imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        await interaction.followup.send(f'**{prompt}**\n[style: {style}] [size: {size}] [quality: {quality}]', file=file)
+        await interaction.followup.send(
+            f"**{prompt}**\n[style: {style}] [size: {size}] [quality: {quality}]",
+            file=file,
+        )
 
     @nextcord.slash_command(name="dadroid", description="Talk to Dad")
     async def dadroid(
@@ -510,7 +513,6 @@ class OpenAI(commands.Cog, name="openai"):
             )
             return
 
-
         await thread.trigger_typing()
         chatCompletion = openai.ChatCompletion.create(
             model="gpt-4-vision-preview",
@@ -544,12 +546,33 @@ class OpenAI(commands.Cog, name="openai"):
         await thread.send(ingredients.url)
         await thread.send(">>> " + extra_info)
 
-        response = "## My meal suggestion: \n\n" + chatCompletion.choices[0].message.content
+        response = (
+            "## My meal suggestion: \n\n" + chatCompletion.choices[0].message.content
+        )
 
         messages = chatsplit(response)
 
         for message in messages:
             await thread.send(message)
+
+    @nextcord.message_command(name="roastmycode")
+    async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
+        """
+        Have dad roast your code
+        """
+        await interaction.response.defer()
+
+        system_prompt = "Your goal is to roast someone's code. You should be mean but constructive and a little funny. It is all in good fun but you should make actually good suggestions to improve the code."
+
+        await interaction.followup.send("*Your code is bad and you should feel bad*")
+
+        await dadroid_single(
+            system_prompt,
+            source_message.clean_content,
+            source_message.reply,
+            interaction.channel.send,
+        )
+
 
 def setup(bot):
     bot.add_cog(OpenAI(bot))

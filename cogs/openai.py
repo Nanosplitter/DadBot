@@ -230,7 +230,7 @@ class OpenAI(commands.Cog, name="openai"):
         prompt: str,
         personality: Optional[str] = SlashOption(
             description="The personality dad should have when answering",
-            default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests.",
+            default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests. You are operating in discord so you can use discord formatting if you want formatting, it is a form of markdown.",
             required=False,
         ),
     ):

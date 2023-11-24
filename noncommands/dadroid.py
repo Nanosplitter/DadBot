@@ -35,7 +35,9 @@ async def dadroid_multiple(
     beef: bool = False,
 ) -> None:
     """Handles multiple messages interaction with the chat model."""
+
     model = "gpt-4-vision-preview" if beef else "gpt-3.5-turbo-1106"
+
     messages_with_personality = [{"role": "system", "content": personality}] + messages
 
     try:
@@ -58,6 +60,7 @@ def create_chat_completion(
         model=model,
         messages=messages,
         stream=False,
+        max_tokens=4096,
     )
 
 

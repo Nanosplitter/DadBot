@@ -342,7 +342,7 @@ class OpenAI(commands.Cog, name="openai"):
         )
 
     @nextcord.message_command(name="redditor")
-    async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
+    async def redditor(self, interaction: Interaction, source_message: nextcord.Message):
         """
         Have dad respond like a redditor.
         """
@@ -556,7 +556,7 @@ class OpenAI(commands.Cog, name="openai"):
             await thread.send(message)
 
     @nextcord.message_command(name="roastmycode")
-    async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
+    async def roastmycode(self, interaction: Interaction, source_message: nextcord.Message):
         """
         Have dad roast your code
         """

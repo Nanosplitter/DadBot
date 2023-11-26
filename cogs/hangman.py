@@ -101,7 +101,7 @@ class Hangman(commands.Cog, name="hangman"):
         return message
 
     @nextcord.slash_command(name="hangman", description="Play a round of hangman!")
-    async def hangman(self, interaction: Interaction):
+    async def hangman(self, interaction: Interaction, word: Optional[str] = None):
         """
         [No Arguments] Play a round of hangman!
         """
@@ -129,7 +129,9 @@ class Hangman(commands.Cog, name="hangman"):
 
         rulesEmbed = Embed(title="Welcome to Hangman!", description="You will have 90 seconds to guess the secret word. To guess, just type your letter into this channel. If I can read it, I will delete it and apply it to the game, and if I can't, I'll put a ❌. Good luck!")
         await interaction.response.send_message(embed=rulesEmbed)
-        answer = str(random.choice(self.wordList).lower()).replace("b'", "").replace("'", "")
+        answer = word
+        if answer is None:
+            answer = str(random.choice(self.wordList).lower()).replace("b'", "").replace("'", "")
         msg = await interaction.followup.send(self.buildMessage(answer, guessed))
         try:
             await self.bot.wait_for("message", timeout=90.0, check=check)

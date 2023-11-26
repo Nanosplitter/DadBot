@@ -96,7 +96,7 @@ class OpenAI(commands.Cog, name="openai"):
                 ephemeral=True,
             )
 
-    @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
+    @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.", guild_ids=[408321710568505344, 856919397754470420, 850473081063211048])
     async def dalle(
         self,
         interaction: Interaction,

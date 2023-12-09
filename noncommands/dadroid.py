@@ -6,6 +6,7 @@ from noncommands.chatsplit import chatsplit
 # Type aliases for readability
 SendMethod = Callable[[str], None]
 
+
 async def dadroid_single(
     personality: str,
     prompt: str,
@@ -16,7 +17,9 @@ async def dadroid_single(
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
-        chats if chats else [
+        chats
+        if chats
+        else [
             {"role": "system", "content": personality},
             {"role": "user", "content": prompt},
         ]
@@ -26,6 +29,28 @@ async def dadroid_single(
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )
+
+
+async def dadroid_response(
+    personality: str,
+    response: str,
+    chats: List[dict] = [],
+    beef: bool = False,
+) -> None:
+    """Handles single message interaction with the chat model."""
+    messages = (
+        chats
+        if chats
+        else [
+            {"role": "system", "content": personality},
+            {"role": "user", "content": response},
+        ]
+    )
+
+    chat_completion = create_chat_completion(messages, beef=beef)
+
+    return chat_completion.choices[0].message.content
+
 
 async def dadroid_multiple(
     personality: str,
@@ -51,9 +76,12 @@ async def dadroid_multiple(
 
 
 def create_chat_completion(
-    messages: List[dict], model: str = "gpt-3.5-turbo-1106"
+    messages: List[dict], model: str = "gpt-3.5-turbo-1106", beef: bool = False
 ) -> dict:
     """Creates a chat completion using OpenAI's API."""
+    if beef:
+        model = "gpt-4-1106-preview"
+
     return openai.ChatCompletion.create(
         model=model,
         messages=messages,

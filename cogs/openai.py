@@ -1,4 +1,5 @@
 import os
+from turtle import title
 from typing import Optional
 import openai
 import yaml
@@ -9,6 +10,7 @@ import base64
 from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
+from noncommands.dadroid import dadroid_response
 
 from noncommands.chatsplit import chatsplit
 
@@ -574,6 +576,81 @@ class OpenAI(commands.Cog, name="openai"):
             source_message.reply,
             interaction.channel.send,
         )
+
+    @nextcord.slash_command(name="onionarticle", description="Create an Onion article.")
+    async def onionarticle(
+        self,
+        interaction: Interaction,
+        topic: Optional[str] = SlashOption(
+            description="The topic of the article",
+            required=False,
+            default="Make a new one up!",
+        ),
+    ):
+        """
+        [topic] Create an Onion article.
+        """
+
+        if topic != "Make a new one up!":
+            response = f"## Writing Onion article!\n\nTopic: {topic}"
+        else:
+            response = f"## Writing Onion article!"
+
+        partial_message = await interaction.response.send_message(response)
+
+        message = await partial_message.fetch()
+
+        thread = None
+
+        title_prompt = "Your goal is to create an Onion article. You should make it funny and satirical. You should make it seem like it is a real article but it should be funny and satirical. You should make the article about the topic you are given. If you are not given a topic, you should make up your own topic. Your goal is to JUST make the title of the article. You should not respond with anything more than the title."
+
+        title_response = await dadroid_response(
+            title_prompt,
+            f"Topic: {topic}",
+            beef=True,
+        )
+
+        try:
+            if not interaction.user:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't fetch your user data. Please try again.", ephemeral=True
+                )
+                return
+            if not interaction.channel:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't start a thread here! Make sure you're running this command in a channel.",
+                    ephemeral=True,
+                )
+                return
+            await message.edit(content=f"## {title_response}")
+            thread = await message.create_thread(
+                name=f"Onion Article",
+                auto_archive_duration=60,
+            )
+        except Exception as e:
+            self.bot.logger.error(f"Error starting thread: {e}")
+            await message.delete()
+            await interaction.followup.send(
+                "I can't start a thread here! Make sure you're running this command in a channel.",
+                ephemeral=True,
+            )
+            return
+
+        await thread.trigger_typing()
+
+        system_prompt = "Your goal is to create an Onion article. You should make it funny and satirical. You should make it seem like it is a real article but it should be funny and satirical. You should make the article with the title you are given."
+
+        article_response = await dadroid_response(
+            system_prompt,
+            f"Title: {title_response}",
+        )
+
+        messages = chatsplit(article_response)
+
+        for message in messages:
+            await thread.send(message)
 
 
 def setup(bot):

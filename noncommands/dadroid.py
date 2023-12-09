@@ -86,6 +86,7 @@ def create_chat_completion(
         model=model,
         messages=messages,
         stream=False,
+        max_tokens=4000,
     )
 
 

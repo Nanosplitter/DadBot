@@ -14,6 +14,7 @@ async def dadroid_single(
     send_method: Optional[SendMethod] = None,
     response_starter: str = "",
     chats: List[dict] = [],
+    beef: bool = False,
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
@@ -25,7 +26,7 @@ async def dadroid_single(
         ]
     )
 
-    chat_completion = create_chat_completion(messages)
+    chat_completion = create_chat_completion(messages, beef=beef)
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )

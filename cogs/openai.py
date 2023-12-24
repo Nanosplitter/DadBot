@@ -1,7 +1,6 @@
 from typing import Optional
 import openai
 import yaml
-import json
 import nextcord
 import io
 import base64
@@ -643,6 +642,65 @@ class OpenAI(commands.Cog, name="openai"):
         article_response = await dadroid_response(
             system_prompt,
             f"Title: {title_response}",
+        )
+
+        messages = chatsplit(article_response)
+
+        for message in messages:
+            await thread.send(message)
+
+    @nextcord.slash_command("monkeyspaw", description="Create a new monkey's paw story")
+    async def monkeyspaw(
+        self,
+        interaction: Interaction,
+        wish: Optional[str] = SlashOption(
+            description="The wish you want to make, like 'I wish for world peace'",
+            required=True,
+        ),
+    ):
+        response = f"> {wish}\n\n *The paw curls*"
+
+        partial_message = await interaction.response.send_message(response)
+
+        message = await partial_message.fetch()
+
+        thread = None
+
+        try:
+            if not interaction.user:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't fetch your user data. Please try again.", ephemeral=True
+                )
+                return
+            if not interaction.channel:
+                await message.delete()
+                await interaction.followup.send(
+                    "I can't start a thread here! Make sure you're running this command in a channel.",
+                    ephemeral=True,
+                )
+                return
+            thread = await message.create_thread(
+                name=f"Monkey's Paw",
+                auto_archive_duration=60,
+            )
+        except Exception as e:
+            self.bot.logger.error(f"Error starting thread: {e}")
+            await message.delete()
+            await interaction.followup.send(
+                "I can't start a thread here! Make sure you're running this command in a channel.",
+                ephemeral=True,
+            )
+            return
+
+        await thread.trigger_typing()
+
+        system_prompt = "Your goal is to create a monkey's paw story. You will be given a wish, and your goal is to write a story as if the outcome is the wish being granted, but the state of the world is absolutely not what the person wanted. It would be bad. This is all about showing the bad consequences of a wish. Start the story with *the paw curls*. It should be told in the second person. As if the monkey's paw is telling the person the results of their wish."
+
+        article_response = await dadroid_response(
+            system_prompt,
+            f"Wish: {wish}",
+            beef=True,
         )
 
         messages = chatsplit(article_response)

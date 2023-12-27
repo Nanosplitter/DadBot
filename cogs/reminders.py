@@ -159,6 +159,8 @@ class Reminders(commands.Cog, name="reminders"):
         embed.add_field(name=f"Output from UTC", value=f'{format_dt(local_utc, "f")} ({format_dt(local_utc, "R")})', inline=False)
         
         await interaction.response.send_message(embed=embed)
+    
+    # @nextcord.slash_command(name="todo", description="Create a new todo item.")
 
 def setup(bot):
     bot.add_cog(Reminders(bot))

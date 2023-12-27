@@ -163,7 +163,7 @@ class Colors(commands.Cog, name="colors"):
                 colorButton.callback = color_callback
                 randomButton.callback = random_callback
 
-                view = View(timeout=1000)
+                view = View(timeout=None)
                 view.add_item(colorButton)
                 view.add_item(randomButton)
 

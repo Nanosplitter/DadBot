@@ -184,7 +184,7 @@ class Memes(commands.Cog, name="memes"):
 
             make_meme_button.callback = make_meme_button_callback
 
-            view = View(timeout=1000)
+            view = View(timeout=None)
             view.add_item(make_meme_button)
             await interaction.response.send_message(r.json()["data"]["url"], view=view, ephemeral=True)
         else:

@@ -73,7 +73,7 @@ class Poll(commands.Cog, name="poll"):
         embed.add_field(name="Custom Poll", value="You can customize the options you want to have in your poll.", inline=False)
         embed.add_field(name="Default Poll", value="You will have 3 options in your poll that you don't get to specify. (👍, 👎, 🤷)", inline=False)
 
-        view = nextcord.ui.View()
+        view = nextcord.ui.View(timeout=None)
 
         select_options = [
             nextcord.SelectOption(label="1 Option", value="1"),

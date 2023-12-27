@@ -93,7 +93,7 @@ class DnD(commands.Cog, name="dnd"):
         previous_button.callback = previous_callback
         next_button.callback = next_callback
 
-        view = View(timeout=1000)
+        view = View(timeout=None)
         view.add_item(previous_button)
         view.add_item(next_button)
 

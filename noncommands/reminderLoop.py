@@ -21,7 +21,7 @@ class ReminderLoop:
         )
         mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute("SELECT * FROM remindme WHERE time <= UTC_TIMESTAMP();")
+        mycursor.execute("SELECT * FROM remindme WHERE time <= UTC_TIMESTAMP() AND reminded = 0;")
 
         for m in mycursor:
             channel = bot.get_channel(int(m[5]))
@@ -47,12 +47,12 @@ class ReminderLoop:
                 break
             except:
                 pass
-
+        
         mydb.commit()
         mycursor.close()
         mydb.close()
 
-    async def deleteOldReminders(self, bot):
+    async def updateOldReminders(self, bot):
         mydb = mysql.connector.connect(
             host=config["dbhost"],
             user=config["dbuser"],
@@ -62,7 +62,7 @@ class ReminderLoop:
         )
         mycursor = mydb.cursor(buffered=True)
         
-        mycursor.execute("DELETE FROM remindme WHERE time <= UTC_TIMESTAMP();")
+        mycursor.execute("UPDATE remindme SET reminded = 1 WHERE time <= UTC_TIMESTAMP();")
 
         mydb.commit()
         mycursor.close()

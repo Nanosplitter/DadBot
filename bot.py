@@ -191,7 +191,7 @@ async def on_command_error(context: Context, error) -> None:
 @tasks.loop(seconds=5)
 async def checkTimes():
     await reminderChecker.checkReminders(bot)
-    await reminderChecker.deleteOldReminders(bot)
+    await reminderChecker.updateOldReminders(bot)
 
 if __name__ == "__main__":
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/cogs"):

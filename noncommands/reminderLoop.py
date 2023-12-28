@@ -4,6 +4,7 @@ import os
 import mysql.connector
 import nextcord
 from nextcord.utils import format_dt
+from noncommands.reminderutils import SnoozeButton
 import pytz
 
 with open("config.yaml") as file:
@@ -38,12 +39,15 @@ class ReminderLoop:
             except:
                 continue
             try:
-                embed = nextcord.Embed(title=m[3], color=0x00ff00)
+                embed = nextcord.Embed(title=m[3], color=0xff0000)
                 time = m[4]
                 time = time.replace(tzinfo=pytz.utc)
 
+                view = nextcord.ui.View(timeout = None)
+                view.add_item(SnoozeButton(m[0], m[3], m[2]))
+
                 embed.add_field(name=f"When", value=f'{format_dt(time, "f")} ({format_dt(time, "R")})', inline=False)
-                await msg.reply(f"Hey <@{m[2]}>, you asked me to remind you of [this]({msg.jump_url}):", embed=embed)
+                await msg.reply(f"Hey <@{m[2]}>, you asked me to remind you of [this]({msg.jump_url}):", embed=embed, view=view)
                 break
             except:
                 pass

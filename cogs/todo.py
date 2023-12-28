@@ -38,7 +38,7 @@ class Todo(commands.Cog, name="todo"):
         
         await interaction.response.send_message(embed=embed)
     
-    @nextcord.slash_command(name="todo", description="Create a new todo item.", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="todo", description="Create a new todo item.")
     async def todo(self, interaction: Interaction, what: str, when: str = SlashOption(description="When you want to be reminded about this", default="null", required=False), tz: str = SlashOption(description="The timezone you want to be reminded in", default="EDT", required=False)):
         pass
     

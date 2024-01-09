@@ -14,12 +14,13 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 class Book:
-    def __init__(self, id, user_id, title, author, genre, chapters, pages, rating, start_date, finish_date):
+    def __init__(self, id, user_id, title, author, genre, type, chapters, pages, rating, start_date, finish_date):
         self.id = id
         self.user_id = user_id
         self.title = title
         self.author = author
         self.genre = genre
+        self.type = type
         self.chapters = chapters
         self.pages = pages
         self.rating = rating
@@ -42,13 +43,15 @@ class Book:
         embed = nextcord.Embed(title=f"{self.title} by {self.author}")
         embed.color = 0x000000
         embed.add_field(name="Genre", value=f"{self.genre}", inline=False)
+        embed.add_field(name="Type", value=f"{self.type}", inline=False)
         embed.add_field(name="Chapters", value=f"{self.chapters}", inline=False)
         embed.add_field(name="Pages", value=f"{self.pages}", inline=False)
         embed.add_field(name="Rating", value=f"{self.rating}", inline=False)
-        embed.add_field(name="Start Date", value=f"{self.start_date}", inline=False)
+        # start date using discord's time display
+        embed.add_field(name="Start Date", value=f"{format_dt(self.start_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.start_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
         if self.finish_date:
             embed.color = 0x00ff00
-            embed.add_field(name="Finish Date", value=f"{self.finish_date}", inline=False)
+            embed.add_field(name="Finish Date", value=f"{format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
         return embed
 
 class DeleteButton(nextcord.ui.Button):

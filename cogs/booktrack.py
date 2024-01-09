@@ -23,7 +23,7 @@ class Booktrack(commands.Cog, name="booktrack"):
         pass
     
     @booktrack.subcommand(description="Start a book")
-    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, chapters: int, pages: int, rating: float):
+    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, type: str, chapters: int, pages: int, rating: float):
         mydb = mysql.connector.connect(
             host=config["dbhost"],
             user=config["dbuser"],
@@ -33,10 +33,10 @@ class Booktrack(commands.Cog, name="booktrack"):
         )
         mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute("INSERT INTO booktrack (user_id, title, author, genre, chapters, pages, rating, start_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (str(interaction.user.id), title, author, genre, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc)))
+        mycursor.execute("INSERT INTO booktrack (user_id, title, author, genre, type, chapters, pages, rating, start_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(interaction.user.id), title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc)))
 
         # Return book embed
-        book = Book(mycursor.lastrowid, interaction.user.id, title, author, genre, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc), None)
+        book = Book(mycursor.lastrowid, interaction.user.id, title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc), None)
         embed = embed = book.make_embed()
 
         await interaction.response.send_message(embed=embed)
@@ -60,7 +60,7 @@ class Booktrack(commands.Cog, name="booktrack"):
 
         firstReply = False
         for x in mycursor:
-            book = Book(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9])
+            book = Book(x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10])
             embed = book.make_embed()
             
             view = nextcord.ui.View(timeout = None)

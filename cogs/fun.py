@@ -94,7 +94,7 @@ class Fun(commands.Cog, name="fun"):
         Get the NASA picture of the day
         """
         await interaction.response.defer()
-        self.bot.logger.info("Getting NASA picture of the day")
+        
         response = requests.get(
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
         )
@@ -108,7 +108,7 @@ class Fun(commands.Cog, name="fun"):
 
         if response.json()["media_type"] == "video":
             embed = Embed(
-                title="Astronomy Picture of the Day",
+                title="Astrophotography Picture of the Day",
                 description=response.json()["explanation"],
             )
             embed.set_image(url=response.json()["thumbnail_url"])
@@ -116,7 +116,7 @@ class Fun(commands.Cog, name="fun"):
             return
 
         embed = Embed(
-            title="Astronomy Picture of the Day",
+            title="Astrophotography Picture of the Day",
             description=response.json()["explanation"],
         )
         embed.set_image(url=response.json()["hdurl"])

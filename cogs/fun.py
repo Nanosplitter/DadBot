@@ -87,7 +87,7 @@ class Fun(commands.Cog, name="fun"):
             )
 
     @nextcord.slash_command(
-        name="apod", description="Get the astonomy picture of the day from NASA."
+        name="apod", description="Get the astrophotography picture of the day from NASA."
     )
     async def apod(self, interaction: Interaction):
         """

@@ -53,6 +53,22 @@ class Book:
             embed.color = 0x00ff00
             embed.add_field(name="Finish Date", value=f"{format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
         return embed
+    
+    def update_db(self):
+        mydb = mysql.connector.connect(
+            host=config["dbhost"],
+            user=config["dbuser"],
+            password=config["dbpassword"],
+            database=config["databasename"],
+            autocommit=True
+        )
+
+        mycursor = mydb.cursor(buffered=True)
+        mycursor.execute("UPDATE booktrack SET title = %s, author = %s, genre = %s, type = %s, chapters = %s, pages = %s, rating = %s, start_date = %s, finish_date = %s WHERE id = %s", (self.title, self.author, self.genre, self.type, self.chapters, self.pages, self.rating, self.start_date, self.finish_date, self.id))
+
+        mydb.commit()
+        mycursor.close()
+        mydb.close()
 
 class DeleteButton(nextcord.ui.Button):
     def __init__(self, row_id, user_id):
@@ -115,5 +131,68 @@ class FinishButton(nextcord.ui.Button):
         mydb.close()
 
         await interaction.response.send_message("Book finished!", ephemeral=True)
+
+        await interaction.message.edit(embed=embed)
+
+class EditButton(nextcord.ui.Button):
+    def __init__(self, row_id, user_id):
+        super().__init__(style=nextcord.ButtonStyle.blurple, label="Edit")
+        self.row_id = row_id
+        self.user_id = int(user_id)
+    
+    async def callback(self, interaction: nextcord.Interaction):
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("You can't edit someone else's book!", ephemeral=True)
+            return
+        
+        mydb = mysql.connector.connect(
+            host=config["dbhost"],
+            user=config["dbuser"],
+            password=config["dbpassword"],
+            database=config["databasename"],
+            autocommit=True
+        )
+
+        mycursor = mydb.cursor(buffered=True)
+        mycursor.execute("SELECT * FROM booktrack WHERE id = %s", (self.row_id,))
+        book = Book(*mycursor.fetchone())
+        embed = book.make_embed()
+
+        mydb.commit()
+        mycursor.close()
+        mydb.close()
+
+        await interaction.response.send_modal(EditView(book))
+
+
+
+class EditView(nextcord.ui.Modal):
+    def __init__(self, book: Book):
+        super().__init__("Edit Book")
+        self.row_id = book.id
+        self.user_id = int(book.user_id)
+        self.book = book
+
+        start = TextInput(label="Start", default_value=str(book.start_date)[:10], max_length=200, required=True)
+        self.add_item(start)
+
+        if book.finish_date:
+            finish = TextInput(label="Finish", default_value=str(book.finish_date)[:10], max_length=200, required=False)
+            self.add_item(finish)
+    
+    async def callback(self, interaction: Interaction):
+        start = self.children[0].value
+        finish = self.children[1].value
+        
+        start_dt = dp.parse(start, settings={'PREFER_DATES_FROM': 'past', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': 'EST', 'RETURN_AS_TIMEZONE_AWARE': True})
+        self.book.start_date = start_dt.astimezone(timezone("UTC"))
+
+        if finish:
+            finish_dt = dp.parse(finish, settings={'PREFER_DATES_FROM': 'past', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': 'EST', 'RETURN_AS_TIMEZONE_AWARE': True})
+            self.book.finish_date = finish_dt.astimezone(timezone("UTC"))
+
+        self.book.update_db()
+
+        embed = self.book.make_embed()
 
         await interaction.message.edit(embed=embed)

@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption, Embed
 from nextcord.ui import Button, TextInput
 from nextcord.utils import format_dt
-from noncommands.booktrackutils import Book, DeleteButton, FinishButton
+from noncommands.booktrackutils import Book, DeleteButton, FinishButton, EditButton
 import dateparser as dp
 from pytz import timezone
 import pytz
@@ -35,7 +35,6 @@ class Booktrack(commands.Cog, name="booktrack"):
 
         mycursor.execute("INSERT INTO booktrack (user_id, title, author, genre, type, chapters, pages, rating, start_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(interaction.user.id), title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc)))
 
-        # Return book embed
         book = Book(mycursor.lastrowid, interaction.user.id, title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc), None)
         embed = embed = book.make_embed()
 
@@ -67,6 +66,8 @@ class Booktrack(commands.Cog, name="booktrack"):
 
             view.add_item(DeleteButton(book.id, book.user_id))
             view.add_item(FinishButton(book.id, book.user_id))
+            view.add_item(EditButton(book.id, book.user_id))
+
 
             if firstReply == False:
                 firstReply = True

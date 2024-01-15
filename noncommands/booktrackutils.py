@@ -14,7 +14,7 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 class Book:
-    def __init__(self, id, user_id, title, author, genre, type, chapters, pages, rating, start_date, finish_date):
+    def __init__(self, id, user_id, title, author, genre, type, chapters, pages, rating, start_date, finish_date, photo_url):
         self.id = id
         self.user_id = user_id
         self.title = title
@@ -26,6 +26,7 @@ class Book:
         self.rating = rating
         self.start_date = start_date
         self.finish_date = finish_date
+        self.photo_url = photo_url
     
     def __str__(self):
         return f"Book: {self.title} by {self.author} ({self.id})"
@@ -47,11 +48,14 @@ class Book:
         embed.add_field(name="Chapters", value=f"{self.chapters}", inline=False)
         embed.add_field(name="Pages", value=f"{self.pages}", inline=False)
         embed.add_field(name="Rating", value=f"{self.rating}", inline=False)
-        # start date using discord's time display
+
         embed.add_field(name="Start Date", value=f"{format_dt(self.start_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.start_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
         if self.finish_date:
             embed.color = 0x00ff00
             embed.add_field(name="Finish Date", value=f"{format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
+        
+        if self.photo_url:
+            embed.set_image(url=self.photo_url)
         return embed
     
     def update_db(self):
@@ -64,7 +68,7 @@ class Book:
         )
 
         mycursor = mydb.cursor(buffered=True)
-        mycursor.execute("UPDATE booktrack SET title = %s, author = %s, genre = %s, type = %s, chapters = %s, pages = %s, rating = %s, start_date = %s, finish_date = %s WHERE id = %s", (self.title, self.author, self.genre, self.type, self.chapters, self.pages, self.rating, self.start_date, self.finish_date, self.id))
+        mycursor.execute("UPDATE booktrack SET title = %s, author = %s, genre = %s, type = %s, chapters = %s, pages = %s, rating = %s, start_date = %s, finish_date = %s, photo_url = %s WHERE id = %s", (self.title, self.author, self.genre, self.type, self.chapters, self.pages, self.rating, self.start_date, self.finish_date, self.photo_url, self.id))
 
         mydb.commit()
         mycursor.close()

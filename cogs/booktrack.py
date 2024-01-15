@@ -1,7 +1,8 @@
 import mysql.connector
 import nextcord
+from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, Embed
+from nextcord import Interaction, SlashOption, Embed, SlashOption
 from nextcord.ui import Button, TextInput
 from nextcord.utils import format_dt
 from noncommands.booktrackutils import Book, DeleteButton, FinishButton, EditButton
@@ -23,8 +24,14 @@ class Booktrack(commands.Cog, name="booktrack"):
         pass
     
     @booktrack.subcommand(description="Start a book")
-    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, type: str, chapters: int, pages: int, rating: float, photo: nextcord.Attachment):
-        photo_url = photo.url
+    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, type: str, chapters: int, pages: int, rating: float, photo: Optional[nextcord.Attachment] = SlashOption(
+            description="A photo that represents the book, possibly a cover",
+            required=False
+        )):
+        if photo:
+            photo_url = photo.url
+        else:
+            photo_url = None
         mydb = mysql.connector.connect(
             host=config["dbhost"],
             user=config["dbuser"],

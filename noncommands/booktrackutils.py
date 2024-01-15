@@ -160,7 +160,6 @@ class EditButton(nextcord.ui.Button):
         mycursor = mydb.cursor(buffered=True)
         mycursor.execute("SELECT * FROM booktrack WHERE id = %s", (self.row_id,))
         book = Book(*mycursor.fetchone())
-        embed = book.make_embed()
 
         mydb.commit()
         mycursor.close()
@@ -186,7 +185,11 @@ class EditView(nextcord.ui.Modal):
     
     async def callback(self, interaction: Interaction):
         start = self.children[0].value
-        finish = self.children[1].value
+
+        if len(self.children) > 1:
+            finish = self.children[1].value
+        else:
+            finish = None
         
         start_dt = dp.parse(start, settings={'PREFER_DATES_FROM': 'past', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': 'EST', 'RETURN_AS_TIMEZONE_AWARE': True})
         self.book.start_date = start_dt.astimezone(timezone("UTC"))

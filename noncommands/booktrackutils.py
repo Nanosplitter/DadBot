@@ -53,6 +53,8 @@ class Book:
         if self.finish_date:
             embed.color = 0x00ff00
             embed.add_field(name="Finish Date", value=f"{format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.finish_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
+
+            embed.add_field(name="Read Time", value=f"{self.finish_date - self.start_date}".replace(", 0:00:00", ""), inline=False)
         
         if self.photo_url:
             embed.set_image(url=self.photo_url)

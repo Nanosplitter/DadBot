@@ -24,8 +24,7 @@ geopy
 Nominatim
 haversine
 syllapy
-openai==1.9.0
-googletrans==4.0.0rc1
+openai
 akinator.py
 pyshorteners
 moviepy

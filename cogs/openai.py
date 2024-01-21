@@ -732,7 +732,7 @@ class OpenAI(commands.Cog, name="openai"):
             input=prompt
         )
 
-        filename = f"speech-{random.randint(1, 10000)}.mp3"
+        filename = f"speech-{random.randint(1, 10000)}.m4a"
         video_filename = f"video-{random.randint(1, 10000)}.mp4"
 
         response.stream_to_file(filename)
@@ -743,7 +743,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         video_clip = video_clip.set_audio(audio_clip)
 
-        video_clip.write_videofile(video_filename, codec="libx264", fps=24, verbose=False, logger=None)
+        video_clip.write_videofile(video_filename, audio_codec="aac", codec="mpeg4", audio=True, fps=24, verbose=False, logger=None)
 
         await interaction.followup.send(file=nextcord.File(video_filename))
 

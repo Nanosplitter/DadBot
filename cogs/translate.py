@@ -8,10 +8,6 @@ from nextcord import Interaction
 from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
 
-from googletrans import Translator
-
-translator = Translator()
-
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 

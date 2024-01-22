@@ -24,26 +24,6 @@ class OpenAI(commands.Cog, name="openai"):
         openai.api_key = config["openapi_token"]
         self.client = openai.OpenAI(api_key=config["openapi_token"])
 
-    async def openAiModeration(self, interaction: Interaction, prompt: str):
-        response = openai.Moderation.create(input=prompt)
-
-        flagged = response["results"][0]["flagged"]  # type: ignore
-        if flagged:
-            if len(prompt) < 2000:
-                res = f"Your prompt: '{prompt}' was flagged as inapropriate because of these categories:\n---------------------------\n"
-            else:
-                res = "Your prompt was flagged as inapropriate because of these categories:\n---------------------------\n"
-            flaggedCategories = response["results"][0]["categories"]  # type: ignore
-            for i in flaggedCategories:
-                if flaggedCategories[i]:
-                    res += f"-----------> **{i}**\n"
-                else:
-                    res += f"{i}\n"
-
-            await interaction.followup.send(res)
-            return False
-        return True
-
     @nextcord.slash_command(name="chat", description="Chat with Dad")
     async def chat(
         self,
@@ -117,10 +97,6 @@ class OpenAI(commands.Cog, name="openai"):
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
 
         await interaction.response.defer()
-
-        isValidPrompt = await self.openAiModeration(interaction, prompt)
-        if not isValidPrompt:
-            return
 
         if len(prompt) > 4000:
             await interaction.followup.send("Prompt must be less than 4000 characters.")
@@ -283,10 +259,6 @@ class OpenAI(commands.Cog, name="openai"):
         [place] Get some cool information about a place.
         """
         await interaction.response.defer()
-
-        isValidPrompt = await self.openAiModeration(interaction, place)
-        if not isValidPrompt:
-            return
 
         prompt = f"Give me some cool information and history about {place}. Try to keep the response relatively short, but make sure it's interesting and informative."
 

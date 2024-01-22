@@ -103,7 +103,7 @@ class OpenAI(commands.Cog, name="openai"):
             return
 
         try:
-            response = openai.Image.create(
+            response = self.client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
                 style=style,
@@ -125,7 +125,7 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send(embed=embed)
             return
 
-        imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
+        imageData = f"{response.data[0].b64_json}"  # type: ignore
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         await interaction.followup.send(f"**{prompt}**\n[style: {style}]", file=file)
 
@@ -169,7 +169,7 @@ class OpenAI(commands.Cog, name="openai"):
             return
 
         try:
-            response = openai.Image.create(
+            response = self.client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
                 style=style,
@@ -194,11 +194,8 @@ class OpenAI(commands.Cog, name="openai"):
             embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
         else:
             embed = Embed(title=f'Prompt: "{prompt}"')
-
-        imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
-        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        # embed.set_image(file=file)
-        imageData = f"{response['data'][0]['b64_json']}"  # type: ignore
+        
+        imageData = f"{response.data[0].b64_json}"
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         await interaction.followup.send(
             f"**{prompt}**\n[style: {style}] [size: {size}] [quality: {quality}]",
@@ -387,7 +384,7 @@ class OpenAI(commands.Cog, name="openai"):
         """
         await interaction.response.defer()
 
-        chatCompletion = openai.ChatCompletion.create(
+        chatCompletion = self.client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=[
                 {
@@ -410,7 +407,7 @@ class OpenAI(commands.Cog, name="openai"):
         apodContent = chatCompletion.choices[0].message.content
 
         # Ask gpt3.5 to come up with a title for the APOD
-        titleCompletion = openai.ChatCompletion.create(
+        titleCompletion = self.client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
                 {
@@ -489,7 +486,7 @@ class OpenAI(commands.Cog, name="openai"):
             return
 
         await thread.trigger_typing()
-        chatCompletion = openai.ChatCompletion.create(
+        chatCompletion = self.client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=[
                 {

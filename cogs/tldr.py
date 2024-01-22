@@ -18,6 +18,7 @@ with open("config.yaml") as file:
 class TLDR(commands.Cog, name="tldr"):
     def __init__(self, bot):
         self.bot = bot
+        self.client = openai.OpenAI(api_key=config["openapi_token"])
 
     @nextcord.slash_command(name="tldrchannel", description="Get a TLDR of X number of past messages on the channel.")
     async def tldrchannel(self, interaction: Interaction, number: Optional[int] = SlashOption(description="The number of past messages to summarize", required=True, min_value=2, max_value=200)):
@@ -34,7 +35,7 @@ class TLDR(commands.Cog, name="tldr"):
             chats.append({"role": "user", "content": f"[{m.author.display_name}]: {m.content}"})
         chats.append({"role": "user", "content": "Please summarize the previous messages in a concise way to catch the user up on what has been happening. Make sure to hit the important details and to not include any unnecessary information."})
 
-        chatCompletion = openai.ChatCompletion.create(model="gpt-3.5-turbo-1106", messages=chats)
+        chatCompletion = self.client.chat.completions.create(model="gpt-3.5-turbo-1106", messages=chats)
         response = chatCompletion.choices[0].message.content
 
         messages = chatsplit(response)

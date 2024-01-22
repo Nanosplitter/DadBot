@@ -1,10 +1,14 @@
 from typing import Callable, List, Optional
 from nextcord import Interaction
-import openai
+from openai import OpenAI
+import yaml
 from noncommands.chatsplit import chatsplit
 
 # Type aliases for readability
 SendMethod = Callable[[str], None]
+
+with open("config.yaml") as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 async def dadroid_single(
@@ -64,26 +68,23 @@ async def dadroid_multiple(
     model = "gpt-4-vision-preview" if beef else "gpt-3.5-turbo-1106"
     messages_with_personality = [{"role": "system", "content": personality}] + messages
 
-    try:
-        chat_completion = create_chat_completion(messages_with_personality, model)
-        await respond_from_chat_completion(
-            chat_completion, first_send_method, send_method
-        )
-    except openai.error.APIError:
-        await first_send_method(
-            "I'm sorry, my system is currently having some issues. "
-            "Send another message! If that doesn't work, wait a few minutes and try again."
-        )
+
+    chat_completion = create_chat_completion(messages_with_personality, model)
+    await respond_from_chat_completion(
+        chat_completion, first_send_method, send_method
+    )
 
 
-def create_chat_completion(
-    messages: List[dict], model: str = "gpt-3.5-turbo-1106", beef: bool = False
-) -> dict:
+
+def create_chat_completion(messages: List[dict], model: str = "gpt-3.5-turbo-1106", beef: bool = False) -> dict:
     """Creates a chat completion using OpenAI's API."""
+
+    client = OpenAI(api_key=config["openapi_token"])
+
     if beef:
         model = "gpt-4-1106-preview"
 
-    return openai.ChatCompletion.create(
+    return client.chat.completions.create(
         model=model,
         messages=messages,
         stream=False,

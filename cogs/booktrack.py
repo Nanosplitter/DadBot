@@ -24,7 +24,7 @@ class Booktrack(commands.Cog, name="booktrack"):
         pass
     
     @booktrack.subcommand(description="Start a book")
-    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, type: str, chapters: int, pages: int, rating: float, photo: Optional[nextcord.Attachment] = SlashOption(
+    async def startbook(self, interaction: Interaction, title: str, author: str, genre: str, type: str, chapters: int, pages: int, photo: Optional[nextcord.Attachment] = SlashOption(
             description="A photo that represents the book, possibly a cover",
             required=False
         )):
@@ -41,9 +41,9 @@ class Booktrack(commands.Cog, name="booktrack"):
         )
         mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute("INSERT INTO booktrack (user_id, title, author, genre, type, chapters, pages, rating, start_date, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(interaction.user.id), title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc), photo_url))
+        mycursor.execute("INSERT INTO booktrack (user_id, title, author, genre, type, chapters, pages, start_date, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (str(interaction.user.id), title, author, genre, type, chapters, pages, datetime.utcnow().replace(tzinfo=pytz.utc), photo_url))
 
-        book = Book(mycursor.lastrowid, interaction.user.id, title, author, genre, type, chapters, pages, rating, datetime.utcnow().replace(tzinfo=pytz.utc), None, photo_url)
+        book = Book(mycursor.lastrowid, interaction.user.id, title, author, genre, type, chapters, pages, None, datetime.utcnow().replace(tzinfo=pytz.utc), None, photo_url)
         embed = embed = book.make_embed()
 
         await interaction.response.send_message(embed=embed)

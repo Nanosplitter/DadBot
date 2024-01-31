@@ -47,7 +47,9 @@ class Book:
         embed.add_field(name="Type", value=f"{self.type}", inline=False)
         embed.add_field(name="Chapters", value=f"{self.chapters}", inline=False)
         embed.add_field(name="Pages", value=f"{self.pages}", inline=False)
-        embed.add_field(name="Rating", value=f"{self.rating}", inline=False)
+
+        if self.rating:
+            embed.add_field(name="Rating", value=f"{self.rating}", inline=False)
 
         embed.add_field(name="Start Date", value=f"{format_dt(self.start_date.replace(tzinfo=pytz.utc), 'f')} ({format_dt(self.start_date.replace(tzinfo=pytz.utc), 'R')})", inline=False)
         if self.finish_date:
@@ -169,8 +171,6 @@ class EditButton(nextcord.ui.Button):
 
         await interaction.response.send_modal(EditView(book))
 
-
-
 class EditView(nextcord.ui.Modal):
     def __init__(self, book: Book):
         super().__init__("Edit Book")
@@ -181,24 +181,36 @@ class EditView(nextcord.ui.Modal):
         start = TextInput(label="Start", default_value=str(book.start_date)[:10], max_length=200, required=True)
         self.add_item(start)
 
+        ratingDefault = str(book.rating) if book.rating else ""
+
+        rating = TextInput(label="Rating", default_value=ratingDefault, max_length=200, required=False)
+        self.add_item(rating)
+
         if book.finish_date:
             finish = TextInput(label="Finish", default_value=str(book.finish_date)[:10], max_length=200, required=False)
             self.add_item(finish)
-    
+        
     async def callback(self, interaction: Interaction):
         start = self.children[0].value
 
-        if len(self.children) > 1:
-            finish = self.children[1].value
+        rating = self.children[1].value
+
+        if len(self.children) > 2:
+            finish = self.children[2].value
         else:
             finish = None
         
         start_dt = dp.parse(start, settings={'PREFER_DATES_FROM': 'past', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': 'EST', 'RETURN_AS_TIMEZONE_AWARE': True})
-        self.book.start_date = start_dt.astimezone(timezone("UTC"))
+
+        if start != str(self.book.start_date)[:10]:
+            self.book.start_date = start_dt.astimezone(timezone("UTC"))
 
         if finish:
             finish_dt = dp.parse(finish, settings={'PREFER_DATES_FROM': 'past', 'PREFER_DAY_OF_MONTH': 'first', 'TIMEZONE': 'EST', 'RETURN_AS_TIMEZONE_AWARE': True})
-            self.book.finish_date = finish_dt.astimezone(timezone("UTC"))
+            if finish != str(self.book.finish_date)[:10]:
+                self.book.finish_date = finish_dt.astimezone(timezone("UTC"))
+        
+        self.book.rating = rating
 
         self.book.update_db()
 

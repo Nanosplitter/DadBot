@@ -24,60 +24,7 @@ class OpenAI(commands.Cog, name="openai"):
         openai.api_key = config["openapi_token"]
         self.client = openai.OpenAI(api_key=config["openapi_token"])
 
-    @nextcord.slash_command(name="chat", description="Chat with Dad")
-    async def chat(
-        self,
-        interaction: Interaction,
-        personality: Optional[str] = SlashOption(
-            description="The personality or 'job' dad should have in this conversation",
-            required=False,
-        ),
-        beef: Optional[bool] = SlashOption(
-            description="If you want DadBot to think harder about his responses. He will respond much slower if enabled.",
-            required=False,
-            default=False,
-        ),
-    ):
-        """
-        [No Arguments] Chat with Dad.
-        """
-
-        response = "## Hey there! Let's chat!"
-
-        if personality is not None:
-            response += f"\n\nCustom Personality: [{personality}]"
-        if beef:
-            response += "\n\nBeef: Enabled"
-
-        partial_message = await interaction.response.send_message(response)
-
-        message = await partial_message.fetch()
-
-        try:
-            if not interaction.user:
-                await message.delete()
-                await interaction.followup.send(
-                    "I can't fetch your user data. Please try again.", ephemeral=True
-                )
-                return
-            if not interaction.channel:
-                await message.delete()
-                await interaction.followup.send(
-                    "I can't start a thread here! Make sure you're running this command in a channel.",
-                    ephemeral=True,
-                )
-                return
-            await message.create_thread(
-                name=f"{interaction.user.display_name}'s Chat with Dad",
-                auto_archive_duration=60,
-            )
-        except Exception as e:
-            self.bot.logger.error(f"Error starting thread: {e}")
-            await message.delete()
-            await interaction.followup.send(
-                "I can't start a thread here! Make sure you're running this command in a channel.",
-                ephemeral=True,
-            )
+   
 
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
     async def dalle(

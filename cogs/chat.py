@@ -17,7 +17,7 @@ from noncommands.savedpersonalitiesutils import Personality, DeleteButton
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-class Chat(commands.Cog, name="template"):
+class Chat(commands.Cog, name="chat"):
     def __init__(self, bot):
         self.bot = bot
         openai.api_key = config["openapi_token"]

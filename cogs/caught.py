@@ -8,6 +8,8 @@ from nextcord import Interaction, SlashOption, ChannelType
 from nextcord.abc import GuildChannel
 import mysql.connector
 import time
+from services.db_service import *
+from models.caught import get_all_in_server, Caught
 
 
 with open("config.yaml") as file:
@@ -18,7 +20,6 @@ class Caught(commands.Cog, name="caught"):
     def __init__(self, bot):
         self.bot = bot
         self.old_names = dict()
-        self.table = "caught"
 
     # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @nextcord.slash_command(name="caught", description="See how many times everyone on the server has been caught by DadBot.")
@@ -30,32 +31,8 @@ class Caught(commands.Cog, name="caught"):
         if interaction.guild is None:
             await interaction.response.send_message("Sorry, I can't find your server information.")
             return
-        
-        members_ids = []
-        members_usernames = []
-
-        for i in interaction.guild.members:
-            members_ids.append(i.id)
-            members_usernames.append(str(i))
-        
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"]
-        )
-        mycursor = mydb.cursor(buffered=True)
-
-        mycursor.execute(f"SELECT * FROM {self.table} ORDER BY count DESC")
-        
-        rows = mycursor.fetchall()
-        
-        if rows is None:
-            await interaction.response.send_message("No one has been caught yet!")
-            return
 
         embeds = []
-
         position = 0
 
         position_colors = {
@@ -64,30 +41,18 @@ class Caught(commands.Cog, name="caught"):
             2: 0xcd7f32
         }
 
-        for m in rows:
-            if m[1] is not None and int(m[1]) in members_ids:
-                member = nextcord.utils.get(interaction.guild.members, name=m[2].split("#")[0])
+        for caught in get_all_in_server(interaction.guild.members):
+            member = nextcord.utils.get(interaction.guild.members, id=int(caught.user_id))
 
-                name = m[2].split('#')[0]
-                caught = m[3]
+            if position < 3:
+                embed = nextcord.Embed(title="", color=position_colors[position])
+                position += 1
+            else:
+                embed = nextcord.Embed(title="")
 
-                if position < 3:
-                    embed = nextcord.Embed(title="", color=position_colors[position])
-                    position += 1
-                else:
-                    embed = nextcord.Embed(title="")
-
-                if member.display_name != name:
-                    name = f"{member.display_name } ({name})"
-
-                formatted_string = f"{name}\n{caught:2d} times"
-
-                embed.set_author(name=formatted_string, icon_url=member.display_avatar.url)
-
+            if member is not None:
+                embed = caught.build_embed(member, embed.color)
                 embeds.append(embed)
-
-        mycursor.close()
-        mydb.close()
 
         if len(embeds) == 0:
             await interaction.response.send_message("No one has been caught yet! \nTry running `/fixcaughtids` if you expected stuff to show up here.")
@@ -95,7 +60,6 @@ class Caught(commands.Cog, name="caught"):
 
         firstMessage = True
 
-        # embeds can only be sent in groups of 10 or less, split into multiple messages if needed
         embed_group = []
         for embed in embeds:
             embed_group.append(embed)

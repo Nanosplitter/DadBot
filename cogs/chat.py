@@ -157,8 +157,6 @@ class Chat(commands.Cog, name="chat"):
 
         mycursor.execute("SELECT * FROM personalities WHERE user_id = %s", (str(interaction.user.id),))
 
-        
-
         firstReply = False
         for x in mycursor:
             personality = Personality(*x)

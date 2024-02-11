@@ -20,6 +20,8 @@ from nextcord import Interaction
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot, Context
 
+
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -61,7 +63,7 @@ class LoggingFormatter(logging.Formatter):
         formatter = logging.Formatter(format, "%Y-%m-%d %H:%M:%S", style="{")
         return formatter.format(record)
 
-logger: logging.Logger = logging.getLogger(name="discord_bot")
+logger: logging.Logger = logging.getLogger(name="DadBot")
 logger.setLevel(level=logging.INFO)
 
 console_handler = logging.StreamHandler()
@@ -85,16 +87,13 @@ haikuDetector = haikudetector.HaikuDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
 
-
-
-# The code in this even is executed when the bot is ready
 @bot.event
 async def on_ready() -> None:
     if bot.user is None:
         sys.exit("Bot has no user!")
     
     bot.logger.info(f"Logged in as {bot.user.name}")
-    bot.logger.info(f"discord.py API version: {nextcord.__version__}")
+    bot.logger.info(f"nextcord.py API version: {nextcord.__version__}")
     bot.logger.info(f"Python version: {platform.python_version()}")
     bot.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
     bot.logger.info(f"Servers: {len(bot.guilds)}")
@@ -104,18 +103,12 @@ async def on_ready() -> None:
     bot.logger.info(f"Users: {len(bot.users)}")
     bot.logger.info("-------------------")
     status_task.start()
-    # if config["sync_commands_globally"]:
-    #     bot.logger.info("Syncing commands globally...")
-    #     await bot.tree.sync()
 
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
     statuses = ["with your mom"]
     await bot.change_presence(activity=nextcord.Game(random.choice(statuses)))
-
-# Removes the default help command of nextcord.py to be able to create our custom help command.
-# bot.remove_command("help")
 
 @bot.event
 async def on_message(message: nextcord.Message) -> None:
@@ -126,7 +119,6 @@ async def on_message(message: nextcord.Message) -> None:
         await imChecker.checkIm(message)
         await haikuDetector.checkForHaiku(message)
         await chat.respond(message)
-
     
     await bot.process_commands(message)
 
@@ -195,7 +187,7 @@ async def checkTimes():
 
 if __name__ == "__main__":
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/cogs"):
-        if file.endswith(".py"):
+        if file.endswith(".py") and file != "template.py":
             extension = file[:-3]
             try:
                 bot.load_extension(f"cogs.{extension}")

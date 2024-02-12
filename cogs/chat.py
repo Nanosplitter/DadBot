@@ -157,7 +157,7 @@ class Chat(commands.Cog, name="chat"):
 
         mycursor.execute("SELECT * FROM personalities WHERE user_id = %s", (str(interaction.user.id),))
 
-        firstReply = False
+        firstReply = True
         for x in mycursor:
             personality = Personality(*x)
 
@@ -166,13 +166,13 @@ class Chat(commands.Cog, name="chat"):
             view.add_item(DeleteButton(personality.id, personality.user_id))
 
             embed = personality.make_embed()
-            if firstReply:
+            if not firstReply:
                 await interaction.response.send_message(embed=embed, view=view)
+                firstReply = True
             else:
                 await interaction.channel.send(embed=embed, view=view)
-                firstReply = True
 
-        if not firstReply:
+        if firstReply:
             await interaction.response.send_message("You don't have any personalities yet!")
 
         mydb.commit()

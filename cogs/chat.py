@@ -1,18 +1,11 @@
-import random
 from typing import Optional
-import mysql.connector
 import openai
 import yaml
 import nextcord
-import io
-import os
-import base64
-from nextcord import Interaction, Embed, SlashOption
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 
-from noncommands.savedpersonalitiesutils import Personality, DeleteButton
-
-
+from models.personality import Personality, DeleteButton, get_personality, get_saved_personalities
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -45,21 +38,12 @@ class Chat(commands.Cog, name="chat"):
 
         if personality is not None:
             if personality.startswith("[saved_personality] "):
-                mydb = mysql.connector.connect(
-                    host=config["dbhost"],
-                    user=config["dbuser"],
-                    password=config["dbpassword"],
-                    database=config["databasename"],
-                    autocommit=True
-                )
-
-                mycursor = mydb.cursor(buffered=True)
-                mycursor.execute("SELECT personality FROM personalities WHERE user_id = %s AND name = %s", (str(interaction.user.id), personality.replace("[saved_personality] ", "")))
-
-                personality = mycursor.fetchone()[0]
-
-                mycursor.close()
-                mydb.close()
+                personality = personality.replace("[saved_personality] ", "")
+                personality = get_personality(interaction.user.id, personality)
+                if personality is None:
+                    await interaction.response.send_message("I couldn't find that personality. Try again.", ephemeral=True)
+                    return
+                personality = personality.personality
 
             response += f"\n\nCustom Personality: [{personality}]"
         if beef:
@@ -97,23 +81,11 @@ class Chat(commands.Cog, name="chat"):
     
     @chat.on_autocomplete("personality")
     async def chat_autocomplete(self, interaction: Interaction, personality: str):
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"],
-            autocommit=True
-        )
+        personalities = get_saved_personalities(interaction.user.id)
 
-        mycursor = mydb.cursor(buffered=True)
-        mycursor.execute("SELECT name FROM personalities WHERE user_id = %s", (str(interaction.user.id),))
+        personality_names = [f"[saved_personality] {x.name}" for x in personalities]
 
-        personality_names = [f"[saved_personality] {x[0]}" for x in mycursor]
-
-        mycursor.close()
-
-        mydb.close()
-
+        # Filter out personalities that don't match the search
         personality_names = [i for i in personality_names if personality.lower() in i.lower()]
 
         await interaction.response.send_autocomplete(personality_names[:25])
@@ -124,60 +96,30 @@ class Chat(commands.Cog, name="chat"):
 
     @personalities.subcommand(description="Create a personality")
     async def create(self, interaction: Interaction, name: str, personality: str):
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"],
-            autocommit=True
-        )
-        mycursor = mydb.cursor(buffered=True)
-
-        mycursor.execute("INSERT INTO personalities (user_id, name, personality) VALUES (%s, %s, %s)", (str(interaction.user.id), name, personality))
-
-        personality = Personality(mycursor.lastrowid, interaction.user.id, name, personality)
+        personality = Personality.create(user_id=interaction.user.id, name=name, personality=personality)
+        
         embed = personality.make_embed()
 
-        await interaction.response.send_message(embed=embed)
+        view = nextcord.ui.View()
+        view.add_item(DeleteButton(personality.id, interaction.user.id))
 
-        mydb.commit()
-        mycursor.close()
-        mydb.close()
+        await interaction.response.send_message(embed=embed, view=view)
 
     @personalities.subcommand(description="List your personalities")
     async def list(self, interaction: Interaction):
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"],
-            autocommit=True
-        )
-        mycursor = mydb.cursor(buffered=True)
-
-        mycursor.execute("SELECT * FROM personalities WHERE user_id = %s", (str(interaction.user.id),))
-
-        firstReply = True
-        for x in mycursor:
-            personality = Personality(*x)
-
-            view = nextcord.ui.View(timeout = None)
-
-            view.add_item(DeleteButton(personality.id, personality.user_id))
+        personalities = get_saved_personalities(interaction.user.id)
+        
+        first_message = True
+        for personality in personalities:
+            view = nextcord.ui.View()
+            view.add_item(DeleteButton(personality.id, interaction.user.id))
 
             embed = personality.make_embed()
-            if not firstReply:
+            if first_message:
                 await interaction.response.send_message(embed=embed, view=view)
-                firstReply = True
+                first_message = False
             else:
                 await interaction.channel.send(embed=embed, view=view)
-
-        if firstReply:
-            await interaction.response.send_message("You don't have any personalities yet!")
-
-        mydb.commit()
-        mycursor.close()
-        mydb.close()
 
 def setup(bot):
     bot.add_cog(Chat(bot))

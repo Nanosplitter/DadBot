@@ -4,6 +4,7 @@ import yaml
 import nextcord
 from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
+import re
 
 from models.personality import Personality, DeleteButton, get_personality, get_saved_personalities
 
@@ -120,6 +121,38 @@ class Chat(commands.Cog, name="chat"):
                 first_message = False
             else:
                 await interaction.channel.send(embed=embed, view=view)
+    
+    @personality.subcommand(description="Save the current personality in a chat thread")
+    async def save(self, interaction: Interaction, name: str):
+        thread = interaction.channel
+        if not isinstance(thread, nextcord.Thread):
+            await interaction.response.send_message("You can only save personalities in threads.", ephemeral=True)
+            return
+        
+        first_message = await thread.history(limit=1, oldest_first=True).flatten()
+        if len(first_message) == 0:
+            await interaction.response.send_message("No first message found in thread", ephemeral=True)
+            return
+        
+        first_message = first_message[0]
+
+        personality = config["default_personality"] + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown."
+
+        if "having for dinner?" in thread.name:
+            personality = config["chef_personality"]
+        
+        if "Custom Personality" in first_message.system_content:
+            match = re.search(r"\[(.*?)\]", first_message.system_content)
+            personality = match.group(1) if match else None
+
+        personality_object = Personality.create(user_id=interaction.user.id, name=name, personality=personality)
+        
+        embed = personality_object.make_embed()
+
+        view = nextcord.ui.View()
+        view.add_item(DeleteButton(personality_object.id, interaction.user.id))
+
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 def setup(bot):
     bot.add_cog(Chat(bot))

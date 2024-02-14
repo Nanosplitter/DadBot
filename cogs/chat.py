@@ -125,8 +125,8 @@ class Chat(commands.Cog, name="chat"):
     @personality.subcommand(description="Save the current personality in a chat thread")
     async def save(self, interaction: Interaction, name: str):
         thread = interaction.channel
-        if not isinstance(thread, nextcord.Thread):
-            await interaction.response.send_message("You can only save personalities in threads.", ephemeral=True)
+        if not isinstance(thread, nextcord.Thread) or ("Chat with Dad" not in thread.name and "having for dinner?" not in thread.name):
+            await interaction.response.send_message("You can only save personalities in chat threads with Dad.", ephemeral=True)
             return
         
         first_message = await thread.history(limit=1, oldest_first=True).flatten()

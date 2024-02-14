@@ -90,11 +90,11 @@ class Chat(commands.Cog, name="chat"):
 
         await interaction.response.send_autocomplete(personality_names[:25])
     
-    @nextcord.slash_command(name="personalities", description="default personalities command")
-    async def personalities(self, interaction: Interaction):
+    @nextcord.slash_command(name="personality", description="default personality command")
+    async def personality(self, interaction: Interaction):
         pass
 
-    @personalities.subcommand(description="Create a personality")
+    @personality.subcommand(description="Create a personality")
     async def create(self, interaction: Interaction, name: str, personality: str):
         personality = Personality.create(user_id=interaction.user.id, name=name, personality=personality)
         
@@ -105,7 +105,7 @@ class Chat(commands.Cog, name="chat"):
 
         await interaction.response.send_message(embed=embed, view=view)
 
-    @personalities.subcommand(description="List your personalities")
+    @personality.subcommand(description="List your personalities")
     async def list(self, interaction: Interaction):
         personalities = get_saved_personalities(interaction.user.id)
         

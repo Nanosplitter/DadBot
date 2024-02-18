@@ -22,7 +22,7 @@ with open("config.yaml") as file:
 
 
 # Here we name the cog and create a new class for the cog.
-class NewPicture(commands.Cog, name="newpicture"):
+class NewCreations(commands.Cog, name="newcreations"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -69,4 +69,4 @@ class NewPicture(commands.Cog, name="newpicture"):
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
-    bot.add_cog(NewPicture(bot))
+    bot.add_cog(NewCreations(bot))

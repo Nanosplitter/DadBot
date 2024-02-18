@@ -1,3 +1,5 @@
+[Invite link](https://discord.com/api/oauth2/authorize?client_id=483747956479229962&permissions=532576857152&scope=bot)
+
 # DadBot
 
 ## Fun

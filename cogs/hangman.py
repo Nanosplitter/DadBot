@@ -23,56 +23,65 @@ from nextcord.ext import commands
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
-HANGMANPICS = ['''
+HANGMANPICS = [
+    """
   +---+
   |   |
       |
       |
       |
       |
-=========''', '''
-  +---+
-  |   |
-  O   |
-      |
-      |
-      |
-=========''', '''
+=========""",
+    """
   +---+
   |   |
   O   |
+      |
+      |
+      |
+=========""",
+    """
+  +---+
+  |   |
+  O   |
   |   |
       |
       |
-=========''', '''
+=========""",
+    """
   +---+
   |   |
   O   |
  /|   |
       |
       |
-=========''', '''
+=========""",
+    """
   +---+
   |   |
   O   |
  /|\  |
       |
       |
-=========''', '''
+=========""",
+    """
   +---+
   |   |
   O   |
  /|\  |
  /    |
       |
-=========''', '''
+=========""",
+    """
   +---+
   |   |
   O   |
  /|\  |
  / \  |
       |
-=========''']
+=========""",
+]
+
 
 # Here we name the cog and create a new class for the cog.
 class Hangman(commands.Cog, name="hangman"):
@@ -101,7 +110,13 @@ class Hangman(commands.Cog, name="hangman"):
         return message
 
     @nextcord.slash_command(name="hangman", description="Play a round of hangman!")
-    async def hangman(self, interaction: Interaction, word: Optional[str] = None):
+    async def hangman(
+        self,
+        interaction: Interaction,
+        word: Optional[str] = SlashOption(
+            description="The word to guess.", required=False
+        ),
+    ):
         """
         [No Arguments] Play a round of hangman!
         """
@@ -111,39 +126,58 @@ class Hangman(commands.Cog, name="hangman"):
             loop = asyncio.get_event_loop()
             if m.author.bot or m.channel != interaction.channel or len(m.content) != 1:
                 return
-            
+
             if not m.content.lower().isalpha():
                 loop.create_task(m.add_reaction("❌"))
                 return
-            
+
             guessed.append(m.content.lower())
-            
+
             if msg is None:
                 return
-            
+
             loop.create_task(msg.edit(content=self.buildMessage(answer, guessed)))
             loop.create_task(m.delete())
 
-            if all(letter in guessed for letter in answer) or len([i for i in guessed if i not in answer]) == (len(HANGMANPICS) - 1):
+            if all(letter in guessed for letter in answer) or len(
+                [i for i in guessed if i not in answer]
+            ) == (len(HANGMANPICS) - 1):
                 return True
 
-        rulesEmbed = Embed(title="Welcome to Hangman!", description="You will have 90 seconds to guess the secret word. To guess, just type your letter into this channel. If I can read it, I will delete it and apply it to the game, and if I can't, I'll put a ❌. Good luck!")
+        rulesEmbed = Embed(
+            title="Welcome to Hangman!",
+            description="You will have 90 seconds to guess the secret word. To guess, just type your letter into this channel. If I can read it, I will delete it and apply it to the game, and if I can't, I'll put a ❌. Good luck!",
+        )
         await interaction.response.send_message(embed=rulesEmbed)
         answer = word.lower()
         if answer is None:
-            answer = str(random.choice(self.wordList).lower()).replace("b'", "").replace("'", "")
+            answer = (
+                str(random.choice(self.wordList).lower())
+                .replace("b'", "")
+                .replace("'", "")
+            )
         msg = await interaction.followup.send(self.buildMessage(answer, guessed))
         try:
             await self.bot.wait_for("message", timeout=90.0, check=check)
         except:
             pass
 
-        resultEmbed = Embed(title="Good try!", description="You didn't figure out the secret word! The word was: " + answer, color=0xff0000)
+        resultEmbed = Embed(
+            title="Good try!",
+            description="You didn't figure out the secret word! The word was: "
+            + answer,
+            color=0xFF0000,
+        )
 
         if all(letter in guessed for letter in answer):
-            resultEmbed = Embed(title="You win!", description="You figured out the secret word! The word was: " + answer, color=0x00ff00)
-            
+            resultEmbed = Embed(
+                title="You win!",
+                description="You figured out the secret word! The word was: " + answer,
+                color=0x00FF00,
+            )
+
         await interaction.followup.send(embed=resultEmbed)
+
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):

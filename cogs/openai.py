@@ -72,7 +72,7 @@ class OpenAI(commands.Cog, name="openai"):
             await interaction.followup.send(embed=embed)
             return
 
-        imageData = f"{response.data[0].b64_json}"  # type: ignore
+        imageData = f"{response.data[0].b64_json}"
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         await interaction.followup.send(f"**{prompt}**\n[style: {style}]", file=file)
 

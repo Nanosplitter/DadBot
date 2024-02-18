@@ -24,13 +24,14 @@ class OpenAI(commands.Cog, name="openai"):
         openai.api_key = config["openapi_token"]
         self.client = openai.OpenAI(api_key=config["openapi_token"])
 
-   
-
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
     async def dalle(
         self,
         interaction: Interaction,
-        prompt: str,
+        prompt: Optional[str] = SlashOption(
+            description="The prompt to generate the image from.",
+            required=True,
+        ),
         style: Optional[str] = SlashOption(
             description="The style of image to generate, vivid will make more dramatic images.",
             choices=["vivid", "natural"],
@@ -38,9 +39,6 @@ class OpenAI(commands.Cog, name="openai"):
             required=False,
         ),
     ):
-        """
-        [prompt] Create a DALL-E 3 image.
-        """
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
 
         await interaction.response.defer()
@@ -84,7 +82,10 @@ class OpenAI(commands.Cog, name="openai"):
     async def beefydalle(
         self,
         interaction: Interaction,
-        prompt: str,
+        prompt: Optional[str] = SlashOption(
+            description="The prompt to generate the image from.",
+            required=True,
+        ),
         style: Optional[str] = SlashOption(
             description="The style of image to generate, vivid will make more dramatic images.",
             choices=["vivid", "natural"],
@@ -104,9 +105,6 @@ class OpenAI(commands.Cog, name="openai"):
             required=False,
         ),
     ):
-        """
-        [prompt] Create a BEEFY DALL-E 3 image.
-        """
         print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
 
         await interaction.response.defer()
@@ -141,7 +139,7 @@ class OpenAI(commands.Cog, name="openai"):
             embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
         else:
             embed = Embed(title=f'Prompt: "{prompt}"')
-        
+
         imageData = f"{response.data[0].b64_json}"
         file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
         await interaction.followup.send(
@@ -153,7 +151,10 @@ class OpenAI(commands.Cog, name="openai"):
     async def dadroid(
         self,
         interaction: Interaction,
-        prompt: str,
+        prompt: Optional[str] = SlashOption(
+            description="The prompt to generate the response from.",
+            required=True,
+        ),
         personality: Optional[str] = SlashOption(
             description="The personality dad should have when answering",
             default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests. You are operating in discord so you can use discord formatting if you want formatting, it is a form of markdown.",
@@ -176,10 +177,18 @@ class OpenAI(commands.Cog, name="openai"):
     @nextcord.slash_command(
         name="epicrapbattle", description="Create an Epic Rap Battle of History."
     )
-    async def epicrapbattle(self, interaction: Interaction, person1: str, person2: str):
-        """
-        [person1] [person2] Create an Epic Rap Battle of History.
-        """
+    async def epicrapbattle(
+        self,
+        interaction: Interaction,
+        person1: Optional[str] = SlashOption(
+            description="Person 1 in the rap battle",
+            required=True,
+        ),
+        person2: Optional[str] = SlashOption(
+            description="Person 2 in the rap battle",
+            required=True,
+        ),
+    ):
         await interaction.response.defer()
 
         prompt = f"Write an epic rap battle of history between {person1} and {person2}. They should be dissing each other in creative ways throughout. The disses should be about the other person's life and history, not about their rapping abilities. It should be in the format of '**{person1}**:\n .... \n\n **{person2}**:\n ....'. "
@@ -246,9 +255,18 @@ class OpenAI(commands.Cog, name="openai"):
         )
 
     @nextcord.slash_command(
-        name="closedopinion", description="Generate a new closed opinion on programming"
+        name="closedopinion",
+        description="Generate a new closed opinion on programming",
+        guild_ids=[850473081063211048, 856919397754470420],
     )
-    async def closedopinion(self, interaction: Interaction, subject: str):
+    async def closedopinion(
+        self,
+        interaction: Interaction,
+        subject: Optional[str] = SlashOption(
+            description="The subject of the closed opinion.",
+            required=True,
+        ),
+    ):
         """
         [subject] Generate a new closed opinion on programming.
         """
@@ -263,7 +281,7 @@ class OpenAI(commands.Cog, name="openai"):
     @nextcord.message_command(name="redditor")
     async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
         """
-        Have dad respond like a redditor.
+        Have dad respond like a redditor to a message.
         """
         await interaction.response.defer()
 
@@ -325,7 +343,13 @@ class OpenAI(commands.Cog, name="openai"):
     @nextcord.slash_command(
         name="newapod", description="Create a new APOD based on your own image"
     )
-    async def newapod(self, interaction: Interaction, image: nextcord.Attachment):
+    async def newapod(
+        self,
+        interaction: Interaction,
+        image: Optional[nextcord.Attachment] = SlashOption(
+            description="The image to base the APOD on.", required=True
+        ),
+    ):
         """
         [image] Create a new APOD based on your own image.
         """
@@ -380,22 +404,24 @@ class OpenAI(commands.Cog, name="openai"):
 
     @nextcord.slash_command(
         "whatsfordinner",
-        description="Based on some photos of your kitchen and fridge, I'll tell you what you should make for dinner.",
+        description="Dad will tell you what to make for dinner based on pictures of your kitchen and ingredients.",
     )
     async def whatsfordinner(
         self,
         interaction: Interaction,
-        kitchen: nextcord.Attachment,
-        ingredients: nextcord.Attachment,
+        kitchen: Optional[nextcord.Attachment] = SlashOption(
+            description="A picture of your kitchen", required=True
+        ),
+        ingredients: Optional[nextcord.Attachment] = SlashOption(
+            description="A picture of the ingredients you have to work with (like the inside of your fridge)",
+            required=True,
+        ),
         extra_info: Optional[str] = SlashOption(
             description="Any extra info to tell me about what you want for dinner",
             required=False,
             default="This is my kitchen and ingredients. I want to make something for dinner with these ingredients.",
         ),
     ):
-        """
-        [kitchen] [ingredients] Based on some photos of your kitchen and ingredients, I'll tell you what you should make for dinner.
-        """
 
         response = "## Yes Chef! Let's get cooking!"
 
@@ -627,8 +653,12 @@ class OpenAI(commands.Cog, name="openai"):
 
         for message in messages:
             await thread.send(message)
-    
-    @nextcord.slash_command("talk", description="Get dad to talk with his voice", guild_ids=[856919397754470420, 850473081063211048, 408321710568505344])
+
+    @nextcord.slash_command(
+        "talk",
+        description="Get dad to talk with his voice",
+        guild_ids=[856919397754470420, 850473081063211048, 408321710568505344],
+    )
     async def talk(
         self,
         interaction: Interaction,
@@ -643,9 +673,7 @@ class OpenAI(commands.Cog, name="openai"):
         await interaction.response.defer()
 
         response = self.client.audio.speech.create(
-            model="tts-1-hd",
-            voice="onyx",
-            input=prompt
+            model="tts-1-hd", voice="onyx", input=prompt
         )
 
         filename = f"speech-{random.randint(1, 10000)}.m4a"
@@ -659,7 +687,15 @@ class OpenAI(commands.Cog, name="openai"):
 
         video_clip = video_clip.set_audio(audio_clip)
 
-        video_clip.write_videofile(video_filename, audio_codec="aac", codec="mpeg4", audio=True, fps=24, verbose=False, logger=None)
+        video_clip.write_videofile(
+            video_filename,
+            audio_codec="aac",
+            codec="mpeg4",
+            audio=True,
+            fps=24,
+            verbose=False,
+            logger=None,
+        )
 
         await interaction.followup.send(file=nextcord.File(video_filename))
 

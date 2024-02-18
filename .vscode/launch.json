@@ -2,7 +2,7 @@
   "configurations": [
     {
       "name": "Run Bot",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "bot.py",
       "console": "integratedTerminal",

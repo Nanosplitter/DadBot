@@ -77,127 +77,127 @@ class Caught(commands.Cog, name="caught"):
             else:
                 await interaction.channel.send(embeds=embed_group)
     
-    @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.")
-    async def fixcaught(self, interaction: Interaction, oldname: str):
-        """
-        [oldname] Fix your username in dad's caught system. Put your old username and descriminator (e.g. DadBot#0001) in the first argument.
-        """
-        if interaction.guild is None:
-            await interaction.response.send_message("Sorry, I can't find your server information.")
-            return
+    # @nextcord.slash_command(name="fixcaught", description="Fix your username in dad's caught system.")
+    # async def fixcaught(self, interaction: Interaction, oldname: str):
+    #     """
+    #     [oldname] Fix your username in dad's caught system. Put your old username and descriminator (e.g. DadBot#0001) in the first argument.
+    #     """
+    #     if interaction.guild is None:
+    #         await interaction.response.send_message("Sorry, I can't find your server information.")
+    #         return
         
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"]
-        )
-        mycursor = mydb.cursor(buffered=True)
+    #     mydb = mysql.connector.connect(
+    #         host=config["dbhost"],
+    #         user=config["dbuser"],
+    #         password=config["dbpassword"],
+    #         database=config["databasename"]
+    #     )
+    #     mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute(f"SELECT count FROM {self.table} WHERE user = %s", (oldname,))
+    #     mycursor.execute(f"SELECT count FROM {self.table} WHERE user = %s", (oldname,))
         
-        rows = mycursor.fetchall()
+    #     rows = mycursor.fetchall()
         
-        if rows is None:
-            await interaction.response.send_message("No record of your old username was found. Please make sure you typed it correctly.")
-            return
+    #     if rows is None:
+    #         await interaction.response.send_message("No record of your old username was found. Please make sure you typed it correctly.")
+    #         return
         
-        oldCount = rows[0][0]
+    #     oldCount = rows[0][0]
 
-        mycursor.execute(f"SELECT * FROM {self.table} WHERE user = '{interaction.user}'")
-        hascolumn = False
-        for m in mycursor:
-            hascolumn = True
+    #     mycursor.execute(f"SELECT * FROM {self.table} WHERE user = '{interaction.user}'")
+    #     hascolumn = False
+    #     for m in mycursor:
+    #         hascolumn = True
         
-        if hascolumn:
-            mycursor.execute(f"UPDATE {self.table} SET count = count + {oldCount} WHERE user = '{str(interaction.user)}'")
-            mycursor.execute(f"UPDATE {self.table} SET user_id = {interaction.user.id} WHERE user = '{str(interaction.user)}'")
-        else:
-            mycursor.execute(f"INSERT INTO {self.table} (user_id, user, count) VALUES ('{interaction.user.id}', '{str(interaction.user)}', {oldCount})")
+    #     if hascolumn:
+    #         mycursor.execute(f"UPDATE {self.table} SET count = count + {oldCount} WHERE user = '{str(interaction.user)}'")
+    #         mycursor.execute(f"UPDATE {self.table} SET user_id = {interaction.user.id} WHERE user = '{str(interaction.user)}'")
+    #     else:
+    #         mycursor.execute(f"INSERT INTO {self.table} (user_id, user, count) VALUES ('{interaction.user.id}', '{str(interaction.user)}', {oldCount})")
         
-        mycursor.execute(f"DELETE FROM {self.table} WHERE user = '{oldname}'")
+    #     mycursor.execute(f"DELETE FROM {self.table} WHERE user = '{oldname}'")
 
-        self.bot.logger.info(f"User {interaction.user} updated their username from {oldname} to {str(interaction.user)}")
+    #     self.bot.logger.info(f"User {interaction.user} updated their username from {oldname} to {str(interaction.user)}")
         
-        mydb.commit()
-        mycursor.close()
-        mydb.close()
-        await interaction.response.send_message("Your username has been updated in Dad's caught system.")
+    #     mydb.commit()
+    #     mycursor.close()
+    #     mydb.close()
+    #     await interaction.response.send_message("Your username has been updated in Dad's caught system.")
     
-    @fixcaught.on_autocomplete("oldname")
-    async def meme_autocomplete(self, interaction: Interaction, search: str):
-        """
-        [Text] Make a meme with custom text
-        """
+    # @fixcaught.on_autocomplete("oldname")
+    # async def meme_autocomplete(self, interaction: Interaction, search: str):
+    #     """
+    #     [Text] Make a meme with custom text
+    #     """
         
-        if "old_names" not in self.old_names.keys() or self.old_names["last_cache"] + 500 < time.time():
-            mydb = mysql.connector.connect(
-                host=config["dbhost"],
-                user=config["dbuser"],
-                password=config["dbpassword"],
-                database=config["databasename"]
-            )
-            mycursor = mydb.cursor(buffered=True)
+    #     if "old_names" not in self.old_names.keys() or self.old_names["last_cache"] + 500 < time.time():
+    #         mydb = mysql.connector.connect(
+    #             host=config["dbhost"],
+    #             user=config["dbuser"],
+    #             password=config["dbpassword"],
+    #             database=config["databasename"]
+    #         )
+    #         mycursor = mydb.cursor(buffered=True)
 
-            mycursor.execute(f"SELECT user FROM {self.table} ORDER BY count DESC")
+    #         mycursor.execute(f"SELECT user FROM {self.table} ORDER BY count DESC")
 
-            rows = mycursor.fetchall()
+    #         rows = mycursor.fetchall()
 
-            if rows is None:
-                return
+    #         if rows is None:
+    #             return
             
-            self.old_names["old_names"] = []
+    #         self.old_names["old_names"] = []
             
-            for m in rows:
-                self.old_names["old_names"].append(m[0])
+    #         for m in rows:
+    #             self.old_names["old_names"].append(m[0])
             
-            self.old_names["last_cache"] = time.time()
-            mycursor.close()
-            mydb.close()
+    #         self.old_names["last_cache"] = time.time()
+    #         mycursor.close()
+    #         mydb.close()
 
-        old_names = []
-        for name in self.old_names["old_names"]:
-            if search.lower() in name.lower() and not name.lower().endswith("#0"):
-                old_names.append(name)
+    #     old_names = []
+    #     for name in self.old_names["old_names"]:
+    #         if search.lower() in name.lower() and not name.lower().endswith("#0"):
+    #             old_names.append(name)
             
-        await interaction.response.send_autocomplete(old_names[:25])
+    #     await interaction.response.send_autocomplete(old_names[:25])
     
-    @nextcord.slash_command(name="fixcaughtids", description="Fix the caught IDs for users in the database")
-    async def fixcaughtids(self, interaction: Interaction):
-        """
-        [No Arguments] Fix the caught IDs for users in the database
-        """
-        if interaction.guild is None:
-            await interaction.response.send_message("Sorry, I can't find your server information.")
-            return
+    # @nextcord.slash_command(name="fixcaughtids", description="Fix the caught IDs for users in the database")
+    # async def fixcaughtids(self, interaction: Interaction):
+    #     """
+    #     [No Arguments] Fix the caught IDs for users in the database
+    #     """
+    #     if interaction.guild is None:
+    #         await interaction.response.send_message("Sorry, I can't find your server information.")
+    #         return
         
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"]
-        )
-        mycursor = mydb.cursor(buffered=True)
+    #     mydb = mysql.connector.connect(
+    #         host=config["dbhost"],
+    #         user=config["dbuser"],
+    #         password=config["dbpassword"],
+    #         database=config["databasename"]
+    #     )
+    #     mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute(f"SELECT * FROM {self.table}")
+    #     mycursor.execute(f"SELECT * FROM {self.table}")
         
-        rows = mycursor.fetchall()
+    #     rows = mycursor.fetchall()
         
-        if rows is None:
-            await interaction.response.send_message("No one has been caught yet!")
-            return
+    #     if rows is None:
+    #         await interaction.response.send_message("No one has been caught yet!")
+    #         return
         
-        for m in rows:
-            if m[2].endswith("#0"):
-                user = nextcord.utils.get(interaction.guild.members, name=m[2].split("#")[0])
-                if user is not None:
-                    mycursor.execute(f"UPDATE {self.table} SET user_id = {user.id} WHERE user = '{m[2]}'")
-                    self.bot.logger.info(f"Updated {m[2]}'s ID to {user.id}")
+    #     for m in rows:
+    #         if m[2].endswith("#0"):
+    #             user = nextcord.utils.get(interaction.guild.members, name=m[2].split("#")[0])
+    #             if user is not None:
+    #                 mycursor.execute(f"UPDATE {self.table} SET user_id = {user.id} WHERE user = '{m[2]}'")
+    #                 self.bot.logger.info(f"Updated {m[2]}'s ID to {user.id}")
         
-        mydb.commit()
-        mycursor.close()
-        mydb.close()
-        await interaction.response.send_message("All caught IDs have been updated.")
+    #     mydb.commit()
+    #     mycursor.close()
+    #     mydb.close()
+    #     await interaction.response.send_message("All caught IDs have been updated.")
 
 
 # And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.

@@ -12,6 +12,7 @@ import random
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
+
 class Minesweeper(commands.Cog, name="minesweeper"):
     def __init__(self, bot):
         self.bot = bot
@@ -26,53 +27,77 @@ class Minesweeper(commands.Cog, name="minesweeper"):
             "7": "7️⃣",
             "8": "8️⃣",
             "9": "9️⃣",
-            "B": "💥"
+            "B": "💥",
         }
-    
+
     def embedGrid(self, grid):
-        return "".join([" ".join(["||" + self.emojiConvert[i] + "||" for i in row]) + "\n" for row in grid])
+        return "".join(
+            [
+                " ".join(["||" + self.emojiConvert[i] + "||" for i in row]) + "\n"
+                for row in grid
+            ]
+        )
 
     def countBombs(self, grid, x, y):
         count = 0
-        for i in range(x-1, x+2):
-            for j in range(y-1, y+2):
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
                 if i >= 0 and i < len(grid) and j >= 0 and j < len(grid[0]):
                     if grid[i][j] == "B":
                         count += 1
         return count
 
-    @nextcord.slash_command(name="minesweeper", description="Play a game of minesweeper!")
-    async def minesweeper(self, interaction: Interaction, gridsize: int = SlashOption(required=True, min_value=1, max_value=9), bombs: int = SlashOption(required=True, min_value=1, max_value=81)):
-        """
-        [gridSize numOfBombs] Play a game of minesweeper!
-        """
+    @nextcord.slash_command(
+        name="minesweeper", description="Play a game of minesweeper!"
+    )
+    async def minesweeper(
+        self,
+        interaction: Interaction,
+        gridsize: int = SlashOption(
+            description="The length of one side of the square grid.",
+            required=True,
+            min_value=1,
+            max_value=9,
+        ),
+        bombs: int = SlashOption(
+            description="The number of bombs to place in the grid.",
+            required=True,
+            min_value=1,
+            max_value=81,
+        ),
+    ):
 
         if gridsize > 9:
-            await interaction.response.send_message("The grid size can't be larger than 9x9! Try again with a smaller grid size.")
+            await interaction.response.send_message(
+                "The grid size can't be larger than 9x9! Try again with a smaller grid size."
+            )
             return
 
         if bombs > gridsize**2:
-            await interaction.response.send_message("You can't have more bombs than spaces in the grid! Try again with less bombs.")
+            await interaction.response.send_message(
+                "You can't have more bombs than spaces in the grid! Try again with less bombs."
+            )
             return
-        
+
         grid = [[0 for i in range(gridsize)] for j in range(gridsize)]
 
         for _ in range(bombs):
             while True:
-                randX = random.randint(0, gridsize-1)
-                randY = random.randint(0, gridsize-1)
+                randX = random.randint(0, gridsize - 1)
+                randY = random.randint(0, gridsize - 1)
 
                 if grid[randX][randY] != "B":
                     break
 
-            grid[randX][randY] = "B" # type: ignore
-        
+            grid[randX][randY] = "B"
+
         for x in range(gridsize):
             for y in range(gridsize):
                 if grid[x][y] != "B":
-                    grid[x][y] = str(self.countBombs(grid, x, y)) # type: ignore
-        
+                    grid[x][y] = str(self.countBombs(grid, x, y))
+
         await interaction.response.send_message(self.embedGrid(grid))
+
 
 def setup(bot):
     bot.add_cog(Minesweeper(bot))

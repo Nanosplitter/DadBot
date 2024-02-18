@@ -92,7 +92,7 @@ class Info(commands.Cog, name="info"):
         [No Arguments] Get the invite link of the Dad to be able to invite him to another server.
         """
         await interaction.response.send_message(
-            f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot"
+            f"Invite me by clicking here: https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&permissions=532576331840&scope=bot"
         )
 
 

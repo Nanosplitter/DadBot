@@ -19,7 +19,9 @@ class Todo(commands.Cog, name="todo"):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="todo", description="Create a new todo item.")
+    @nextcord.slash_command(
+        name="todo", description="Create and manage your todo items."
+    )
     async def todo(
         self,
         interaction: Interaction,

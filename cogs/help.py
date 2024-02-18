@@ -21,7 +21,7 @@ class Help(commands.Cog, name="help"):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="help", description="List all of Dad's commands", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="help", description="List all of Dad's commands")
     async def help(self, interaction: Interaction):
         await interaction.response.defer()
 
@@ -32,11 +32,11 @@ class Help(commands.Cog, name="help"):
         for command in commands:
             if command.parent_cog.qualified_name not in cogs:
                 cogs[command.parent_cog.qualified_name] = command.parent_cog
-        
+
         message = "# DadBot\n\n"
 
         excluded_cogs = ["moderation", "steps"]
-        
+
         for cog in cogs:
             if cog in excluded_cogs:
                 continue
@@ -55,14 +55,15 @@ class Help(commands.Cog, name="help"):
                 first_message = False
             else:
                 await interaction.channel.send(message)
-    
+
+
 def build_command_string(command, interaction: Interaction):
     message = ""
     if command.type != 3:
         message += f"- **`/{command.name}`: {command.description}**\n"
     else:
         message += f"- (message options > apps) > **`{command.name}`: {command.callback.__doc__.strip()}**\n"
-    
+
     payload = command.get_payload(interaction.guild_id)
     if "options" in payload:
         options = payload["options"]

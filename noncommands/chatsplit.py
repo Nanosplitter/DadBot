@@ -1,7 +1,7 @@
 from typing import List
 
 
-def chatsplit(text: str) -> List[str]:
+def chatsplit(text: str, help=False) -> List[str]:
     chunks: List[str] = []
     split = text.split("```")
 
@@ -9,7 +9,10 @@ def chatsplit(text: str) -> List[str]:
         if split[i] == "":
             continue
         if i % 2 == 0:
-            processNonCodeBlock(split[i], chunks)
+            if not help:
+                processNonCodeBlock(split[i], chunks)
+            else:
+                processHelpBlock(split[i], chunks)
         else:
             processCodeBlock(split[i], chunks)
 
@@ -36,3 +39,15 @@ def processCodeBlock(text: str, chunks: List[str]) -> None:
         chunks.append(f"```{language}\n{text[:index]}```")
         text = text[index:]
     chunks.append(f"```{language}\n{text}```")
+
+def processHelpBlock(text: str, chunks: List[str]) -> None:
+    while len(text) > 2000:
+        index = text[:2000].rfind("--------------\n")
+        if index == 0:
+            index = text[:2000].rfind("- **`/")
+        if index == -1:
+            index = 2000
+        chunks.append(text[:index])
+        text = text[index:]
+    chunks.append(text)
+

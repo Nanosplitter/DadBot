@@ -2,7 +2,7 @@ from typing import Callable, List, Optional
 from nextcord import Interaction
 from openai import OpenAI
 import yaml
-from noncommands.chatsplit import chatsplit
+from noncommands.chatsplit import chat_split
 
 # Type aliases for readability
 SendMethod = Callable[[str], None]
@@ -100,7 +100,7 @@ async def respond_from_chat_completion(
 ) -> None:
     """Sends response from chat completion."""
     send_method = send_method or first_send_method
-    messages = chatsplit(initial_response + chat_completion.choices[0].message.content)
+    messages = chat_split(initial_response + chat_completion.choices[0].message.content)
 
     for index, message in enumerate(messages):
         await (first_send_method if index == 0 else send_method)(message)

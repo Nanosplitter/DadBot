@@ -8,7 +8,7 @@ from nextcord import Interaction, SlashOption, ChannelType
 from nextcord.abc import GuildChannel
 from noncommands import summarizer
 import openai
-from noncommands.chatsplit import chatsplit
+from noncommands.chatsplit import chat_split
 
 
 with open("config.yaml") as file:
@@ -38,7 +38,7 @@ class TLDR(commands.Cog, name="tldr"):
         chatCompletion = self.client.chat.completions.create(model="gpt-3.5-turbo-1106", messages=chats)
         response = chatCompletion.choices[0].message.content
 
-        messages = chatsplit(response)
+        messages = chat_split(response)
 
         for message in messages:
             await interaction.followup.send(message)

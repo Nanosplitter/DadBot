@@ -1,7 +1,7 @@
 from typing import List
 
 
-def chatsplit(text: str, help=False) -> List[str]:
+def chat_split(text: str, help=False) -> List[str]:
     chunks: List[str] = []
     split = text.split("```")
 

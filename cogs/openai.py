@@ -12,7 +12,7 @@ from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
 from noncommands.dadroid import dadroid_response
 
-from noncommands.chatsplit import chatsplit
+from noncommands.chatsplit import chat_split
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -469,7 +469,7 @@ class OpenAI(commands.Cog, name="openai"):
             "## My meal suggestion: \n\n" + chatCompletion.choices[0].message.content
         )
 
-        messages = chatsplit(response)
+        messages = chat_split(response)
 
         for message in messages:
             await thread.send(message)
@@ -564,7 +564,7 @@ class OpenAI(commands.Cog, name="openai"):
             f"Title: {title_response}",
         )
 
-        messages = chatsplit(article_response)
+        messages = chat_split(article_response)
 
         for message in messages:
             await thread.send(message)
@@ -623,7 +623,7 @@ class OpenAI(commands.Cog, name="openai"):
             beef=True,
         )
 
-        messages = chatsplit(article_response)
+        messages = chat_split(article_response)
 
         for message in messages:
             await thread.send(message)

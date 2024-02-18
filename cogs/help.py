@@ -11,7 +11,7 @@ import yaml
 from nextcord.ext import commands
 from nextcord.ui import Button, View
 
-from noncommands.chatsplit import chatsplit
+from noncommands.chatsplit import chat_split
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -21,12 +21,8 @@ class Help(commands.Cog, name="help"):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="help", description="List all of Dad's commands!", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="help", description="List all of Dad's commands", guild_ids=[850473081063211048])
     async def help(self, interaction: Interaction):
-        """
-        How do I find out what all the commands are?
-        """
-
         await interaction.response.defer()
 
         commands = self.bot.get_all_application_commands()
@@ -50,11 +46,7 @@ class Help(commands.Cog, name="help"):
                 message += build_command_string(command, interaction)
             message += "\n"
 
-        # print(message)
-
-        messages = chatsplit(message, help=True)
-
-        # await interaction.response.send_message("---")
+        messages = chat_split(message, help=True)
 
         first_message = True
         for message in messages:
@@ -65,8 +57,6 @@ class Help(commands.Cog, name="help"):
                 await interaction.channel.send(message)
     
 def build_command_string(command, interaction: Interaction):
-    if command.name == "startbook":
-        print(command)
     message = ""
     if command.type != 3:
         message += f"- **`/{command.name}`: {command.description}**\n"

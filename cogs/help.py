@@ -1,5 +1,6 @@
 import os
 import sys
+import inspect
 
 import nextcord
 from typing import Optional
@@ -10,6 +11,8 @@ import yaml
 from nextcord.ext import commands
 from nextcord.ui import Button, View
 
+from noncommands.chatsplit import chatsplit
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -18,28 +21,68 @@ class Help(commands.Cog, name="help"):
     def __init__(self, bot):
         self.bot = bot
 
-    def generateEmbedForCog(self, cog, prefix, index, max_index):
-        """
-        Generate an embed for a cog.
-        """ 
-        commands = cog.get_commands()
-        command_list = [command.name for command in commands]
-        command_description = [command.help for command in commands]
-
-        embed = nextcord.Embed(title="Help: " + cog.qualified_name, description="List of available commands:", color=config["success"])
-        for command, description in zip(command_list, command_description):
-            embed.add_field(name=prefix + command, value=description)
-        
-        embed.set_footer(text=f"{index+1}/{max_index}")
-        return embed
-
-    @nextcord.slash_command(name="help", description="List all commands from every Cog the bot has loaded.")
+    @nextcord.slash_command(name="help", description="List all of Dad's commands!", guild_ids=[850473081063211048])
     async def help(self, interaction: Interaction):
         """
         How do I find out what all the commands are?
         """
 
-        await interaction.response.send_message("This bot uses slash commands! Type a `/` into the chat, click my icon, and you should see all the commands I can take!")
+        await interaction.response.defer()
+
+        commands = self.bot.get_all_application_commands()
+
+        cogs = dict()
+
+        for command in commands:
+            if command.parent_cog.qualified_name not in cogs:
+                cogs[command.parent_cog.qualified_name] = command.parent_cog
+        
+        message = "# DadBot\n\n"
+
+        excluded_cogs = ["moderation", "steps"]
+        
+        for cog in cogs:
+            if cog in excluded_cogs:
+                continue
+            message += "## " + cog.capitalize() + "\n\n--------------\n"
+            cog_commands = cogs[cog].application_commands
+            for command in cog_commands:
+                message += build_command_string(command, interaction)
+            message += "\n"
+
+        # print(message)
+
+        messages = chatsplit(message, help=True)
+
+        # await interaction.response.send_message("---")
+
+        first_message = True
+        for message in messages:
+            if first_message:
+                await interaction.followup.send(message)
+                first_message = False
+            else:
+                await interaction.channel.send(message)
+    
+def build_command_string(command, interaction: Interaction):
+    if command.name == "startbook":
+        print(command)
+    message = ""
+    if command.type != 3:
+        message += f"- **`/{command.name}`: {command.description}**\n"
+    else:
+        message += f"- (message options > apps) > **`{command.name}`: {command.callback.__doc__.strip()}**\n"
+    
+    payload = command.get_payload(interaction.guild_id)
+    if "options" in payload:
+        options = payload["options"]
+        for option in options:
+            message += f"  - **{option['name']}**: {option['description']} ({'required' if 'required' in option else 'optional'})\n"
+            if "options" in option:
+                for sub_option in option["options"]:
+                    message += f"    - **{sub_option['name']}**: {sub_option['description']} ({'required' if 'required' in sub_option else 'optional'})\n"
+
+    return message
 
 
 def setup(bot):

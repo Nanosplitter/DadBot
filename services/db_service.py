@@ -9,7 +9,6 @@ with open("config.yaml") as file:
 
 class ReconnectMySQLDatabase(MySQLDatabase):
     def execute_sql(self, sql, params=None, commit=True):
-        print("Executing SQL query.", sql, params, commit)
         try:
             return super().execute_sql(sql, params, commit)
         except OperationalError as e:
@@ -26,7 +25,6 @@ class ReconnectMySQLDatabase(MySQLDatabase):
                 raise
 
 
-# Updated get_db function to use the custom database class
 def get_db():
     return ReconnectMySQLDatabase(
         config["databasename"],

@@ -83,7 +83,6 @@ HANGMANPICS = [
 ]
 
 
-# Here we name the cog and create a new class for the cog.
 class Hangman(commands.Cog, name="hangman"):
     def __init__(self, bot):
         self.bot = bot

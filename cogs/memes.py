@@ -17,7 +17,6 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
-# Here we name the cog and create a new class for the cog.
 class Memes(commands.Cog, name="memes"):
     def __init__(self, bot):
         self.bot = bot

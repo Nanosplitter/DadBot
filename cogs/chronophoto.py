@@ -29,7 +29,6 @@ with open("config.yaml") as file:
     urlShortener = pyshorteners.Shortener()
 
 
-# Here we name the cog and create a new class for the cog.
 class Chronophoto(commands.Cog, name="chronophoto"):
     def __init__(self, bot):
         self.geodata = []

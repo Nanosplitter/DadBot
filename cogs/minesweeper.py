@@ -53,7 +53,7 @@ class Minesweeper(commands.Cog, name="minesweeper"):
     async def minesweeper(
         self,
         interaction: Interaction,
-        gridsize: int = SlashOption(
+        grid_size: int = SlashOption(
             description="The length of one side of the square grid.",
             required=True,
             min_value=1,
@@ -67,32 +67,32 @@ class Minesweeper(commands.Cog, name="minesweeper"):
         ),
     ):
 
-        if gridsize > 9:
+        if grid_size > 9:
             await interaction.response.send_message(
                 "The grid size can't be larger than 9x9! Try again with a smaller grid size."
             )
             return
 
-        if bombs > gridsize**2:
+        if bombs > grid_size**2:
             await interaction.response.send_message(
                 "You can't have more bombs than spaces in the grid! Try again with less bombs."
             )
             return
 
-        grid = [[0 for i in range(gridsize)] for j in range(gridsize)]
+        grid = [[0 for i in range(grid_size)] for j in range(grid_size)]
 
         for _ in range(bombs):
             while True:
-                randX = random.randint(0, gridsize - 1)
-                randY = random.randint(0, gridsize - 1)
+                randX = random.randint(0, grid_size - 1)
+                randY = random.randint(0, grid_size - 1)
 
                 if grid[randX][randY] != "B":
                     break
 
             grid[randX][randY] = "B"
 
-        for x in range(gridsize):
-            for y in range(gridsize):
+        for x in range(grid_size):
+            for y in range(grid_size):
                 if grid[x][y] != "B":
                     grid[x][y] = str(self.countBombs(grid, x, y))
 

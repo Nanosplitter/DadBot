@@ -43,7 +43,7 @@ class NewCreations(commands.Cog, name="newcreations"):
         name="newword",
         description="Creates a new word that does not exist with an optional definition.",
     )
-    async def newword(
+    async def new_word(
         self,
         interaction: Interaction,
         definition: str = SlashOption(

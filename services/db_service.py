@@ -12,6 +12,7 @@ class ReconnectMySQLDatabase(MySQLDatabase):
         try:
             return super().execute_sql(sql, params, commit)
         except OperationalError as e:
+            print(f"An OperationalError occurred: {e}")
             if e.args[0] in (
                 2006,
                 2013,
@@ -23,6 +24,9 @@ class ReconnectMySQLDatabase(MySQLDatabase):
                 return super().execute_sql(sql, params, commit)
             else:
                 raise
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise
 
 
 def get_db():

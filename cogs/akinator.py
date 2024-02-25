@@ -118,6 +118,5 @@ class Akinator(commands.Cog, name="akinator"):
         await interaction.followup.send(embed=aki_embed, view=view)
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Akinator(bot))

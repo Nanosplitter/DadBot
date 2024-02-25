@@ -96,6 +96,5 @@ class Info(commands.Cog, name="info"):
         )
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Info(bot))

@@ -255,6 +255,5 @@ class Memes(commands.Cog, name="memes"):
         await interaction.response.send_autocomplete(meme_names[:25])
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Memes(bot))

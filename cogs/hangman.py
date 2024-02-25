@@ -179,6 +179,5 @@ class Hangman(commands.Cog, name="hangman"):
         await interaction.followup.send(embed=resultEmbed)
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(Hangman(bot))

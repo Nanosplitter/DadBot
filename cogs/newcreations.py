@@ -21,7 +21,6 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
-# Here we name the cog and create a new class for the cog.
 class NewCreations(commands.Cog, name="newcreations"):
     def __init__(self, bot):
         self.bot = bot
@@ -67,6 +66,5 @@ class NewCreations(commands.Cog, name="newcreations"):
         )
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(NewCreations(bot))

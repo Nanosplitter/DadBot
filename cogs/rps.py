@@ -10,6 +10,7 @@ from nextcord.ext import commands
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
+
 # Here we name the cog and create a new class for the cog.
 class RPS(commands.Cog, name="rps"):
     def __init__(self, bot):
@@ -20,14 +21,12 @@ class RPS(commands.Cog, name="rps"):
         """
         [No Arguments] Play a round of Rock-Paper-Scissors with Dad.
         """
-        reactions = {
-            "🪨": 0,
-            "🧻": 1,
-            "✂": 2
-        }
+        reactions = {"🪨": 0, "🧻": 1, "✂": 2}
 
         embed = nextcord.Embed(title="Please choose", color=config["warning"])
-        embed.set_author(name=context.author.display_name, icon_url=context.author.avatar.url)
+        embed.set_author(
+            name=context.author.display_name, icon_url=context.author.avatar.url
+        )
         choose_message = await context.send(embed=embed)
         for emoji in reactions:
             await choose_message.add_reaction(emoji)
@@ -36,7 +35,9 @@ class RPS(commands.Cog, name="rps"):
             return user == context.message.author and str(reaction) in reactions
 
         try:
-            reaction, user = await self.bot.wait_for("reaction_add", timeout=10, check=check)
+            reaction, user = await self.bot.wait_for(
+                "reaction_add", timeout=10, check=check
+            )
 
             user_choice_emote = reaction.emoji
             user_choice_index = reactions[user_choice_emote]
@@ -45,7 +46,9 @@ class RPS(commands.Cog, name="rps"):
             bot_choice_index = reactions[bot_choice_emote]
 
             result_embed = nextcord.Embed(color=config["success"])
-            result_embed.set_author(name=context.author.display_name, icon_url=context.author.avatar.url)
+            result_embed.set_author(
+                name=context.author.display_name, icon_url=context.author.avatar.url
+            )
             await choose_message.clear_reactions()
 
             if user_choice_index == bot_choice_index:
@@ -65,14 +68,15 @@ class RPS(commands.Cog, name="rps"):
                 result_embed.colour = config["error"]
                 await choose_message.add_reaction("🇱")
             await choose_message.edit(embed=result_embed)
-            
+
         except asyncio.exceptions.TimeoutError:
             await choose_message.clear_reactions()
             timeout_embed = nextcord.Embed(title="Too late", color=config["error"])
-            timeout_embed.set_author(name=context.author.display_name, icon_url=context.author.avatar.url)
+            timeout_embed.set_author(
+                name=context.author.display_name, icon_url=context.author.avatar.url
+            )
             await choose_message.edit(embed=timeout_embed)
 
 
-# And then we finally add the cog to the bot so that it can load, unload, reload and use it's content.
 def setup(bot):
     bot.add_cog(RPS(bot))

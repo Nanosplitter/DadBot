@@ -16,7 +16,6 @@ class Template(commands.Cog, name="template"):
     def __init__(self, bot):
         self.bot = bot
 
-    # Here you can just add your own commands, you'll always need to provide "self" as first parameter.
     @nextcord.slash_command(
         name="template", description="This is a testing command that does nothing."
     )

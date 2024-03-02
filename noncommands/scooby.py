@@ -29,9 +29,9 @@ class Scooby:
         await c.send("***PRAISE***")
 
     async def logSteps(self):
-        c = self.bot.get_channel(1015789631188508752)  # 1095050641157673021
+        c = self.bot.get_channel(1095050641157673021)
         await c.send(
-            "Time to log your steps from yesterday!",
+            "# Time to log your steps from yesterday!",
             embed=build_embed_for_server(c.guild),
             view=build_step_logger_view(),
         )

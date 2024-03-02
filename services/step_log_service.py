@@ -100,9 +100,7 @@ def get_highest_single_day_step_count(server_id):
 def build_embed_for_server(guild) -> Embed:
     leaderboard = get_steps_leaderboard_for_server(guild.id)
 
-    embed = nextcord.Embed(
-        title="Leaderboard", description="Current leaderboard:", color=0xFFFFFF
-    )
+    embed = nextcord.Embed(title="No steps yet!")
 
     first = True
 
@@ -110,8 +108,7 @@ def build_embed_for_server(guild) -> Embed:
         member = guild.get_member(int(step_log.user_id))
         if first:
             embed = nextcord.Embed(
-                title="Leaderboard",
-                description="Current leaderboard:",
+                title="Step Leaderboard",
                 color=member.color,
             )
             embed.set_author(

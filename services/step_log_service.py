@@ -24,7 +24,7 @@ class StepLoggerModal(Modal):
         await self.step_message.edit(embed=build_embed_for_server(interaction.guild))
 
         await interaction.response.send_message(
-            f"{interaction.user.mention} logged {self.children[0].value} steps!"
+            f"{interaction.user.mention} logged {int(self.children[0].value):,} steps!"
         )
 
 

@@ -1,13 +1,13 @@
 import datetime
-from nextcord import Interaction
-from nextcord.ui import TextInput
+from nextcord import Interaction, Embed
+from nextcord.ui import TextInput, View, Button, Modal
 import nextcord
 from peewee import *
 
 from models.step_log import StepLog
 
 
-class StepLoggerModal(nextcord.ui.Modal):
+class StepLoggerModal(Modal):
     def __init__(self, step_message):
         super().__init__("Log your steps!")
         steps_input = TextInput(
@@ -30,21 +30,24 @@ class StepLoggerModal(nextcord.ui.Modal):
         )
 
 
-def build_step_logger_button():
-    button = nextcord.ui.Button(
+def build_step_logger_view() -> View:
+    view = View(timeout=None)
+    button = Button(
         style=nextcord.ButtonStyle.primary,
         label="Log Steps",
     )
     button.callback = step_logger_button_callback
-    return button
+
+    view.add_item(button)
+    return view
 
 
-async def step_logger_button_callback(interaction: Interaction):
+async def step_logger_button_callback(interaction: Interaction) -> None:
     step_modal = StepLoggerModal(interaction.message)
     await interaction.response.send_modal(step_modal)
 
 
-def submit_step_log(server_id, user_id, steps):
+def submit_step_log(server_id, user_id, steps) -> StepLog:
     step_log = StepLog(
         server_id=server_id,
         user_id=user_id,
@@ -56,7 +59,7 @@ def submit_step_log(server_id, user_id, steps):
     return step_log
 
 
-def get_steps_leaderboard_for_server(server_id):
+def get_steps_leaderboard_for_server(server_id) -> list:
     server_id = str(server_id)
     step_logs = (
         StepLog.select()
@@ -96,8 +99,8 @@ def get_highest_single_day_step_count(server_id):
     return step_log
 
 
-def build_embed_for_server(server_id, interaction):
-    leaderboard = get_steps_leaderboard_for_server(server_id)
+def build_embed_for_server(guild) -> Embed:
+    leaderboard = get_steps_leaderboard_for_server(guild.id)
 
     embed = nextcord.Embed(
         title="Leaderboard", description="Current leaderboard:", color=0xFFFFFF
@@ -106,7 +109,7 @@ def build_embed_for_server(server_id, interaction):
     first = True
 
     for step_log in leaderboard:
-        member = interaction.guild.get_member(int(step_log.user_id))
+        member = guild.get_member(int(step_log.user_id))
         if first:
             embed.set_author(
                 name=f"{member.name} is in the lead!",
@@ -117,8 +120,8 @@ def build_embed_for_server(server_id, interaction):
             name=member.name, value=f"{step_log.steps:,} steps", inline=False
         )
 
-    top_single_day = get_highest_single_day_step_count(server_id)
-    top_single_day_member = interaction.guild.get_member(int(top_single_day.user_id))
+    top_single_day = get_highest_single_day_step_count(guild.id)
+    top_single_day_member = guild.get_member(int(top_single_day.user_id))
 
     embed.set_footer(
         text=f"Single day record:\n{top_single_day_member.name} with {top_single_day.steps} steps",

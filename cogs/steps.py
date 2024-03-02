@@ -29,7 +29,7 @@ class Steps(commands.Cog, name="steps"):
     )
     async def steps(self, interaction: Interaction):
 
-        step_embed = build_embed_for_server(interaction.guild.id, interaction)
+        step_embed = build_embed_for_server(interaction.guild)
 
         step_logger_button = build_step_logger_button()
 

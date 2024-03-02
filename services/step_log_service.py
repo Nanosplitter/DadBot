@@ -109,6 +109,11 @@ def build_embed_for_server(guild) -> Embed:
     for step_log in leaderboard:
         member = guild.get_member(int(step_log.user_id))
         if first:
+            embed = nextcord.Embed(
+                title="Leaderboard",
+                description="Current leaderboard:",
+                color=member.color,
+            )
             embed.set_author(
                 name=f"{member.name} is in the lead!",
                 icon_url=member.display_avatar.url,

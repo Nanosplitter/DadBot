@@ -214,7 +214,7 @@ scheduler.add_job(
     scooby.apod, CronTrigger(hour="9", minute="0", second="0", timezone="EST")
 )
 scheduler.add_job(
-    scooby.log_steps, CronTrigger(hour="12", minute="49", second="40", timezone="EST")
+    scooby.log_steps, CronTrigger(hour="8", minute="0", second="0", timezone="EST")
 )
 scheduler.add_job(
     birthdayChecker.checkBirthdays,

@@ -21,18 +21,24 @@ from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot, Context
 
 
-
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
+
 class DadBot(commands.Bot):
     def __init__(self, loggingFormatter, botConfig) -> None:
-        super().__init__(command_prefix=commands.when_mentioned_or(botConfig["bot_prefix"]), intents=intents, help_command=None)
+        super().__init__(
+            command_prefix=commands.when_mentioned_or(botConfig["bot_prefix"]),
+            intents=intents,
+            help_command=None,
+        )
         self.logger: logging.Logger = loggingFormatter
         self.config: dict = botConfig
         self.super = super()
 
+
 intents = nextcord.Intents.default().all()
+
 
 class LoggingFormatter(logging.Formatter):
     black: str = "\x1b[30m"
@@ -63,6 +69,7 @@ class LoggingFormatter(logging.Formatter):
         formatter = logging.Formatter(format, "%Y-%m-%d %H:%M:%S", style="{")
         return formatter.format(record)
 
+
 logger: logging.Logger = logging.getLogger(name="DadBot")
 logger.setLevel(level=logging.INFO)
 
@@ -87,11 +94,12 @@ haikuDetector = haikudetector.HaikuDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
 
+
 @bot.event
 async def on_ready() -> None:
     if bot.user is None:
         sys.exit("Bot has no user!")
-    
+
     bot.logger.info(f"Logged in as {bot.user.name}")
     bot.logger.info(f"nextcord.py API version: {nextcord.__version__}")
     bot.logger.info(f"Python version: {platform.python_version()}")
@@ -104,11 +112,13 @@ async def on_ready() -> None:
     bot.logger.info("-------------------")
     status_task.start()
 
+
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
     statuses = ["with your mom"]
     await bot.change_presence(activity=nextcord.Game(random.choice(statuses)))
+
 
 @bot.event
 async def on_message(message: nextcord.Message) -> None:
@@ -119,7 +129,7 @@ async def on_message(message: nextcord.Message) -> None:
         await imChecker.checkIm(message)
         await haikuDetector.checkForHaiku(message)
         await chat.respond(message)
-    
+
     await bot.process_commands(message)
 
 
@@ -180,10 +190,12 @@ async def on_command_error(context: Context, error) -> None:
     else:
         raise error
 
+
 @tasks.loop(seconds=5)
 async def checkTimes():
     await reminderChecker.checkReminders(bot)
     await reminderChecker.updateOldReminders(bot)
+
 
 if __name__ == "__main__":
     for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/cogs"):
@@ -198,8 +210,19 @@ if __name__ == "__main__":
 
 checkTimes.start()
 scheduler = AsyncIOScheduler()
-scheduler.add_job(scooby.apod, CronTrigger(hour = "9", minute = "0", second = "0", timezone="EST"))
-scheduler.add_job(birthdayChecker.checkBirthdays, CronTrigger(hour = "8", minute = "0", second = "0", timezone="EST"))
-scheduler.add_job(scooby.praiseFireGator, CronTrigger(day_of_week="thu", hour = "0", minute = "0", second = "0", timezone="EST"))
+scheduler.add_job(
+    scooby.apod, CronTrigger(hour="9", minute="0", second="0", timezone="EST")
+)
+scheduler.add_job(
+    scooby.logSteps, CronTrigger(hour="12", minute="49", second="40", timezone="EST")
+)
+scheduler.add_job(
+    birthdayChecker.checkBirthdays,
+    CronTrigger(hour="8", minute="0", second="0", timezone="EST"),
+)
+scheduler.add_job(
+    scooby.praiseFireGator,
+    CronTrigger(day_of_week="thu", hour="0", minute="0", second="0", timezone="EST"),
+)
 scheduler.start()
 bot.run(config["token"])

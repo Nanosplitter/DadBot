@@ -13,7 +13,7 @@ from nextcord.abc import GuildChannel
 from services.step_log_service import (
     build_embed_for_server,
     submit_step_log,
-    build_step_logger_button,
+    build_step_logger_view,
 )
 
 with open("config.yaml") as file:
@@ -29,14 +29,10 @@ class Steps(commands.Cog, name="steps"):
     )
     async def steps(self, interaction: Interaction):
 
-        step_embed = build_embed_for_server(interaction.guild)
-
-        step_logger_button = build_step_logger_button()
-
-        view = View(timeout=None)
-        view.add_item(step_logger_button)
-
-        await interaction.response.send_message(embed=step_embed, view=view)
+        await interaction.response.send_message(
+            embed=build_embed_for_server(interaction.guild),
+            view=build_step_logger_view(),
+        )
 
     @nextcord.slash_command(name="logsteps", description="Log your steps for the day.")
     async def logsteps(

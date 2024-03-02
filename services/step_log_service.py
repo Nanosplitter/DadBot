@@ -21,9 +21,7 @@ class StepLoggerModal(Modal):
             interaction.guild.id, interaction.user.id, self.children[0].value
         )
 
-        await self.step_message.edit(
-            embed=build_embed_for_server(interaction.guild.id, interaction)
-        )
+        await self.step_message.edit(embed=build_embed_for_server(interaction.guild))
 
         await interaction.response.send_message(
             f"{interaction.user.mention} logged {self.children[0].value} steps!"
@@ -121,11 +119,13 @@ def build_embed_for_server(guild) -> Embed:
         )
 
     top_single_day = get_highest_single_day_step_count(guild.id)
-    top_single_day_member = guild.get_member(int(top_single_day.user_id))
 
-    embed.set_footer(
-        text=f"Single day record:\n{top_single_day_member.name} with {top_single_day.steps} steps",
-        icon_url=top_single_day_member.display_avatar.url,
-    )
+    if top_single_day is not None:
+        top_single_day_member = guild.get_member(int(top_single_day.user_id))
+
+        embed.set_footer(
+            text=f"Single day record:\n{top_single_day_member.name} with {top_single_day.steps} steps",
+            icon_url=top_single_day_member.display_avatar.url,
+        )
 
     return embed

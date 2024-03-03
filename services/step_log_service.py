@@ -98,6 +98,7 @@ def get_highest_single_day_step_count(server_id):
 
 
 def build_embed_for_server(guild) -> Embed:
+
     leaderboard = get_steps_leaderboard_for_server(guild.id)
 
     embed = nextcord.Embed(title="No steps yet!")
@@ -106,16 +107,22 @@ def build_embed_for_server(guild) -> Embed:
 
     for step_log in leaderboard:
         member = guild.get_member(int(step_log.user_id))
+        name = member.name
+
         if first:
             leader_step_count = step_log.steps
+
             embed = nextcord.Embed(
                 title="Step Leaderboard",
                 color=member.color,
             )
+
             embed.set_author(
                 name=f"{member.name} is in the lead!",
                 icon_url=member.display_avatar.url,
             )
+
+            name = f"🏆 {name}"
             first = False
 
         diff_text = ""
@@ -123,7 +130,7 @@ def build_embed_for_server(guild) -> Embed:
             diff_text = f"(-{leader_step_count - step_log.steps:,})"
 
         embed.add_field(
-            name=member.name,
+            name=name,
             value=f"{step_log.steps:,} steps {diff_text}",
             inline=False,
         )

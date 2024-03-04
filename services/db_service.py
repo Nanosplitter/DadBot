@@ -2,7 +2,6 @@ import yaml
 from peewee import MySQLDatabase, InterfaceError, OperationalError
 import time
 
-# Load database configuration from a YAML file
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -18,7 +17,6 @@ class ReconnectMySQLDatabase(MySQLDatabase):
             except (InterfaceError, OperationalError) as e:
                 print(f"Attempt {attempt + 1}: Database connection error - {str(e)}")
 
-                # Check if the maximum number of retries has been reached
                 if attempt < self.max_retries - 1:
                     print("Attempting to reconnect and retry the query.")
                     self._reconnect()
@@ -27,7 +25,6 @@ class ReconnectMySQLDatabase(MySQLDatabase):
                     print("Max reconnection attempts reached. Raising the exception.")
                     raise
             except Exception as e:
-                # Handle other exceptions
                 print(f"An unexpected error occurred: {str(e)}")
                 raise
 

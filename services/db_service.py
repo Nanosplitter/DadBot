@@ -1,20 +1,43 @@
-from peewee import MySQLDatabase
 import yaml
+from peewee import MySQLDatabase, InterfaceError, OperationalError
+import time
 
+# Load database configuration from a YAML file
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 class ReconnectMySQLDatabase(MySQLDatabase):
+    max_retries = 3
+    retry_delay = 2
+
     def execute_sql(self, sql, params=None, commit=True):
+        for attempt in range(self.max_retries):
+            try:
+                return super().execute_sql(sql, params, commit)
+            except (InterfaceError, OperationalError) as e:
+                print(f"Attempt {attempt + 1}: Database connection error - {str(e)}")
+
+                # Check if the maximum number of retries has been reached
+                if attempt < self.max_retries - 1:
+                    print("Attempting to reconnect and retry the query.")
+                    self._reconnect()
+                    time.sleep(self.retry_delay)
+                else:
+                    print("Max reconnection attempts reached. Raising the exception.")
+                    raise
+            except Exception as e:
+                # Handle other exceptions
+                print(f"An unexpected error occurred: {str(e)}")
+                raise
+
+    def _reconnect(self):
         try:
-            return super().execute_sql(sql, params, commit)
+            self.close()
         except Exception as e:
-            print(
-                "Database connection lost, attempting to reconnect and retry the query."
-            )
-            self.connect(reuse_if_open=True)
-            return super().execute_sql(sql, params, commit)
+            print(f"Error closing the database connection: {str(e)}")
+        finally:
+            self.connect()
 
 
 def get_db():
@@ -23,5 +46,5 @@ def get_db():
         user=config["dbuser"],
         password=config["dbpassword"],
         host=config["dbhost"],
-        port=3306,
+        port=config.get("dbport", 3306),
     )

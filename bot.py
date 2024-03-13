@@ -222,7 +222,7 @@ scheduler.add_job(
 )
 scheduler.add_job(
     scooby.praiseFireGator,
-    CronTrigger(day_of_week="WED", hour="11", minute="0", second="0", timezone="EST"),
+    CronTrigger(day_of_week="WED", hour="23", minute="0", second="0", timezone="EST"),
 )
 scheduler.start()
 bot.run(config["token"])

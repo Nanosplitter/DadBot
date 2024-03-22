@@ -42,6 +42,8 @@ class TLDR(commands.Cog, name="tldr"):
 
         messages = await interaction.channel.history(limit=number).flatten()
 
+        messages = list(reversed(messages))
+
         chats = [
             {
                 "role": "system",

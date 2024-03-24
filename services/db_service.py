@@ -15,10 +15,7 @@ class ReconnectMySQLDatabase(MySQLDatabase):
             try:
                 return super().execute_sql(sql, params, commit)
             except (InterfaceError, OperationalError) as e:
-                print(f"Attempt {attempt + 1}: Database connection error - {str(e)}")
-
                 if attempt < self.max_retries - 1:
-                    print("Attempting to reconnect and retry the query.")
                     self._reconnect()
                     time.sleep(self.retry_delay)
                 else:

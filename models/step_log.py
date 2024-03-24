@@ -9,6 +9,8 @@ class StepLog(Model):
     steps = IntegerField()
     submit_time = DateTimeField()
 
+    total_steps = 0
+
     class Meta:
         database = get_db()
 

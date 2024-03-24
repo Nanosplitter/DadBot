@@ -66,10 +66,13 @@ def get_steps_leaderboard_for_server(server_id) -> list:
     )
 
     step_totals = {}
+    step_numbers = {}
     for step_log in step_logs:
         if step_log.user_id in step_totals:
+            step_numbers[step_log.user_id] += 1
             step_totals[step_log.user_id] += step_log.steps
         else:
+            step_numbers[step_log.user_id] = 1
             step_totals[step_log.user_id] = step_log.steps
 
     sorted_step_totals = sorted(
@@ -78,8 +81,10 @@ def get_steps_leaderboard_for_server(server_id) -> list:
 
     step_logs = []
     for step_total in sorted_step_totals:
+        step_log = StepLog(server_id=server_id, user_id=step_total[0], steps=step_total[1])
+        step_log.total_steps = step_numbers[step_total[0]]
         step_logs.append(
-            StepLog(server_id=server_id, user_id=step_total[0], steps=step_total[1])
+            step_log
         )
 
     return step_logs
@@ -96,10 +101,11 @@ def get_highest_single_day_step_count(server_id):
 
     return step_log
 
-
 def build_embed_for_server(guild) -> Embed:
 
     leaderboard = get_steps_leaderboard_for_server(guild.id)
+
+    highest_days_logged = max([step_log.total_steps for step_log in leaderboard])
 
     embed = nextcord.Embed(title="No steps yet!")
 
@@ -125,15 +131,17 @@ def build_embed_for_server(guild) -> Embed:
             name = f"🏆 {name}"
             first = False
 
-        diff_text = ""
-        if step_log.steps < leader_step_count:
-            diff_text = f"(-{leader_step_count - step_log.steps:,})"
+        diff_text = f"(-{leader_step_count - step_log.steps:,})" if step_log.steps < leader_step_count else ""
+
+        days_behind = highest_days_logged - step_log.total_steps
+        days_text = f"{days_behind} day{'s' if days_behind != 1 else ''} behind" if step_log.total_steps < highest_days_logged else "Up to date"
 
         embed.add_field(
             name=name,
-            value=f"{step_log.steps:,} steps {diff_text}",
+            value=f"{step_log.steps:,} steps {diff_text} | {days_text}",
             inline=False,
         )
+
 
     top_single_day = get_highest_single_day_step_count(guild.id)
 

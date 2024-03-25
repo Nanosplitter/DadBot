@@ -58,7 +58,7 @@ def get_steps_logged_graph(guild, user_ids):
 
         y_cumulative = [sum(y[: i + 1]) for i in range(len(y))]
 
-        ax.plot(x, y_cumulative, label=guild.get_member(int(user_id)))
+        ax.plot(x, y_cumulative, label=guild.get_member(int(user_id)).name)
 
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%B %d"))
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x:,.0f}"))

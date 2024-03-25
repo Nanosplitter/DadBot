@@ -15,6 +15,7 @@ from services.step_log_service import (
     submit_step_log,
     build_step_logger_view,
     get_steps_logged_graph,
+    get_all_user_ids,
 )
 
 with open("config.yaml") as file:
@@ -48,25 +49,31 @@ class Steps(commands.Cog, name="steps"):
         await interaction.response.send_message(
             f"{interaction.user.mention} logged {steps} steps!"
         )
-    
-    @nextcord.slash_command(name="stepgraph", description="Graph things about the step competition", guild_ids=[850473081063211048])
+
+    @nextcord.slash_command(
+        name="stepgraph",
+        description="Graph things about the step competition",
+        guild_ids=[850473081063211048],
+    )
     async def graph(self, interaction: Interaction):
         pass
-    
+
     @graph.subcommand(description="Get a graph of your steps.")
     async def user(self, interaction: Interaction):
-        graph = get_steps_logged_graph(interaction.guild.id, interaction.user.id)
+        graph = get_steps_logged_graph(interaction.guild, [interaction.user.id])
         await interaction.response.send_message(
             file=nextcord.File(graph),
         )
-    
+
     @graph.subcommand(description="Get a graph of the server's steps.")
     async def server(self, interaction: Interaction):
-        graph = get_steps_logged_graph(interaction.guild.id)
-        await interaction.response.send_message(
+        await interaction.response.defer()
+        graph = get_steps_logged_graph(
+            interaction.guild, get_all_user_ids(interaction.guild.id)
+        )
+        await interaction.followup.send(
             file=nextcord.File(graph),
         )
-    
 
 
 def setup(bot):

@@ -6,10 +6,12 @@ from peewee import *
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import FuncFormatter
 
 from models.step_log import StepLog
 
-plt.style.use('dark_background')
+plt.style.use("dark_background")
+
 
 class StepLoggerModal(Modal):
     def __init__(self, step_message):
@@ -31,27 +33,36 @@ class StepLoggerModal(Modal):
             f"{interaction.user.mention} logged {int(self.children[0].value):,} steps!"
         )
 
-def get_steps_logged_graph(server_id, user_id):
-    # Make a graph using matplotlib with a line graph of the cumulative steps logged by the user with the x-axis being the submit time and the y-axis being the cumulative steps
+
+def get_all_user_ids(server_id):
     server_id = str(server_id)
-    user_id = str(user_id)
-    step_logs = (
-        StepLog.select()
-        .where(StepLog.server_id == server_id, StepLog.user_id == user_id)
-        .order_by(StepLog.submit_time)
-    )
+    step_logs = StepLog.select().where(StepLog.server_id == server_id)
+    return list(set([step_log.user_id for step_log in step_logs]))
 
-    x = [step.submit_time for step in step_logs]
-    y = [step.steps for step in step_logs]
 
-    # Calculate the cumulative sum of steps
-    y_cumulative = [sum(y[:i+1]) for i in range(len(y))]
+def get_steps_logged_graph(guild, user_ids):
+    server_id = str(guild.id)
+    user_ids = [str(user_id) for user_id in user_ids]
 
     fig, ax = plt.subplots()
-    ax.plot(x, y_cumulative)
 
-    # Format x-axis to scale with time and make it more human-readable
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%B %d'))
+    for user_id in user_ids:
+        step_logs = (
+            StepLog.select()
+            .where(StepLog.server_id == server_id, StepLog.user_id == user_id)
+            .order_by(StepLog.submit_time)
+        )
+
+        x = [step.submit_time for step in step_logs]
+        y = [step.steps for step in step_logs]
+
+        y_cumulative = [sum(y[: i + 1]) for i in range(len(y))]
+
+        ax.plot(x, y_cumulative, label=guild.get_member(int(user_id)))
+
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%B %d"))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x:,.0f}"))
+    ax.legend(loc="upper left", bbox_to_anchor=(0, 1), shadow=True)
     fig.autofmt_xdate()
 
     ax.set_xlabel("Submit Time")
@@ -62,6 +73,7 @@ def get_steps_logged_graph(server_id, user_id):
     plt.savefig("graph.png")
 
     return "graph.png"
+
 
 def build_step_logger_view() -> View:
     view = View(timeout=None)
@@ -116,11 +128,11 @@ def get_steps_leaderboard_for_server(server_id) -> list:
 
     step_logs = []
     for step_total in sorted_step_totals:
-        step_log = StepLog(server_id=server_id, user_id=step_total[0], steps=step_total[1])
-        step_log.total_steps = step_numbers[step_total[0]]
-        step_logs.append(
-            step_log
+        step_log = StepLog(
+            server_id=server_id, user_id=step_total[0], steps=step_total[1]
         )
+        step_log.total_steps = step_numbers[step_total[0]]
+        step_logs.append(step_log)
 
     return step_logs
 
@@ -135,6 +147,7 @@ def get_highest_single_day_step_count(server_id):
     )
 
     return step_log
+
 
 def build_embed_for_server(guild) -> Embed:
 
@@ -166,17 +179,24 @@ def build_embed_for_server(guild) -> Embed:
             name = f"🏆 {name}"
             first = False
 
-        diff_text = f"(-{leader_step_count - step_log.steps:,})" if step_log.steps < leader_step_count else ""
+        diff_text = (
+            f"(-{leader_step_count - step_log.steps:,})"
+            if step_log.steps < leader_step_count
+            else ""
+        )
 
         days_behind = highest_days_logged - step_log.total_steps
-        days_text = f"{days_behind} day{'s' if days_behind != 1 else ''} behind" if step_log.total_steps < highest_days_logged else "Up to date"
+        days_text = (
+            f"{days_behind} day{'s' if days_behind != 1 else ''} behind"
+            if step_log.total_steps < highest_days_logged
+            else "Up to date"
+        )
 
         embed.add_field(
             name=name,
             value=f"{step_log.steps:,} steps {diff_text} | {days_text}",
             inline=False,
         )
-
 
     top_single_day = get_highest_single_day_step_count(guild.id)
 

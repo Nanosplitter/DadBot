@@ -30,3 +30,4 @@ pyshorteners
 moviepy
 aiomysql
 peewee
+matplotlib

@@ -4,8 +4,12 @@ from nextcord.ui import TextInput, View, Button, Modal
 import nextcord
 from peewee import *
 
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 from models.step_log import StepLog
 
+plt.style.use('dark_background')
 
 class StepLoggerModal(Modal):
     def __init__(self, step_message):
@@ -27,6 +31,37 @@ class StepLoggerModal(Modal):
             f"{interaction.user.mention} logged {int(self.children[0].value):,} steps!"
         )
 
+def get_steps_logged_graph(server_id, user_id):
+    # Make a graph using matplotlib with a line graph of the cumulative steps logged by the user with the x-axis being the submit time and the y-axis being the cumulative steps
+    server_id = str(server_id)
+    user_id = str(user_id)
+    step_logs = (
+        StepLog.select()
+        .where(StepLog.server_id == server_id, StepLog.user_id == user_id)
+        .order_by(StepLog.submit_time)
+    )
+
+    x = [step.submit_time for step in step_logs]
+    y = [step.steps for step in step_logs]
+
+    # Calculate the cumulative sum of steps
+    y_cumulative = [sum(y[:i+1]) for i in range(len(y))]
+
+    fig, ax = plt.subplots()
+    ax.plot(x, y_cumulative)
+
+    # Format x-axis to scale with time and make it more human-readable
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%B %d'))
+    fig.autofmt_xdate()
+
+    ax.set_xlabel("Submit Time")
+    ax.set_ylabel("Cumulative Steps")
+    ax.set_title("Cumulative Steps Logged Over Time")
+
+    plt.tight_layout()
+    plt.savefig("graph.png")
+
+    return "graph.png"
 
 def build_step_logger_view() -> View:
     view = View(timeout=None)

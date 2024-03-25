@@ -53,7 +53,7 @@ class Steps(commands.Cog, name="steps"):
     @nextcord.slash_command(
         name="stepgraph",
         description="Graph things about the step competition",
-        guild_ids=[850473081063211048],
+        guild_ids=[850473081063211048, 856919397754470420],
     )
     async def graph(self, interaction: Interaction):
         pass

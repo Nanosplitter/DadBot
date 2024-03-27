@@ -6,7 +6,8 @@ import json
 import nextcord
 from nextcord import Interaction
 from nextcord.ext import commands
-from noncommands.dadroid import dadroid_single
+from noncommands.dadroid import dadroid_multiple
+from noncommands.chat import Chat
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -24,9 +25,11 @@ class Translate(commands.Cog, name="translate"):
 
         await interaction.response.defer()
 
-        await dadroid_single(
-            "You are a translator. Your goal is to translate the following message to English. Only reply with the translation and nothing else.",
-            message.content,
+        chat = Chat(self.bot)
+
+        await dadroid_multiple(
+            "You are a translator. Your goal is to translate the following message to English. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to English.",
+            chat.prepare_chat_messages([message])[0],
             first_send_method=interaction.followup.send,
             send_method=interaction.followup.send,
             response_starter=f"Translation of: {message.jump_url}\n >>> ",

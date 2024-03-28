@@ -1,32 +1,23 @@
-import yaml
-import sys
-import os
-import mysql.connector
+import datetime
+from peewee import fn
+from models.birthday import Birthday
 
-with open("config.yaml") as file:
-    config = yaml.load(file, Loader=yaml.FullLoader)
 
 class BirthdayLoop:
     def __init__(self, bot):
         self.bot = bot
+
     async def checkBirthdays(self):
         print("Running Birthday Checker")
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"],
-            autocommit=True
+
+        today = datetime.datetime.now()
+
+        query = Birthday.select().where(
+            (fn.MONTH(Birthday.birthday) == today.month)
+            & (fn.DAY(Birthday.birthday) == today.day)
         )
-        mycursor = mydb.cursor(buffered=True)
 
-        mycursor.execute("SELECT author, mention, birthday, channel_id FROM birthdays WHERE DAY(birthday) = DAY(CONVERT_TZ(NOW(), '+00:00', '-05:00')) AND MONTH(birthday) = MONTH(CONVERT_TZ(NOW(), '+00:00', '-05:00'))")
-        for m in mycursor:
+        for birthday in query:
             for channel in self.bot.get_all_channels():
-                if m[3] == str(channel.id):
-                    await channel.send(f"{m[1]}'s birthday is today!")
-
-
-        mydb.commit()
-        mycursor.close()
-        mydb.close()
+                if str(birthday.channel_id) == str(channel.id):
+                    await channel.send(f"# {birthday.mention}'s birthday is today!")

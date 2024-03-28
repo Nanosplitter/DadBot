@@ -1,5 +1,4 @@
-import os
-import mysql.connector
+import datetime
 import dateparser as dp
 from dateparser.search import search_dates
 import yaml
@@ -9,15 +8,14 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption, ChannelType
 from nextcord.abc import GuildChannel
 
-
 from noncommands import birthdayLoop
-
+from models.birthday import Birthday
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
-class Birthday(commands.Cog, name="birthday"):
+class BirthdayCog(commands.Cog, name="birthday"):
     def __init__(self, bot):
         self.bot = bot
         self.birthdayLoop = birthdayLoop.BirthdayLoop(bot)
@@ -32,17 +30,8 @@ class Birthday(commands.Cog, name="birthday"):
             description="A date, like 'January 4th'", required=True
         ),
     ):
-        """
-        [Date] Dad always remembers birthdays.
-        """
-        mydb = mysql.connector.connect(
-            host=config["dbhost"],
-            user=config["dbuser"],
-            password=config["dbpassword"],
-            database=config["databasename"],
-            autocommit=True,
-        )
         timeStr = birthday
+        timeWords = birthday
         time = dp.parse(
             timeStr,
             settings={
@@ -52,8 +41,7 @@ class Birthday(commands.Cog, name="birthday"):
                 "PREFER_DAY_OF_MONTH": "first",
             },
         )
-        timeWords = timeStr
-        f = "%Y-%m-%d %H:%M:%S"
+
         if time is None:
             searchRes = search_dates(
                 timeStr,
@@ -65,17 +53,14 @@ class Birthday(commands.Cog, name="birthday"):
                 },
                 languages=["en"],
             )
-            for t in searchRes:
-                time = t[1]
-                timeWords = t[0]
-                break
+            if searchRes:
+                time, timeWords = searchRes[0]
 
-        if time is not None:
+        if time:
             timeUTC = dp.parse(
-                time.strftime(f),
+                time.strftime("%Y-%m-%d %H:%M:%S"),
                 settings={"TIMEZONE": "US/Eastern", "TO_TIMEZONE": "UTC"},
             )
-            mycursor = mydb.cursor(buffered=True)
 
             if timeUTC is None:
                 await interaction.response.send_message(
@@ -83,43 +68,22 @@ class Birthday(commands.Cog, name="birthday"):
                 )
                 return
 
-            if interaction.user is None:
-                await interaction.response.send_message(
-                    "Sorry, I can't find your user information."
-                )
-                return
+            Birthday.delete().where(
+                (Birthday.author == interaction.user.name)
+                & (Birthday.channel_id == str(interaction.channel.id))
+            ).execute()
 
-            if interaction.channel is None:
-                await interaction.response.send_message(
-                    "Sorry, I can't find your channel information."
-                )
-                return
-
-            mycursor.execute(
-                f"DELETE FROM birthdays WHERE author = '{interaction.user.name}' AND channel_id = {interaction.channel.id}"
+            Birthday.create(
+                author=interaction.user.name,
+                mention=interaction.user.mention,
+                channel_id=str(interaction.channel.id),
+                birthday=timeUTC,
             )
-            mydb.commit()
 
-            mycursor.execute(
-                "INSERT INTO birthdays (author, mention, channel_id, birthday) VALUES ('"
-                + str(interaction.user.name)
-                + "', '"
-                + str(interaction.user.mention)
-                + "', '"
-                + str(interaction.channel.id)
-                + "', '"
-                + timeUTC.strftime(f)
-                + "')"
-            )
             await interaction.response.send_message(
-                "Your Birthday is set for: "
-                + time.strftime(f)
-                + " EST \n\nHere's the time I read: "
-                + timeWords
+                f"Your Birthday is set for: {time.strftime('%Y-%m-%d %H:%M:%S')} EST \n\nHere's the time I read: {timeWords}"
             )
-            mydb.commit()
-            mycursor.close()
-            mydb.close()
+
         else:
             await interaction.response.send_message(
                 "I can't understand that time, try again but differently"
@@ -129,12 +93,29 @@ class Birthday(commands.Cog, name="birthday"):
         name="todaysbirthdays", description="Get all of the birthdays for today"
     )
     async def todaysbirthdays(self, interaction: Interaction):
-        """
-        [No Arguments] Dad will tell you who has birthdays today.
-        """
-        await interaction.response.send_message("Checking!")
-        await self.birthdayLoop.checkBirthdays()
+        await interaction.response.defer()
+
+        today = datetime.date.today()
+
+        birthdays_today = Birthday.select().where(
+            Birthday.birthday.day == today.day, Birthday.birthday.month == today.month
+        )
+
+        if not birthdays_today:
+            await interaction.followup.send("No birthdays found for today.")
+            return
+
+        for birthday in birthdays_today:
+            member = await interaction.guild.fetch_member(
+                int(birthday.mention.strip("<@!>"))
+            )
+
+            if member:
+                embed = birthday.build_embed(member, nextcord.Color.blue())
+                await interaction.followup.send(embed=embed)
+            else:
+                pass
 
 
 def setup(bot):
-    bot.add_cog(Birthday(bot))
+    bot.add_cog(BirthdayCog(bot))

@@ -1,9 +1,6 @@
 from collections import defaultdict
 import re
 import yaml
-import sys
-import os
-import mysql.connector
 import random
 from models.caught import Caught
 

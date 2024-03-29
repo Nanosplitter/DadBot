@@ -3,7 +3,6 @@ import os
 import random
 
 import requests
-import mysql.connector
 import dateparser as dp
 from dateparser.search import search_dates
 import yaml

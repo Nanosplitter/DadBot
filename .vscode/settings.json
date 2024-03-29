@@ -1,3 +1,9 @@
 {
-    "cSpell.words": ["todaysbirthdays"]
+    "cSpell.words": [
+        "booktrack",
+        "dateparser",
+        "pytz",
+        "startbook",
+        "todaysbirthdays"
+    ]
 }

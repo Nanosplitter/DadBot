@@ -1,5 +1,4 @@
 import os
-import mysql.connector
 import dateparser as dp
 from dateparser.search import search_dates
 import yaml

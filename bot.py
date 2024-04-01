@@ -130,6 +130,18 @@ async def on_message(message: nextcord.Message) -> None:
         await haikuDetector.checkForHaiku(message)
         await chat.respond(message)
 
+    if (
+        message.author.id == 437085901714358279
+        and message.guild.id == 856919397754470420
+    ):
+        await message.reply("This is Josh")
+
+    if (
+        message.author.id == 341896667504836608
+        and message.guild.id == 856919397754470420
+    ):
+        await message.reply("This is Jeremy")
+
     await bot.process_commands(message)
 
 

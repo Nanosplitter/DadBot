@@ -126,8 +126,11 @@ async def on_message(message: nextcord.Message) -> None:
         return
 
     if not re.search("(\|\|[\S\s]*\|\|)", message.content):
-        await imChecker.checkIm(message)
-        await haikuDetector.checkForHaiku(message)
+        # So that dad doesn't respond in a thread with im or haiku
+        if not isinstance(message.channel, nextcord.Thread):
+            await imChecker.checkIm(message)
+            await haikuDetector.checkForHaiku(message)
+
         await chat.respond(message)
 
     await bot.process_commands(message)

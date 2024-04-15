@@ -31,11 +31,6 @@ class Chat(commands.Cog, name="chat"):
             description="The personality or 'job' dad should have in this conversation",
             required=False,
         ),
-        beef: Optional[bool] = SlashOption(
-            description="If you want DadBot to think harder about his responses. He will respond much slower if enabled.",
-            required=False,
-            default=False,
-        ),
     ):
         """
         [No Arguments] Chat with Dad.
@@ -55,8 +50,6 @@ class Chat(commands.Cog, name="chat"):
                 personality = personality.personality
 
             response += f"\n\nCustom Personality: [{personality}]"
-        if beef:
-            response += "\n\nBeef: Enabled"
 
         partial_message = await interaction.response.send_message(response)
 

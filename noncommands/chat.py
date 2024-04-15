@@ -67,14 +67,16 @@ class Chat:
         return first_message[0]
 
     def determine_personality(self, thread, first_message_content):
-        beef = "Beef: Enabled" in first_message_content
-        personality = self.config["default_personality"] + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown."
+        beef = True
+        personality = self.config["default_personality"]
 
         if "having for dinner?" in thread.name:
             personality = self.config["chef_personality"]
-            beef = True
         elif "Custom Personality" in first_message_content:
-            personality = self.extract_custom_personality(first_message_content)
+            personality = (
+                self.extract_custom_personality(first_message_content)
+                + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown. Try and avoid mentioning that you are talking on discord unless you are asked."
+            )
 
         return personality, beef
 

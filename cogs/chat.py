@@ -32,11 +32,7 @@ class Chat(commands.Cog, name="chat"):
             required=False,
         ),
     ):
-        """
-        [No Arguments] Chat with Dad.
-        """
-
-        response = "## Hey there! Let's chat!"
+        response = "## Hey there, let's chat!"
 
         if personality is not None:
             if personality.startswith("[saved_personality] "):

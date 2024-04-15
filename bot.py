@@ -105,7 +105,7 @@ async def on_ready() -> None:
     bot.logger.info(f"Python version: {platform.python_version()}")
     bot.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
     bot.logger.info(f"Servers: {len(bot.guilds)}")
-    # list each server name
+
     for i in bot.guilds:
         bot.logger.info(f" - {i.name}")
     bot.logger.info(f"Users: {len(bot.users)}")

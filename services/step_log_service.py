@@ -194,7 +194,7 @@ def build_embed_for_server(guild) -> Embed:
 
         embed.add_field(
             name=name,
-            value=f"{step_log.steps:,} steps {diff_text} | {days_text}",
+            value=f"**{step_log.steps:,} steps** {diff_text} | {days_text}\n({step_log.steps / step_log.total_steps:,.0f} steps per day)",
             inline=False,
         )
 

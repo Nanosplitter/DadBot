@@ -356,7 +356,7 @@ class OpenAI(commands.Cog, name="openai"):
         await interaction.response.defer()
 
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -379,7 +379,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         # Ask gpt3.5 to come up with a title for the APOD
         titleCompletion = self.client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
+            model="gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",
@@ -460,7 +460,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         await thread.trigger_typing()
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",

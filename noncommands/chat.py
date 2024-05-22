@@ -82,7 +82,7 @@ class Chat:
 
     @staticmethod
     def extract_custom_personality(input_string):
-        match = re.search(r"\[(.*?)\]", input_string)
+        match = re.search(r"\[(.*?)\]", input_string, re.DOTALL)
         return match.group(1) if match else None
 
     def prepare_chat_messages(self, messages):

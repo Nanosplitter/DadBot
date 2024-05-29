@@ -13,16 +13,25 @@ class Scooby:
     async def apod(self):
         c1 = self.bot.get_channel(856919399789625376)
         c2 = self.bot.get_channel(1105336042296463432)
+
+        channels = [c1, c2]
+
         response = requests.get(
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
         )
-        embed = Embed(
-            title="Astrophotography Picture of the Day",
-            description=response.json()["explanation"],
-        )
-        embed.set_image(url=response.json()["hdurl"])
-        await c1.send(embed=embed)
-        await c2.send(embed=embed)
+
+        for channel in channels:
+            if response.status_code != 200 or len(response.json()) == 0:
+                await channel.send("NASA APOD is currently down :(")
+                self.bot.logger.error("NASA APOD is down")
+                return
+
+            await channel.send("# Astronomy Picture of the Day")
+            if "hdurl" in response.json():
+                await channel.send(response.json()["hdurl"])
+            else:
+                await channel.send(response.json()["url"])
+            await channel.send(">>> " + response.json()["explanation"])
 
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)

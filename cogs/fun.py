@@ -87,14 +87,15 @@ class Fun(commands.Cog, name="fun"):
             )
 
     @nextcord.slash_command(
-        name="apod", description="Get the astrophotography picture of the day from NASA."
+        name="apod",
+        description="Get the astronomy picture of the day from NASA.",
     )
     async def apod(self, interaction: Interaction):
         """
         Get the NASA picture of the day
         """
         await interaction.response.defer()
-        
+
         response = requests.get(
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
         )
@@ -106,21 +107,12 @@ class Fun(commands.Cog, name="fun"):
             self.bot.logger.error("NASA APOD is down")
             return
 
-        if response.json()["media_type"] == "video":
-            embed = Embed(
-                title="Astrophotography Picture of the Day",
-                description=response.json()["explanation"],
-            )
-            embed.set_image(url=response.json()["thumbnail_url"])
-            await interaction.followup.send(embed=embed)
-            return
-
-        embed = Embed(
-            title="Astrophotography Picture of the Day",
-            description=response.json()["explanation"],
-        )
-        embed.set_image(url=response.json()["hdurl"])
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send("# Astronomy Picture of the Day")
+        if "hdurl" in response.json():
+            await interaction.channel.send(response.json()["hdurl"])
+        else:
+            await interaction.channel.send(response.json()["url"])
+        await interaction.channel.send(">>> " + response.json()["explanation"])
 
     @nextcord.slash_command(
         name="iswanted", description="See if someone is on the FBI's most wanted list."

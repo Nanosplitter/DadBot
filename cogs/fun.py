@@ -107,7 +107,7 @@ class Fun(commands.Cog, name="fun"):
             self.bot.logger.error("NASA APOD is down")
             return
 
-        await interaction.followup.send("# Astronomy Picture of the Day")
+        await interaction.followup.send("# APOD - " + response.json()["title"])
         if "hdurl" in response.json():
             await interaction.channel.send(response.json()["hdurl"])
         else:

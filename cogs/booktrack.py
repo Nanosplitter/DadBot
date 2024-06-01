@@ -41,6 +41,7 @@ class Booktrack(commands.Cog, name="booktrack"):
             required=False,
         ),
     ):
+        await interaction.response.defer()
         if photo:
             photo_url = photo.url
         else:
@@ -59,10 +60,11 @@ class Booktrack(commands.Cog, name="booktrack"):
         )
 
         embed = book.make_embed()
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @booktrack.subcommand(description="List your books")
     async def list(self, interaction: Interaction):
+        await interaction.response.defer()
         books = Book.select().where(Book.user_id == str(interaction.user.id))
 
         firstReply = False
@@ -76,12 +78,14 @@ class Booktrack(commands.Cog, name="booktrack"):
 
             if firstReply is False:
                 firstReply = True
-                await interaction.response.send_message(embed=embed, view=view)
+                await interaction.followup.send(embed=embed, view=view)
             else:
                 await interaction.channel.send(embed=embed, view=view)
 
         if firstReply is False:
-            await interaction.response.send_message("You have no books!")
+            await interaction.followup.send(
+                "You have no books! Use `/booktrack startbook` to start one."
+            )
 
 
 def setup(bot):

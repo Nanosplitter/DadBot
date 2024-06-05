@@ -23,32 +23,32 @@ class Scooby:
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
         )
 
-        for channel in channels:
-            if response.status_code != 200 or len(response.json()) == 0:
-                await channel.send("NASA APOD is currently down :(")
-                self.bot.logger.error("NASA APOD is down")
-                return
+        if response.status_code != 200 or len(response.json()) == 0:
+            await channel.send("NASA APOD is currently down :(")
+            self.bot.logger.error("NASA APOD is down")
+            return
 
-            title = "# APOD - " + response.json()["title"] + "\n"
-            explanation = ">>> " + response.json()["explanation"] + "\n"
+        title = "# APOD - " + response.json()["title"] + "\n"
+        explanation = ">>> " + response.json()["explanation"] + "\n"
 
-            url = (
-                response.json()["hdurl"]
-                if "hdurl" in response.json()
-                else response.json()["url"]
-            )
+        url = (
+            response.json()["hdurl"]
+            if "hdurl" in response.json()
+            else response.json()["url"]
+        )
 
-            if response.json()["media_type"] == "image":
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url) as resp:
-                        if resp.status == 200:
-                            data = await resp.read()
+        if response.json()["media_type"] == "image":
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.read()
+                        for channel in channels:
                             await channel.send(
                                 title + explanation,
                                 file=nextcord.File(io.BytesIO(data), "image.png"),
                             )
-                            return
-
+                        return
+        for channel in channels:
             await channel.send(title + explanation)
             await channel.send(url)
 

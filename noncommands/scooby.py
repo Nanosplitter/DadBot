@@ -1,5 +1,8 @@
 import requests
 from nextcord import Embed
+import aiohttp
+import io
+import nextcord
 from services.step_log_service import (
     build_embed_for_server,
     build_step_logger_view,
@@ -26,13 +29,28 @@ class Scooby:
                 self.bot.logger.error("NASA APOD is down")
                 return
 
-            await channel.send("# APOD - " + response.json()["title"])
-            await channel.send(">>> " + response.json()["explanation"])
+            title = "# APOD - " + response.json()["title"] + "\n"
+            explanation = ">>> " + response.json()["explanation"] + "\n"
 
-            if "hdurl" in response.json():
-                await channel.send(response.json()["hdurl"])
-            else:
-                await channel.send(response.json()["url"])
+            url = (
+                response.json()["hdurl"]
+                if "hdurl" in response.json()
+                else response.json()["url"]
+            )
+
+            if response.json()["media_type"] == "image":
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as resp:
+                        if resp.status == 200:
+                            data = await resp.read()
+                            await channel.send(
+                                title + explanation,
+                                file=nextcord.File(io.BytesIO(data), "image.png"),
+                            )
+                            return
+
+            await channel.send(title + explanation)
+            await channel.send(url)
 
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)

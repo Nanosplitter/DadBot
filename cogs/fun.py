@@ -1,5 +1,6 @@
 import asyncio
 import os
+import io
 import random
 import sys
 import aiohttp
@@ -101,18 +102,32 @@ class Fun(commands.Cog, name="fun"):
         )
 
         if response.status_code != 200 or len(response.json()) == 0:
-            await interaction.followup.send(
-                "NASA APOD is currently down, please try again later"
-            )
+            await interaction.channel.send("NASA APOD is currently down :(")
             self.bot.logger.error("NASA APOD is down")
             return
 
-        await interaction.followup.send("# APOD - " + response.json()["title"])
-        if "hdurl" in response.json():
-            await interaction.channel.send(response.json()["hdurl"])
-        else:
-            await interaction.channel.send(response.json()["url"])
-        await interaction.channel.send(">>> " + response.json()["explanation"])
+        title = "# APOD - " + response.json()["title"] + "\n"
+        explanation = ">>> " + response.json()["explanation"] + "\n"
+
+        url = (
+            response.json()["hdurl"]
+            if "hdurl" in response.json()
+            else response.json()["url"]
+        )
+
+        if response.json()["media_type"] == "image":
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.read()
+                        await interaction.followup.send(
+                            title + explanation,
+                            file=nextcord.File(io.BytesIO(data), "image.png"),
+                        )
+                        return
+
+        await interaction.followup.send(title + explanation)
+        await interaction.channel.send(url)
 
     @nextcord.slash_command(
         name="iswanted", description="See if someone is on the FBI's most wanted list."

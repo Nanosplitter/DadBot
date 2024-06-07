@@ -500,25 +500,25 @@ class OpenAI(commands.Cog, name="openai"):
         for message in messages:
             await thread.send(message)
 
-    @nextcord.message_command(name="roastmycode")
-    async def roastmycode(
-        self, interaction: Interaction, source_message: nextcord.Message
-    ):
-        """
-        Have dad roast your code
-        """
-        await interaction.response.defer()
+    # @nextcord.message_command(name="roastmycode")
+    # async def roastmycode(
+    #     self, interaction: Interaction, source_message: nextcord.Message
+    # ):
+    #     """
+    #     Have dad roast your code
+    #     """
+    #     await interaction.response.defer()
 
-        system_prompt = "Your goal is to roast someone's code. You should be mean but constructive and a little funny. It is all in good fun but you should make actually good suggestions to improve the code."
+    #     system_prompt = "Your goal is to roast someone's code. You should be mean but constructive and a little funny. It is all in good fun but you should make actually good suggestions to improve the code."
 
-        await interaction.followup.send("*Your code is bad and you should feel bad*")
+    #     await interaction.followup.send("*Your code is bad and you should feel bad*")
 
-        await dadroid_single(
-            system_prompt,
-            source_message.clean_content,
-            source_message.reply,
-            interaction.channel.send,
-        )
+    #     await dadroid_single(
+    #         system_prompt,
+    #         source_message.clean_content,
+    #         source_message.reply,
+    #         interaction.channel.send,
+    #     )
 
     @nextcord.slash_command(name="onionarticle", description="Create an Onion article.")
     async def onionarticle(

@@ -36,6 +36,25 @@ class Translate(commands.Cog, name="translate"):
             beef=True,
         )
 
+    @nextcord.message_command(name="zoomer")
+    async def zoomer(self, interaction: Interaction, message: nextcord.Message):
+        """
+        Translate a message to Zoomer.
+        """
+
+        await interaction.response.defer()
+
+        chat = Chat(self.bot)
+
+        await dadroid_multiple(
+            "You are a translator. Your goal is to translate the following message to Gen-Z-speak. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to Gen-Z-speak.",
+            chat.prepare_chat_messages([message])[0],
+            first_send_method=interaction.followup.send,
+            send_method=interaction.followup.send,
+            response_starter=f"Zoomer Translation of: {message.jump_url}\n >>> ",
+            beef=True,
+        )
+
 
 def setup(bot):
     bot.add_cog(Translate(bot))

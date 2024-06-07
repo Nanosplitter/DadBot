@@ -278,23 +278,23 @@ class OpenAI(commands.Cog, name="openai"):
             personality, subject, interaction.followup.send, interaction.channel.send
         )
 
-    @nextcord.message_command(name="redditor")
-    async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
-        """
-        Have dad respond like a redditor to a message.
-        """
-        await interaction.response.defer()
+    # @nextcord.message_command(name="redditor")
+    # async def uwu(self, interaction: Interaction, source_message: nextcord.Message):
+    #     """
+    #     Have dad respond like a redditor to a message.
+    #     """
+    #     await interaction.response.defer()
 
-        system_prompt = "Your goal is to respond to a message as if you are a stereotypical redditor who is a know-it-all, sarcastic, charismatic asshole on the internet, and a shy loser off the internet. Take yourself very seriously and act like you know everything. You are a redditor."
+    #     system_prompt = "Your goal is to respond to a message as if you are a stereotypical redditor who is a know-it-all, sarcastic, charismatic asshole on the internet, and a shy loser off the internet. Take yourself very seriously and act like you know everything. You are a redditor."
 
-        await interaction.followup.send("*tips fedora*")
+    #     await interaction.followup.send("*tips fedora*")
 
-        await dadroid_single(
-            system_prompt,
-            source_message.clean_content,
-            source_message.reply,
-            interaction.channel.send,
-        )
+    #     await dadroid_single(
+    #         system_prompt,
+    #         source_message.clean_content,
+    #         source_message.reply,
+    #         interaction.channel.send,
+    #     )
 
     @nextcord.slash_command(
         name="persona",

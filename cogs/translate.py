@@ -55,6 +55,25 @@ class Translate(commands.Cog, name="translate"):
             beef=True,
         )
 
+    @nextcord.message_command(name="boomer")
+    async def boomer(self, interaction: Interaction, message: nextcord.Message):
+        """
+        Translate a message to Boomer.
+        """
+
+        await interaction.response.defer()
+
+        chat = Chat(self.bot)
+
+        await dadroid_multiple(
+            "You are a translator. Your goal is to translate the following message to Boomer-speak. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to Boomer-speak.",
+            chat.prepare_chat_messages([message])[0],
+            first_send_method=interaction.followup.send,
+            send_method=interaction.followup.send,
+            response_starter=f"Boomer Translation of: {message.jump_url}\n >>> ",
+            beef=True,
+        )
+
 
 def setup(bot):
     bot.add_cog(Translate(bot))

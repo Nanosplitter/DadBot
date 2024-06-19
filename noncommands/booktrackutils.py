@@ -48,7 +48,7 @@ class FinishButton(nextcord.ui.Button):
             return
 
         book = Book.get(Book.id == self.book_id, Book.user_id == self.user_id)
-        book.finish_date = dt.now(datetime.UTC)
+        book.finish_date = dt.now(pytz.utc)
         book.save()
 
         embed = book.make_embed()

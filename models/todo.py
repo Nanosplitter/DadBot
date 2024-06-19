@@ -37,9 +37,9 @@ class Todo(Model):
                 inline=False,
             )
 
-            if utc_time < dt.now(datetime.UTC).replace(tzinfo=pytz.utc):
+            if utc_time < dt.now(pytz.utc).replace(tzinfo=pytz.utc):
                 embed.color = 0xFF0000
-            if utc_time > dt.now(datetime.UTC).replace(tzinfo=pytz.utc):
+            if utc_time > dt.now(pytz.utc).replace(tzinfo=pytz.utc):
                 embed.color = 0x00FF00
 
         return embed

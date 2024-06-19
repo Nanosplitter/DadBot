@@ -55,7 +55,7 @@ class Booktrack(commands.Cog, name="booktrack"):
             type=type,
             chapters=chapters,
             pages=pages,
-            start_date=dt.now(datetime.UTC).replace(tzinfo=pytz.utc),
+            start_date=dt.now(pytz.utc).replace(tzinfo=pytz.utc),
             photo_url=photo_url,
         )
 

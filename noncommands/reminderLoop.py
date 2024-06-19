@@ -12,7 +12,7 @@ class ReminderLoop:
 
     async def checkReminders(self, bot):
         due_reminders = Todo.select().where(
-            (Todo.time <= dt.now(datetime.UTC)) & (Todo.reminded == 0)
+            (Todo.time <= dt.now(pytz.utc)) & (Todo.reminded == 0)
         )
 
         for reminder in due_reminders:
@@ -46,5 +46,5 @@ class ReminderLoop:
                 pass
 
     async def updateOldReminders(self, bot):
-        query = Todo.update(reminded=1).where(Todo.time <= dt.now(datetime.UTC))
+        query = Todo.update(reminded=1).where(Todo.time <= dt.now(pytz.utc))
         query.execute()

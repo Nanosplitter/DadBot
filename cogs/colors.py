@@ -122,16 +122,21 @@ class Colors(commands.Cog, name="colors"):
             userRoles = interaction.user.roles  # type: ignore
 
             if contrast < limit:
+                topRole = userRoles[-1]
+                await topRole.edit(
+                    colour=nextcord.Colour(int(color.replace("#", ""), 16))
+                )
+
                 embed = nextcord.Embed(
-                    title="Error",
-                    description="Color does not have enough contrast. That color has a contrast ratio of: "
+                    title="Low Contrast Color!",
+                    description="Your color has been changed! Your color has very low contrast to the default discord background, so it may be hard to read for people. That color has a contrast ratio of: "
                     + str(round(contrast, 4))
-                    + ":1. It needs to be above 4:1.",
+                    + ":1. It needs to be above 4:1 to look good. Use the buttons below to try again with a color with better contrast if you'd like!",
                     color=int(color.replace("#", ""), 16),
                 )
 
                 colorButton = Button(
-                    label="Closest Color", style=nextcord.ButtonStyle.blurple
+                    label="Closest High Contrast Color", style=nextcord.ButtonStyle.blurple
                 )
 
                 randomButton = Button(
@@ -210,7 +215,7 @@ class Colors(commands.Cog, name="colors"):
             print(e)
             embed = nextcord.Embed(
                 title="Error",
-                description="Something went wrong, make sure you are using a 6 digit hex code. (ex: !changecolor #FFFFFF)",
+                description="Something went wrong, make sure you are using a 6 digit hex code. (ex: /changecolor #FFFFFF)",
                 color=config["error"],
             )
             await interaction.response.send_message(embed=embed)

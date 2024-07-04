@@ -2,6 +2,7 @@ import re
 import yaml
 from nextcord import Thread, MessageType
 from noncommands.dadroid import dadroid_multiple
+import base64
 
 
 class Chat:
@@ -31,13 +32,13 @@ class Chat:
             thread, first_message.system_content
         )
 
-        chat_messages, hasImages = self.prepare_chat_messages(messages)
+        chat_messages, hasImages = await self.prepare_chat_messages(messages)
 
         if hasImages:
             beef = True
 
         await dadroid_multiple(
-            personality, chat_messages, thread.send, thread.send, beef
+            personality, chat_messages, thread.send, thread.send
         )
 
     def is_valid_thread(self, message) -> bool:
@@ -85,8 +86,9 @@ class Chat:
         match = re.search(r"\[(.*?)\]", input_string, re.DOTALL)
         return match.group(1) if match else None
 
-    def prepare_chat_messages(self, messages):
+    async def prepare_chat_messages(self, messages):
         chat_messages = []
+        print(messages)
         hasImages = False
         for message in messages:
             if message.type == MessageType.thread_starter_message:
@@ -100,19 +102,30 @@ class Chat:
                 role = "assistant"
             else:
                 role = "user"
-                content.extend(self.prepare_attachment_content(message.attachments))
+                print(message.attachments)
+                content.extend(await self.prepare_attachment_content(message.attachments))
 
             content.append({"type": "text", "text": message.clean_content})
             chat_messages.append({"role": role, "content": content})
+        
+        print(chat_messages)
 
         return chat_messages, hasImages
 
     @staticmethod
-    def prepare_attachment_content(attachments):
-        return [
-            {
-                "type": "image_url",
-                "image_url": {"url": attachment.url, "detail": "high"},
-            }
-            for attachment in attachments
-        ]
+    async def prepare_attachment_content(attachments):
+        # Read each attachment and convert it to base64 for the model
+        content = []
+        for attachment in attachments:
+            if attachment.content_type in ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"]:
+                content.append(
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": attachment.content_type,
+                            "data": base64.b64encode(await attachment.read()).decode("utf-8"),
+                        }
+                    }
+                )
+        return content

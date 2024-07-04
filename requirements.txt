@@ -31,3 +31,4 @@ moviepy
 aiomysql
 peewee
 matplotlib
+anthropic

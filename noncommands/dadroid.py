@@ -1,8 +1,10 @@
 from typing import Callable, List, Optional
 from nextcord import Interaction
-from openai import OpenAI
+from openai import OpenAI, chat
+from anthropic import Anthropic
 import yaml
 from noncommands.chatsplit import chat_split
+import base64
 
 # Type aliases for readability
 SendMethod = Callable[[str], None]
@@ -62,35 +64,39 @@ async def dadroid_multiple(
     messages: List[dict],
     first_send_method: SendMethod,
     send_method: SendMethod,
-    beef: bool = False,
     response_starter: str = "",
 ) -> None:
     """Handles multiple messages interaction with the chat model."""
-    model = "gpt-4o" if beef else "gpt-3.5-turbo"
-    messages_with_personality = [{"role": "system", "content": personality}] + messages
+    model = "claude-3-5-sonnet-20240620"
 
-    chat_completion = create_chat_completion(messages_with_personality, model)
+    chat_completion = create_chat_completion(messages, model, personality)
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )
 
 
 def create_chat_completion(
-    messages: List[dict], model: str = "gpt-3.5-turbo", beef: bool = False
+    messages: List[dict], model: str = "claude-3-haiku-20240307", system: str = None
 ) -> dict:
-    """Creates a chat completion using OpenAI's API."""
+    """Creates a chat completion using Anthropic's API."""
 
-    client = OpenAI(api_key=config["openapi_token"])
+    client = Anthropic(api_key=config["anthropic_api_key"])
 
-    if beef:
-        model = "gpt-4-1106-preview"
-
-    return client.chat.completions.create(
-        model=model,
-        messages=messages,
-        stream=False,
-        max_tokens=4000,
-    )
+    if system:
+        return client.messages.create(
+            model=model,
+            messages=messages,
+            stream=False,
+            system=system,
+            max_tokens=4096,
+        )
+    else:
+        return client.messages.create(
+            model=model,
+            messages=messages,
+            stream=False,
+            max_tokens=4096,
+        )
 
 
 async def respond_from_chat_completion(
@@ -101,7 +107,12 @@ async def respond_from_chat_completion(
 ) -> None:
     """Sends response from chat completion."""
     send_method = send_method or first_send_method
-    messages = chat_split(initial_response + chat_completion.choices[0].message.content)
+    print(chat_completion)
+    print(chat_completion.content)
+    print(chat_completion.content[0])
+    print(chat_completion.content[0].text)
+    print(initial_response)
+    messages = chat_split(initial_response + chat_completion.content[0].text)
 
     for index, message in enumerate(messages):
         await (first_send_method if index == 0 else send_method)(message)

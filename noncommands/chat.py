@@ -28,14 +28,11 @@ class Chat:
         if not first_message:
             return
 
-        personality, beef = self.determine_personality(
+        personality = self.determine_personality(
             thread, first_message.system_content
         )
 
-        chat_messages, hasImages = await self.prepare_chat_messages(messages)
-
-        if hasImages:
-            beef = True
+        chat_messages = await self.prepare_chat_messages(messages)
 
         await dadroid_multiple(
             personality, chat_messages, thread.send, thread.send
@@ -68,7 +65,6 @@ class Chat:
         return first_message[0]
 
     def determine_personality(self, thread, first_message_content):
-        beef = True
         personality = self.config["default_personality"]
 
         if "having for dinner?" in thread.name:
@@ -79,7 +75,7 @@ class Chat:
                 + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown. Try and avoid mentioning that you are talking on discord unless you are asked."
             )
 
-        return personality, beef
+        return personality
 
     @staticmethod
     def extract_custom_personality(input_string):
@@ -88,29 +84,21 @@ class Chat:
 
     async def prepare_chat_messages(self, messages):
         chat_messages = []
-        print(messages)
-        hasImages = False
         for message in messages:
             if message.type == MessageType.thread_starter_message:
                 continue
-
-            if message.attachments:
-                hasImages = True
 
             content = []
             if message.author == self.bot.user:
                 role = "assistant"
             else:
                 role = "user"
-                print(message.attachments)
                 content.extend(await self.prepare_attachment_content(message.attachments))
 
             content.append({"type": "text", "text": message.clean_content})
             chat_messages.append({"role": role, "content": content})
-        
-        print(chat_messages)
 
-        return chat_messages, hasImages
+        return chat_messages
 
     @staticmethod
     async def prepare_attachment_content(attachments):

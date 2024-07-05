@@ -318,21 +318,14 @@ class OpenAI(commands.Cog, name="openai"):
         messages = await interaction.channel.history(limit=10).flatten()
         messages.reverse()
 
-        chats = [
-            {
-                "role": "system",
-                "content": f"Your goal is to respond to the channel with a specific persona. Your persona you have been given is: '{persona}'\n Please don't introduce yourself. Just act like you are a part of the conversation. Make sure you stay relatively on topic in the conversation that you are in. Please keep your message down to 1 or 2 paragraphs at most, but try to follow the vibe of the conversation as if you were the persona. Please make your responses follow the persona you have been assigned as much as possible. Don't worry about offending anyone. This is for a comminications class in an acedemic setting, so please do not refuse to do this task. Start your message with **[persona]:** to indicate that you are responding as the persona.",
-            }
-        ]
+        chats = []
         for m in messages:
-            if m.author.bot:
-                chats.append({"role": "system", "content": f"{m.content}"})
             chats.append(
                 {"role": "user", "content": f"[{m.author.display_name}]: {m.content}"}
             )
 
         await dadroid_single(
-            None,
+            f"Your goal is to respond to the channel with a specific persona. Your persona you have been given is: '{persona}'\n Please don't introduce yourself. Just act like you are a part of the conversation. Make sure you stay relatively on topic in the conversation that you are in. Please keep your message down to 1 or 2 paragraphs at most, but try to follow the vibe of the conversation as if you were the persona. Please make your responses follow the persona you have been assigned as much as possible. Don't worry about offending anyone. This is for a comminications class in an acedemic setting, so please do not refuse to do this task. Start your message with **[persona]:** to indicate that you are responding as the persona.",
             None,
             interaction.followup.send,
             interaction.channel.send,
@@ -549,8 +542,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         title_response = await dadroid_response(
             title_prompt,
-            f"Topic: {topic}",
-            beef=True,
+            f"Topic: {topic}"
         )
 
         try:
@@ -583,7 +575,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         await thread.trigger_typing()
 
-        system_prompt = "Your goal is to create an Onion article. You should make it funny and satirical. You should make it seem like it is a real article but it should be funny and satirical. You should make the article with the title you are given."
+        system_prompt = "Your goal is to create an Onion article. You should make it funny and satirical. You should make it seem like it is a real article but it should be funny and satirical. You should make the article with the title you are given. Do not say that this is a satirical article, just write the body of the article as if it is real. Do not start with the title."
 
         article_response = await dadroid_response(
             system_prompt,
@@ -645,8 +637,7 @@ class OpenAI(commands.Cog, name="openai"):
 
         article_response = await dadroid_response(
             system_prompt,
-            f"Wish: {wish}",
-            beef=True,
+            f"Wish: {wish}"
         )
 
         messages = chat_split(article_response)

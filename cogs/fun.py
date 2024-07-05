@@ -194,8 +194,7 @@ class Fun(commands.Cog, name="fun"):
             question,
             first_send_method=interaction.response.send_message,
             send_method=interaction.followup.send,
-            response_starter=f"{question}\n >>> ",
-            beef=True,
+            response_starter=f"{question}\n >>> "
         )
 
     @nextcord.slash_command(

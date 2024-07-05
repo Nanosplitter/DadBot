@@ -4,7 +4,8 @@
 
 ## Fun
 
---------------
+---
+
 - **`/dadjoke`: Have Dad tell you one of his classics.**
   - **searchterm**: A term to try and find a dadjoke about (optional)
 - **`/xkcd`: Get an xkcd comic.**
@@ -19,7 +20,8 @@
 
 ## Todo
 
---------------
+---
+
 - **`/todo`: Create and manage your todo items.**
   - **create**: Create a todo item. (optional)
     - **what**: What you want to be reminded about (required)
@@ -29,12 +31,14 @@
 
 ## Translate
 
---------------
+---
+
 - (message options > apps) > **`translate`: Translate a message to English.**
 
 ## Info
 
---------------
+---
+
 - **`/info`: Get some useful (or not) information about the bot.**
 - **`/serverinfo`: Get some useful (or not) information about the server.**
 - **`/ping`: Check if the bot is alive.**
@@ -42,7 +46,8 @@
 
 ## Openai
 
---------------
+---
+
 - **`/dalle`: Create a DALL-E 3 image.**
   - **prompt**: The prompt to generate the image from. (required)
   - **style**: The style of image to generate, vivid will make more dramatic images. (optional)
@@ -75,7 +80,8 @@
 
 ## Tldr
 
---------------
+---
+
 - **`/tldrchannel`: Get a TLDR of X number of past messages on the channel.**
   - **number**: The number of past messages to summarize (required)
 - **`/tldr`: Get a TLDR of a web page.**
@@ -83,8 +89,9 @@
 
 ## Memes
 
---------------
-- **`/megamind`: Make a No B*tches? Megamind meme with custom text**
+---
+
+- **`/megamind`: Make a No B\*tches? Megamind meme with custom text**
   - **text**: Text to put on the meme (required)
 - (message options > apps) > **`uwu`: Tyuwn a message unto a cyute uwyu message. ( ˊ.ᴗˋ )**
 - (message options > apps) > **`pastafy`: Turn a message into a pastafied message.**
@@ -95,18 +102,21 @@
 
 ## Birthday
 
---------------
+---
+
 - **`/setbirthday`: Dad always remembers birthdays.**
   - **birthday**: A date, like 'January 4th' (required)
 
 ## Help
 
---------------
+---
+
 - **`/help`: List all of Dad's commands**
 
 ## Wisdom
 
---------------
+---
+
 - **`/randomfact`: Dad has learned a few things, he'll share.**
 - **`/inspire`: Get an inspirational poster courtesy of https://inspirobot.me/**
 - **`/wisdom`: Get some wisdom courtesy of https://inspirobot.me/**
@@ -114,19 +124,22 @@
 
 ## Minesweeper
 
---------------
+---
+
 - **`/minesweeper`: Play a game of minesweeper!**
   - **gridsize**: The length of one side of the square grid. (required)
   - **bombs**: The number of bombs to place in the grid. (required)
 
 ## Poll
 
---------------
+---
+
 - **`/poll`: Create a poll where members can vote.**
 
 ## Dnd
 
---------------
+---
+
 - **`/dndsearch`: Search the D&D 5e SRD**
   - **terms**: A query about dnd (required)
 - **`/roll`: Roll some dice**
@@ -134,38 +147,43 @@
 
 ## Geo
 
---------------
+---
+
 - **`/geo`: Play a round of geo guesser!**
 - **`/geosingle`: Play a round of geo guesser by yourself!**
 
 ## Caught
 
---------------
+---
+
 - **`/caught`: See how many times everyone on the server has been caught by DadBot.**
 
 ## Akinator
 
---------------
+---
+
 - **`/akinator`: This command lets you play an akinator game**
 
 ## Chronophoto
 
---------------
+---
+
 - **`/chrono`: Play a round of chronophoto!**
 
 ## Newcreations
 
---------------
+---
+
 - **`/newdog`: Creates a picture of a dog that does not exist.(From https://random.dog/)**
 - **`/newword`: Creates a new word that does not exist with an optional definition.**
   - **definition**: The definition of the word (optional)
 
 ## Chat
 
---------------
+---
+
 - **`/chat`: Chat with Dad**
   - **personality**: The personality or 'job' dad should have in this conversation (optional)
-  - **beef**: If you want DadBot to think harder about his responses. He will respond much slower if enabled. (optional)
 - **`/personality`: Manage your saved personalities for the /chat command**
   - **create**: Create a personality (optional)
     - **name**: The name of the personality you are saving (required)
@@ -176,6 +194,7 @@
 
 ## Hangman
 
---------------
+---
+
 - **`/hangman`: Play a round of hangman!**
   - **word**: The word to guess. (optional)

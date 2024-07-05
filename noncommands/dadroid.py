@@ -20,19 +20,17 @@ async def dadroid_single(
     send_method: Optional[SendMethod] = None,
     response_starter: str = "",
     chats: List[dict] = [],
-    beef: bool = False,
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
         chats
         if chats
         else [
-            {"role": "system", "content": personality},
             {"role": "user", "content": prompt},
         ]
     )
 
-    chat_completion = create_chat_completion(messages, beef=beef)
+    chat_completion = create_chat_completion(messages, system=personality)
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )
@@ -42,21 +40,18 @@ async def dadroid_response(
     personality: str,
     response: str,
     chats: List[dict] = [],
-    beef: bool = False,
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
         chats
         if chats
         else [
-            {"role": "system", "content": personality},
             {"role": "user", "content": response},
         ]
     )
 
-    chat_completion = create_chat_completion(messages, beef=beef)
-
-    return chat_completion.choices[0].message.content
+    chat_completion = create_chat_completion(messages, system=personality)
+    return chat_completion.content[0].text
 
 
 async def dadroid_multiple(
@@ -76,7 +71,7 @@ async def dadroid_multiple(
 
 
 def create_chat_completion(
-    messages: List[dict], model: str = "claude-3-haiku-20240307", system: str = None
+    messages: List[dict], model: str = "claude-3-5-sonnet-20240620", system: str = None
 ) -> dict:
     """Creates a chat completion using Anthropic's API."""
 
@@ -107,11 +102,6 @@ async def respond_from_chat_completion(
 ) -> None:
     """Sends response from chat completion."""
     send_method = send_method or first_send_method
-    print(chat_completion)
-    print(chat_completion.content)
-    print(chat_completion.content[0])
-    print(chat_completion.content[0].text)
-    print(initial_response)
     messages = chat_split(initial_response + chat_completion.content[0].text)
 
     for index, message in enumerate(messages):

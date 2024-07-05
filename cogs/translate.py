@@ -32,8 +32,7 @@ class Translate(commands.Cog, name="translate"):
             chat.prepare_chat_messages([message])[0],
             first_send_method=interaction.followup.send,
             send_method=interaction.followup.send,
-            response_starter=f"Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+            response_starter=f"Translation of: {message.jump_url}\n >>> "
         )
 
     @nextcord.message_command(name="zoomer")
@@ -51,8 +50,7 @@ class Translate(commands.Cog, name="translate"):
             chat.prepare_chat_messages([message])[0],
             first_send_method=interaction.followup.send,
             send_method=interaction.followup.send,
-            response_starter=f"Zoomer Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+            response_starter=f"Zoomer Translation of: {message.jump_url}\n >>> "
         )
 
     @nextcord.message_command(name="boomer")
@@ -70,8 +68,7 @@ class Translate(commands.Cog, name="translate"):
             chat.prepare_chat_messages([message])[0],
             first_send_method=interaction.followup.send,
             send_method=interaction.followup.send,
-            response_starter=f"Boomer Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+            response_starter=f"Boomer Translation of: {message.jump_url}\n >>> "
         )
 
 

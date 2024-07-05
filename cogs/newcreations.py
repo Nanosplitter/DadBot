@@ -61,8 +61,7 @@ class NewCreations(commands.Cog, name="newcreations"):
             personality,
             definition,
             interaction.followup.send,
-            interaction.channel.send,
-            beef=True,
+            interaction.channel.send
         )
 
 

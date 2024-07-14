@@ -70,6 +70,7 @@ async def dadroid_multiple(
     messages_with_personality = [{"role": "system", "content": personality}] + messages
 
     chat_completion = create_chat_completion(messages_with_personality, model)
+    
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )

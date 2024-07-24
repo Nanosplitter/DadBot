@@ -216,9 +216,10 @@ scheduler = AsyncIOScheduler()
 scheduler.add_job(
     scooby.apod, CronTrigger(hour="8", minute="0", second="0", timezone="EST")
 )
-scheduler.add_job(
-    scooby.log_steps, CronTrigger(hour="7", minute="0", second="0", timezone="EST")
-)
+
+# scheduler.add_job(
+#     scooby.log_steps, CronTrigger(hour="7", minute="0", second="0", timezone="EST")
+# )
 scheduler.add_job(
     birthdayChecker.checkBirthdays,
     CronTrigger(hour="7", minute="0", second="0", timezone="EST"),

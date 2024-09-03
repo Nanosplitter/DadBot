@@ -18,7 +18,7 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
-class OpenAI(commands.Cog, name="openai"):
+class AiStuff(commands.Cog, name="aistuff"):
     def __init__(self, bot):
         self.bot = bot
         openai.api_key = config["openapi_token"]
@@ -704,4 +704,4 @@ class OpenAI(commands.Cog, name="openai"):
 
 
 def setup(bot):
-    bot.add_cog(OpenAI(bot))
+    bot.add_cog(AiStuff(bot))

@@ -8,6 +8,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from noncommands import haikudetector
+from noncommands import musicdetector
 from noncommands import imchecker
 from noncommands import reminderLoop
 from noncommands import birthdayLoop
@@ -91,6 +92,7 @@ imChecker = imchecker.ImChecker()
 reminderChecker = reminderLoop.ReminderLoop()
 birthdayChecker = birthdayLoop.BirthdayLoop(bot)
 haikuDetector = haikudetector.HaikuDetector()
+musicDetector = musicdetector.MusicDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
 
@@ -130,6 +132,7 @@ async def on_message(message: nextcord.Message) -> None:
         if not isinstance(message.channel, nextcord.Thread):
             await imChecker.checkIm(message)
             await haikuDetector.checkForHaiku(message)
+            await musicDetector.detectMusic(message)
 
         await chat.respond(message)
 

@@ -30,17 +30,16 @@ class MusicDetector:
         converter = song_converter.SongConverter()
 
         for url in urls:
-            if "spotify.com" in url or "music.apple.com" in url or "youtube.com" in url:
-                song = converter.convert(url)
-                if song is not None and song.isValid():
-                    try:
-                        await message.channel.send(
-                            f"Alternate links for {song.title}",
-                            view=LinkView(song),
-                            suppress_embeds=True,
-                        )
-                    except:
-                        pass
+            song = converter.convert(url)
+            if song is not None and song.isValid():
+                try:
+                    await message.channel.send(
+                        f"Alternate links for {song.title}",
+                        view=LinkView(song),
+                        suppress_embeds=True,
+                    )
+                except:
+                    pass
 
 
 class LinkView(nextcord.ui.View):

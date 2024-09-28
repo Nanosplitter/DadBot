@@ -111,9 +111,7 @@ class Chat:
     @staticmethod
     async def prepare_attachment_content(attachments):
         content = []
-        print(attachments)
         for attachment in attachments:
-            print(attachment.content_type)
             if "image" in attachment.content_type:
                 content.append(
                     {

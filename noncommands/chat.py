@@ -126,7 +126,6 @@ class Chat:
 
                 try:
                     text = extract_text("temp.pdf")
-                    print(text)
                     content.append(
                     {
                         "type": "text",

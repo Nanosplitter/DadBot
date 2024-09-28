@@ -11,6 +11,7 @@ from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
 from noncommands.dadroid import dadroid_response
+from pdfminer.high_level import extract_text
 
 from noncommands.chatsplit import chat_split
 
@@ -701,6 +702,34 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         os.remove(filename)
         os.remove(video_filename)
+    
+    @nextcord.slash_command(name="summarize_pdf", description="Summarize a PDF", guild_ids=[850473081063211048])
+    async def summarize_pdf(
+        self,
+        interaction: Interaction,
+        pdf: Optional[nextcord.Attachment] = SlashOption(
+            description="The PDF to read and summarize", required=True
+        ),
+    ):
+        await interaction.response.defer()
+        await pdf.save("temp.pdf")
+
+        try:
+            text = extract_text("temp.pdf")
+            print(text)
+        except Exception as e:
+            print(e)
+        
+        prompt = f"Summarize the extraction of a PDF that is coming after this. Try to keep the response relatively short, but make sure it's informative.\n\n{text}"
+
+
+        await dadroid_single(
+            "",
+            prompt,
+            interaction.followup.send,
+            interaction.channel.send,
+            response_starter="## Here is a summary of the PDF you provided:\n\n",
+        )
 
 
 def setup(bot):

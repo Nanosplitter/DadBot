@@ -66,7 +66,7 @@ async def dadroid_multiple(
     response_starter: str = "",
 ) -> None:
     """Handles multiple messages interaction with the chat model."""
-    model = "gpt-4o" if beef else "gpt-3.5-turbo"
+    model = "gpt-4o-mini" if beef else "gpt-3.5-turbo"
     messages_with_personality = [{"role": "system", "content": personality}] + messages
 
     chat_completion = create_chat_completion(messages_with_personality, model)
@@ -76,14 +76,14 @@ async def dadroid_multiple(
 
 
 def create_chat_completion(
-    messages: List[dict], model: str = "gpt-3.5-turbo", beef: bool = False
+    messages: List[dict], model: str = "gpt-4o-mini", beef: bool = False
 ) -> dict:
     """Creates a chat completion using OpenAI's API."""
 
     client = OpenAI(api_key=config["openapi_token"])
 
     if beef:
-        model = "gpt-4-1106-preview"
+        model = "gpt-4o-mini"
 
     return client.chat.completions.create(
         model=model,

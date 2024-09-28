@@ -186,7 +186,7 @@ class Chat(commands.Cog, name="chat"):
         view.add_item(DeleteButton(personality_object.id, interaction.user.id))
 
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-
+        
 
 def setup(bot):
     bot.add_cog(Chat(bot))

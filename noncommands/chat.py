@@ -2,6 +2,7 @@ import re
 import yaml
 from nextcord import Thread, MessageType
 from noncommands.dadroid import dadroid_multiple
+from pdfminer.high_level import extract_text
 
 
 class Chat:
@@ -31,7 +32,7 @@ class Chat:
             thread, first_message.system_content
         )
 
-        chat_messages, hasImages = self.prepare_chat_messages(messages)
+        chat_messages, hasImages = await self.prepare_chat_messages(messages)
 
         if hasImages:
             beef = True
@@ -85,7 +86,7 @@ class Chat:
         match = re.search(r"\[(.*?)\]", input_string, re.DOTALL)
         return match.group(1) if match else None
 
-    def prepare_chat_messages(self, messages):
+    async def prepare_chat_messages(self, messages):
         chat_messages = []
         hasImages = False
         for message in messages:
@@ -100,7 +101,7 @@ class Chat:
                 role = "assistant"
             else:
                 role = "user"
-                content.extend(self.prepare_attachment_content(message.attachments))
+                content.extend(await self.prepare_attachment_content(message.attachments))
 
             content.append({"type": "text", "text": message.clean_content})
             chat_messages.append({"role": role, "content": content})
@@ -108,11 +109,44 @@ class Chat:
         return chat_messages, hasImages
 
     @staticmethod
-    def prepare_attachment_content(attachments):
-        return [
-            {
-                "type": "image_url",
-                "image_url": {"url": attachment.url, "detail": "high"},
-            }
-            for attachment in attachments
-        ]
+    async def prepare_attachment_content(attachments):
+        content = []
+        print(attachments)
+        for attachment in attachments:
+            print(attachment.content_type)
+            if "image" in attachment.content_type:
+                content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": attachment.url, "detail": "high"},
+                    }
+                )
+            elif "pdf" in attachment.content_type: 
+                await attachment.save("temp.pdf")
+
+                try:
+                    text = extract_text("temp.pdf")
+                    print(text)
+                    content.append(
+                    {
+                        "type": "text",
+                        "text": f"Text of PDF the user uploaded:\n\n {text}",
+                    }
+                )
+                except Exception as e:
+                    print(e)
+                    content.append(
+                        {
+                            "type": "text",
+                            "text": f"There was an error parsing the user's PDF: {attachment.url}",
+                        }
+                    )
+            else:
+                content.append(
+                    {
+                        "type": "text",
+                        "text": f"Attachment: {attachment.url}",
+                    }
+                )
+                
+        return content

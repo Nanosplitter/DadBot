@@ -14,7 +14,7 @@ class MusicDetector:
         pass
 
     async def detectMusic(self, message):
-        if message.guild.id not in [
+        if message.guild and message.guild.id not in [
             856919397754470420,
             850473081063211048,
             408321710568505344,

@@ -24,9 +24,10 @@ class Scooby:
         )
 
         if response.status_code != 200 or len(response.json()) == 0:
-            await channel.send("NASA APOD is currently down :(")
-            self.bot.logger.error("NASA APOD is down")
-            return
+            for channel in channels:
+                await channel.send("NASA APOD is currently down :(")
+                self.bot.logger.error("NASA APOD is down")
+                return
 
         title = "# APOD - " + response.json()["title"] + "\n"
         explanation = ">>> " + response.json()["explanation"] + "\n"

@@ -22,8 +22,8 @@ with open("config.yaml") as file:
 class AiStuff(commands.Cog, name="aistuff"):
     def __init__(self, bot):
         self.bot = bot
-        openai.api_key = config["openapi_token"]
-        self.client = openai.OpenAI(api_key=config["openapi_token"])
+        openai.api_key = config["openai_token"]
+        self.client = openai.OpenAI(api_key=config["openai_token"])
 
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
     async def dalle(
@@ -384,7 +384,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             messages=[
                 {
                     "role": "system",
-                    "content": "Your goal is to take this NASA APOD description and create a title. You should only respond with 1-5 words as a title to this. Do not respond with anything else. Just the title based on the content. Please also do not include quotes around the whole title.",
+                    "content": "Your goal is to take this NASA APOD description and create a title. You should only respond with 1-5 words as a title to this. Do not respond with anything more than the title.",
                 },
                 {
                     "role": "user",

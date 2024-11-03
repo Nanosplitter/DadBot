@@ -217,7 +217,7 @@ if __name__ == "__main__":
 checkTimes.start()
 scheduler = AsyncIOScheduler()
 scheduler.add_job(
-    scooby.apod, CronTrigger(hour="8", minute="0", second="0", timezone="EST")
+    scooby.apod, CronTrigger(hour="9", minute="0", second="0", timezone="EST")
 )
 
 # scheduler.add_job(
@@ -225,11 +225,11 @@ scheduler.add_job(
 # )
 scheduler.add_job(
     birthdayChecker.checkBirthdays,
-    CronTrigger(hour="7", minute="0", second="0", timezone="EST"),
+    CronTrigger(hour="8", minute="0", second="0", timezone="EST"),
 )
 scheduler.add_job(
     scooby.praiseFireGator,
-    CronTrigger(day_of_week="WED", hour="23", minute="0", second="0", timezone="EST"),
+    CronTrigger(day_of_week="THU", hour="0", minute="0", second="0", timezone="EST"),
 )
 scheduler.start()
 bot.run(config["token"])

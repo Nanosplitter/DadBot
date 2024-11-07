@@ -32,3 +32,5 @@ aiomysql
 peewee
 matplotlib
 pdfminer.six
+beautifulsoup4
+feedparser

@@ -1,3 +1,16 @@
 {
-    "cSpell.words": ["booktrack", "Confusables", "dateparser", "hdurl", "pytz", "startbook", "todaysbirthdays"]
+  "cSpell.words": [
+    "booktrack",
+    "Confusables",
+    "dadroid",
+    "dateparser",
+    "hdurl",
+    "imchecker",
+    "moviepy",
+    "musicdetector",
+    "pdfminer",
+    "pytz",
+    "startbook",
+    "todaysbirthdays"
+  ]
 }

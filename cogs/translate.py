@@ -17,23 +17,29 @@ class Translate(commands.Cog, name="translate"):
     def __init__(self, bot):
         self.bot = bot
 
+    async def handle_translation(self, interaction: Interaction, message: nextcord.Message, translation_type: str, response_starter: str):
+        await interaction.response.defer()
+        chat = Chat(self.bot)
+        prepared_messages = await chat.prepare_chat_messages([message])
+        await dadroid_multiple(
+            f"You are a translator. Your goal is to translate the following message to {translation_type}. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to {translation_type}.",
+            prepared_messages[0],
+            first_send_method=interaction.followup.send,
+            send_method=interaction.followup.send,
+            response_starter=response_starter,
+            beef=True,
+        )
+
     @nextcord.message_command(name="translate")
     async def translate(self, interaction: Interaction, message: nextcord.Message):
         """
         Translate a message to English.
         """
-
-        await interaction.response.defer()
-
-        chat = Chat(self.bot)
-
-        await dadroid_multiple(
-            "You are a translator. Your goal is to translate the following message to English. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to English.",
-            await chat.prepare_chat_messages([message])[0],
-            first_send_method=interaction.followup.send,
-            send_method=interaction.followup.send,
-            response_starter=f"Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+        await self.handle_translation(
+            interaction,
+            message,
+            "English",
+            f"Translation of: {message.jump_url}\n >>> "
         )
 
     @nextcord.message_command(name="zoomer")
@@ -41,18 +47,11 @@ class Translate(commands.Cog, name="translate"):
         """
         Translate a message to Zoomer.
         """
-
-        await interaction.response.defer()
-
-        chat = Chat(self.bot)
-
-        await dadroid_multiple(
-            "You are a translator. Your goal is to translate the following message to Gen-Z-speak. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to Gen-Z-speak.",
-            await chat.prepare_chat_messages([message])[0],
-            first_send_method=interaction.followup.send,
-            send_method=interaction.followup.send,
-            response_starter=f"Zoomer Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+        await self.handle_translation(
+            interaction,
+            message,
+            "Gen-Z-speak",
+            f"Zoomer Translation of: {message.jump_url}\n >>> "
         )
 
     @nextcord.message_command(name="boomer")
@@ -60,18 +59,11 @@ class Translate(commands.Cog, name="translate"):
         """
         Translate a message to Boomer.
         """
-
-        await interaction.response.defer()
-
-        chat = Chat(self.bot)
-
-        await dadroid_multiple(
-            "You are a translator. Your goal is to translate the following message to Boomer-speak. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to Boomer-speak.",
-            await chat.prepare_chat_messages([message])[0],
-            first_send_method=interaction.followup.send,
-            send_method=interaction.followup.send,
-            response_starter=f"Boomer Translation of: {message.jump_url}\n >>> ",
-            beef=True,
+        await self.handle_translation(
+            interaction,
+            message,
+            "Boomer-speak",
+            f"Boomer Translation of: {message.jump_url}\n >>> "
         )
 
 

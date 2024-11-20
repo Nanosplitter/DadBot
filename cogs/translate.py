@@ -42,30 +42,6 @@ class Translate(commands.Cog, name="translate"):
             f"Translation of: {message.jump_url}\n >>> "
         )
 
-    @nextcord.message_command(name="zoomer")
-    async def zoomer(self, interaction: Interaction, message: nextcord.Message):
-        """
-        Translate a message to Zoomer.
-        """
-        await self.handle_translation(
-            interaction,
-            message,
-            "Gen-Z-speak",
-            f"Zoomer Translation of: {message.jump_url}\n >>> "
-        )
-
-    @nextcord.message_command(name="boomer")
-    async def boomer(self, interaction: Interaction, message: nextcord.Message):
-        """
-        Translate a message to Boomer.
-        """
-        await self.handle_translation(
-            interaction,
-            message,
-            "Boomer-speak",
-            f"Boomer Translation of: {message.jump_url}\n >>> "
-        )
-
 
 def setup(bot):
     bot.add_cog(Translate(bot))

@@ -1,4 +1,5 @@
 import asyncio
+from datetime import date
 import os
 import io
 import random
@@ -19,6 +20,7 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption, Embed
 
 from noncommands.dadroid import dadroid_single
+from noncommands.adventofcode_service import create_advent_of_code_messages
 
 
 with open("config.yaml") as file:
@@ -206,7 +208,7 @@ class Fun(commands.Cog, name="fun"):
         [No Arguments] Get the current price of bitcoin.
         """
         url = "https://api.coindesk.com/v1/bpi/currentprice/BTC.json"
-        # Async HTTP request
+
         async with aiohttp.ClientSession() as session:
             raw_response = await session.get(url)
             response = await raw_response.text()
@@ -217,6 +219,24 @@ class Fun(commands.Cog, name="fun"):
                 color=config["success"],
             )
             await interaction.response.send_message(embed=embed)
+    
+    @nextcord.slash_command(
+        name="advent_of_code", description="Get the link to today's Advent of Code problem."
+    )
+    async def advent_of_code(
+        self,
+        interaction: Interaction,
+        day: Optional[int] = SlashOption(
+            description="The day of december you want advent of code for", required=False,
+            default=date.today().day
+        ),
+    ):
+        """
+        [No Arguments] Get the link to today's Advent of Code problem.
+        """
+        await create_advent_of_code_messages(interaction.channel, day)
+        await interaction.response.send_message("Advent of Code messages created!")
+        
 
 
 def setup(bot):

@@ -234,5 +234,9 @@ scheduler.add_job(
     scooby.praiseFireGator,
     CronTrigger(day_of_week="THU", hour="0", minute="0", second="0", timezone="EST"),
 )
+scheduler.add_job(
+    scooby.advent_of_code,
+    CronTrigger(hour="9", minute="0", second="0", timezone="EST"),
+)
 scheduler.start()
 bot.run(config["token"])

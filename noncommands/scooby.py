@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 from nextcord import Embed
 import aiohttp
@@ -7,6 +8,7 @@ from services.step_log_service import (
     build_embed_for_server,
     build_step_logger_view,
 )
+from noncommands.adventofcode_service import create_advent_of_code_messages
 
 
 class Scooby:
@@ -64,3 +66,8 @@ class Scooby:
             embed=build_embed_for_server(c.guild),
             view=build_step_logger_view(),
         )
+    
+    async def advent_of_code(self):
+        c = self.bot.get_channel(857453949392388107)
+        
+        create_advent_of_code_messages(c, day=datetime.today().day)

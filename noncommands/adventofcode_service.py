@@ -1,9 +1,10 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 def get_advent_of_code_link(day):
     return f"https://adventofcode.com/2024/day/{day}"
 
-async def create_advent_of_code_messages(channel, day=datetime.today().day):
+async def create_advent_of_code_messages(channel, day=datetime.now(ZoneInfo('America/New_York')).day):
     link = get_advent_of_code_link(day)
     discussion_message_text = f"# :christmas_tree: Advent of Code 2024 Day {day} :snowflake:\n{link}"
     solution_message_text = f"Solution thread for day {day}"

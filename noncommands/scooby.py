@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import requests
 from nextcord import Embed
 import aiohttp
@@ -70,4 +71,4 @@ class Scooby:
     async def advent_of_code(self):
         c = self.bot.get_channel(857453949392388107)
         
-        await create_advent_of_code_messages(c, day=datetime.today().day)
+        await create_advent_of_code_messages(c, day=datetime.now(ZoneInfo('America/New_York')).day)

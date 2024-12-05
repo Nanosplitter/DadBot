@@ -70,4 +70,4 @@ class Scooby:
     async def advent_of_code(self):
         c = self.bot.get_channel(857453949392388107)
         
-        create_advent_of_code_messages(c, day=datetime.today().day)
+        await create_advent_of_code_messages(c, day=datetime.today().day)

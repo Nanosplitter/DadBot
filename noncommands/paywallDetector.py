@@ -27,6 +27,7 @@ class PaywallDetector:
         850473081063211048,
         408321710568505344,
         940645588205187133,
+        693254450055348294
     ]
 
     async def detectPaywall(self, message):

@@ -13,6 +13,10 @@ class HaikuDetector:
 
     # Detect a haiku in the message
     async def checkForHaiku(self, message):
+        if message.guild and message.guild.id in [
+            693254450055348294
+        ]:
+            return
         text = message.content
         words = text.split()[::-1]
         if len(words) < 3:

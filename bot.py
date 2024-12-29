@@ -37,6 +37,7 @@ class DadBot(commands.Bot):
         self.logger: logging.Logger = loggingFormatter
         self.config: dict = botConfig
         self.super = super()
+        self.settings = {}
 
 
 intents = nextcord.Intents.default().all()
@@ -97,6 +98,8 @@ musicDetector = musicdetector.MusicDetector()
 paywallDetector = paywallDetector.PaywallDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
+
+
 
 
 @bot.event

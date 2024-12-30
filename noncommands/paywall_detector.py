@@ -3,6 +3,7 @@ import yaml
 import nextcord
 
 from cogs.remove_paywall import RemovePaywall
+from services.settings_service import get_setting
 
 URL_PATTERN = re.compile(r'https?://\S+')
 
@@ -10,6 +11,8 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 class PaywallDetector:
+    def __init__(self, settings):
+        self.settings = settings
     paywalled_sites = [
         "nytimes.com",
         "washingtonpost.com",
@@ -37,6 +40,11 @@ class PaywallDetector:
         urls = URL_PATTERN.findall(message.content)
         if not urls:
             return
+        
+        paywall_setting = self.settings.get(message.guild.id, {}).get("paywall_detector")
+
+        if not paywall_setting:
+            return
 
         paywall_urls = [url for url in urls if any(site in url for site in self.paywalled_sites)]
         if paywall_urls:
@@ -52,3 +60,4 @@ class PaywallDetector:
                 "It looks like a link in that message may contain a paywall - here's my attempt to remove it:",
                 view=view
             )
+            

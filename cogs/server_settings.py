@@ -22,8 +22,9 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
         settings = ServerSettings.select().where(ServerSettings.server_id == server_id)
         if settings.exists():
             settings_dict = {s.setting_name: s.setting_value for s in settings}
-            view = SettingsView(settings_dict, server_id)
+            view = SettingsView(settings_dict, server_id, self.bot)
             await interaction.response.send_message("Current settings:", view=view)
+            print("hi")
         else:
             await interaction.response.send_message("No settings found for this server.")
 
@@ -39,8 +40,12 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
                 setting_name=setting,
                 defaults={'setting_value': value}
             )
+            if not created:
+                setting_obj.setting_value = value
+                setting_obj.save()
+            # Ensure the bot's settings dictionary is updated
+            self.bot.update_setting(server_id, setting, value)
             print(setting_obj)
-            setting_obj.save()
         await interaction.response.send_message("Server settings have been reset to default values.")
 
 def setup(bot):

@@ -1,8 +1,9 @@
-from peewee import Model, CharField, BooleanField, CompositeKey, SqliteDatabase
+from peewee import Model, CharField, BooleanField, CompositeKey
 from services.db_service import get_db
 
 class ServerSettings(Model):
     server_id = CharField()
+    server_name = CharField()
     setting_name = CharField()
     setting_value = BooleanField()
 

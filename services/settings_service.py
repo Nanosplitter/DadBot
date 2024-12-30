@@ -3,9 +3,10 @@ from models.server_settings import ServerSettings
 
 
 class SettingsView(nextcord.ui.View):
-    def __init__(self, settings_dict, server_id, timeout=None):
+    def __init__(self, settings_dict, server_id, bot, timeout=None):
         super().__init__(timeout=timeout)
         self.server_id = server_id
+        self.bot = bot
         for setting, value in settings_dict.items():
             button_color = nextcord.ButtonStyle.success if value else nextcord.ButtonStyle.danger
             setting_label = setting.replace("_", " ").title()
@@ -21,7 +22,11 @@ class SettingsView(nextcord.ui.View):
                         setting_obj.setting_value = not setting_obj.setting_value
                         setting_obj.save()
 
+                        # Update the bot's settings dictionary
+                        self.bot.update_setting(self.server_id, setting, setting_obj.setting_value)
+
                         button.style = nextcord.ButtonStyle.success if setting_obj.setting_value else nextcord.ButtonStyle.danger
+                        print(self.bot.settings)
                         await interaction.response.edit_message(view=self)
                 return button_callback
 

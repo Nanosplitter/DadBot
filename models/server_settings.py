@@ -1,14 +1,13 @@
-from peewee import Model, CharField, SqliteDatabase
-
-db = SqliteDatabase('my_database.db')
+from peewee import Model, CharField, BooleanField, CompositeKey, SqliteDatabase
+from services.db_service import get_db
 
 class ServerSettings(Model):
     server_id = CharField()
     setting_name = CharField()
-    setting_value = CharField()
+    setting_value = BooleanField()
 
     class Meta:
-        database = db
+        primary_key = CompositeKey('server_id', 'setting_name')
+        database = get_db()
 
-db.connect()
-db.create_tables([ServerSettings], safe=True)
+ServerSettings.create_table(safe=True)

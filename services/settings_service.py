@@ -22,7 +22,6 @@ class SettingsView(nextcord.ui.View):
                         setting_obj.setting_value = not setting_obj.setting_value
                         setting_obj.save()
 
-                        # Update the bot's settings dictionary
                         self.bot.update_setting(self.server_id, setting, setting_obj.setting_value)
 
                         button.style = nextcord.ButtonStyle.success if setting_obj.setting_value else nextcord.ButtonStyle.danger

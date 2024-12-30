@@ -27,6 +27,16 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
             print("hi")
         else:
             await interaction.response.send_message("No settings found for this server.")
+    
+    @settings.subcommand(name="help", description="Get information about server settings.")
+    async def settings_help(self, interaction: nextcord.Interaction):
+        setting_descriptions = config["server_settings_descriptions"]
+        
+        help_message = "Here are the available server settings:\n"
+        for setting, description in setting_descriptions.items():
+            help_message += f"**{setting.replace('_', ' ').title()}** \n> {description}\n\n"
+        
+        await interaction.response.send_message(help_message)
 
     @settings.subcommand(name="reset", description="Reset server settings to default values.")
     @commands.has_permissions(administrator=True)

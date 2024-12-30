@@ -1,5 +1,5 @@
 import nextcord
-from models.server_settings import ServerSettings  # Added import
+from models.server_settings import ServerSettings
 
 
 class SettingsView(nextcord.ui.View):
@@ -11,10 +11,8 @@ class SettingsView(nextcord.ui.View):
             setting_label = setting.replace("_", " ").title()
             button = nextcord.ui.Button(label=setting_label, style=button_color, custom_id=setting)
 
-            # Define the callback inside a factory to capture setting and button
             def create_callback(setting, button):
                 async def button_callback(interaction: nextcord.Interaction):
-                    # Toggle the setting value
                     setting_obj = ServerSettings.get_or_none(
                         ServerSettings.server_id == self.server_id,
                         ServerSettings.setting_name == setting
@@ -22,10 +20,18 @@ class SettingsView(nextcord.ui.View):
                     if setting_obj:
                         setting_obj.setting_value = not setting_obj.setting_value
                         setting_obj.save()
-                        # Update the button color
+
                         button.style = nextcord.ButtonStyle.success if setting_obj.setting_value else nextcord.ButtonStyle.danger
                         await interaction.response.edit_message(view=self)
                 return button_callback
 
-            button.callback = create_callback(setting, button)  # Assign the correct callback
+            button.callback = create_callback(setting, button)
             self.add_item(button)
+
+def get_setting(server_id, setting_name):
+    setting = ServerSettings.get_or_none(
+        ServerSettings.server_id == server_id,
+        ServerSettings.setting_name == setting_name
+    )
+    
+    return setting.setting_value if setting else None

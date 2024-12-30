@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands
 from models.server_settings import ServerSettings
 import yaml
-from noncommands.settingsutils import SettingsView
+from services.settings_service import SettingsView
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -22,7 +22,7 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
         settings = ServerSettings.select().where(ServerSettings.server_id == server_id)
         if settings.exists():
             settings_dict = {s.setting_name: s.setting_value for s in settings}
-            view = SettingsView(settings_dict, server_id)  # Pass server_id
+            view = SettingsView(settings_dict, server_id)
             await interaction.response.send_message("Current settings:", view=view)
         else:
             await interaction.response.send_message("No settings found for this server.")

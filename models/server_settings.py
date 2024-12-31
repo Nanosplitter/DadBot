@@ -5,7 +5,7 @@ class ServerSettings(Model):
     server_id = CharField()
     server_name = CharField()
     setting_name = CharField()
-    setting_value = BooleanField()
+    setting_value = CharField()
 
     class Meta:
         primary_key = CompositeKey('server_id', 'setting_name')

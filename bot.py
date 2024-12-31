@@ -52,20 +52,22 @@ class DadBot(commands.Bot):
         self.settings[server_id][setting_name] = setting_value
 
     def ensure_all_settings(self):
-        default_settings = self.config.get("default_server_settings", {})
-        print(f"Default settings: {default_settings}")
-        print(f"Current guilds: {self.guilds}")
+        default_settings = self.config.get("server_settings", {})
         for guild in self.guilds:
-            for setting, default_value in default_settings.items():
+            for setting_category, values in default_settings.items():
                 server_id = guild.id
-                if setting not in self.settings[server_id]:
-                    ServerSettings.create(
-                        server_id=server_id,
-                        server_name=guild.name,
-                        setting_name=setting,
-                        setting_value=default_value
-                    )
-                    self.update_setting(server_id, setting, default_value)
+                for setting, default_value in values.items():
+                    setting_name = f"{setting_category}_{setting}"
+                    setting_value = default_value
+                    print(setting_name, setting_value)
+                    if setting_name not in self.settings[server_id]:
+                        ServerSettings.create(
+                            server_id=server_id,
+                            server_name=guild.name,
+                            setting_name=setting_name,
+                            setting_value=default_value
+                        )
+                        self.update_setting(server_id, setting_name, default_value)
 
 
 intents = nextcord.Intents.default().all()

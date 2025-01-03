@@ -1,4 +1,5 @@
 import nextcord
+from numpy import place
 from models.server_settings import ServerSettings
 import yaml
 from nextcord.ui import ChannelSelect
@@ -76,7 +77,7 @@ class CategoryView(nextcord.ui.View):
                         category = s.rsplit('_enabled', 1)[0]
                         channel_setting = f"{category}_channel"
                         channel_id = self.bot.settings[self.server_id].get(channel_setting, "None")
-                        if channel_id == "None" or not channel_id:
+                        if channel_setting in self.bot.settings[self.server_id] and (channel_id == "None" or not channel_id):
                             await interaction.response.send_message(
                                 f"**Error:** Please select a channel for `{format_setting(category)}` before enabling this setting.",
                                 ephemeral=True
@@ -135,11 +136,23 @@ class ChanceModal(nextcord.ui.Modal):
 
 class BotChannelSelect(ChannelSelect):
     def __init__(self, bot, server_id, setting_name):
+        self.setting = ServerSettings.get_or_none(
+            server_id=server_id, setting_name=setting_name
+        )
+        
+        selected_channel = None
+        
+        if self.setting and self.setting.setting_value != "None":
+            channel_id = self.setting.setting_value
+            selected_channel = bot.get_channel(int(channel_id))
+        
+        placeholder = f"# {selected_channel.name}" if selected_channel else "Select a channel..."
+            
         super().__init__(
-            placeholder="Select a channel...",
+            placeholder=placeholder,
             min_values=1,
             max_values=1,
-            channel_types=[nextcord.ChannelType.text]  # Restrict to text channels
+            channel_types=[nextcord.ChannelType.text],  # Restrict to text channels
         )
         self.bot = bot
         self.server_id = server_id
@@ -150,12 +163,10 @@ class BotChannelSelect(ChannelSelect):
         new_val = selected_channel.id  # Get the channel ID
         print(f"Selected Channel ID: {new_val}")
         self.bot.update_setting(self.server_id, self.setting_name, str(new_val))
-        ss = ServerSettings.get_or_none(
-            server_id=self.server_id, setting_name=self.setting_name
-        )
-        if ss:
-            ss.setting_value = str(new_val)
-            ss.save()
+
+        if self.setting:
+            self.setting.setting_value = str(new_val)
+            self.setting.save()
 
 def get_setting(server_id, setting_name):
     setting = ServerSettings.get_or_none(

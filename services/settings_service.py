@@ -1,8 +1,4 @@
-from cProfile import label
-from faulthandler import is_enabled
-from gc import enable
 import nextcord
-from numpy import place
 from models.server_settings import ServerSettings
 import yaml
 from nextcord.ui import ChannelSelect
@@ -20,7 +16,7 @@ class SettingsView(nextcord.ui.View):
             button_style = nextcord.ButtonStyle.success if is_active else nextcord.ButtonStyle.danger
             button_label = to_title_case(option_name)
             button = nextcord.ui.Button(label=button_label, style=button_style, custom_id=option_name)
-            button.callback = lambda i, n=option_name, b=button: self.toggle_button_callback(i, n, b)
+            button.callback = lambda interaction, option_name=option_name, button=button: self.toggle_button_callback(interaction, option_name, button)
             self.add_item(button)
 
     async def toggle_button_callback(self, interaction: nextcord.Interaction, name: str, btn: nextcord.ui.Button):
@@ -28,12 +24,13 @@ class SettingsView(nextcord.ui.View):
             ServerSettings.server_id == self.server_id,
             ServerSettings.setting_name == name
         )
+        
         if found_setting:
             found_setting.setting_value = not found_setting.setting_value
             found_setting.save()
             self.bot.update_setting(self.server_id, name, found_setting.setting_value)
             btn.style = (
-                nextcord.ButtonStyle.success if found_setting.setting_value 
+                nextcord.ButtonStyle.success if found_setting.setting_value
                 else nextcord.ButtonStyle.danger
             )
             await interaction.response.edit_message(view=self)
@@ -51,7 +48,7 @@ class CategoriesView(nextcord.ui.View):
 
     async def select_category_callback(self, interaction: nextcord.Interaction, cat: str):
         await interaction.response.send_message(
-            f"Settings for **{cat}**:",
+            f"Settings for **{to_title_case(cat)}**:",
             view=CategoryView(self.bot, self.server_id, cat),
             ephemeral=True
         )
@@ -74,7 +71,7 @@ class CategoryView(nextcord.ui.View):
                 label = "Enabled" if enabled else "Disabled"
                 
                 enable_button = nextcord.ui.Button(label=label, style=style, custom_id=option_name)
-                enable_button.callback = lambda i, o=option_name, b=enable_button: self.toggle_enabled_setting_callback(i, o, b)
+                enable_button.callback = lambda interaction, option_name=option_name, button=enable_button: self.toggle_enabled_setting_callback(interaction, option_name, button)
                 self.add_item(enable_button)
             elif "_chance" in option:
                 chance_button = nextcord.ui.Button(
@@ -82,7 +79,7 @@ class CategoryView(nextcord.ui.View):
                     style=nextcord.ButtonStyle.secondary,
                     custom_id=option_name
                 )
-                chance_button.callback = lambda i, o=option_name, l=option: self.change_chance_callback(i, o, l)
+                chance_button.callback = lambda interaction, option_name=option_name, label=option: self.change_chance_callback(interaction, option_name, label)
                 self.add_item(chance_button)
             elif "channel" in option:
                 self.add_item(ChannelSelector(bot, server_id, option_name))
@@ -126,6 +123,7 @@ class ChanceEditModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         new_value = self.chance_input.value
+        
         try:
             parsed_value = int(new_value)
             if parsed_value < 0 or parsed_value > 100:
@@ -138,16 +136,21 @@ class ChanceEditModal(nextcord.ui.Modal):
                 "Please enter a whole number for chance.", ephemeral=True
             )
             return
+        
         self.bot.update_setting(self.server_id, self.setting_name, str(parsed_value))
+        
         found_setting = ServerSettings.get_or_none(
             server_id=self.server_id, setting_name=self.setting_name
         )
+        
         if found_setting:
             found_setting.setting_value = str(parsed_value)
             found_setting.save()
+
         for item in self.parent_view.children:
             if isinstance(item, nextcord.ui.Button) and item.custom_id == self.setting_name:
                 item.label = f"{to_title_case(self.button_label)} ({parsed_value}%)"
+                
         await interaction.response.edit_message(view=self.parent_view)
 
 class ChannelSelector(ChannelSelect):

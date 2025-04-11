@@ -58,8 +58,6 @@ class DadBot(commands.Bot):
                 server_id = guild.id
                 for setting, default_value in values.items():
                     setting_name = f"{setting_category}_{setting}"
-                    setting_value = default_value
-                    print(setting_name, setting_value)
                     if setting_name not in self.settings[server_id]:
                         ServerSettings.create(
                             server_id=server_id,
@@ -167,7 +165,7 @@ async def on_message(message: nextcord.Message) -> None:
 
     if not re.search("(\|\|[\S\s]*\|\|)", message.content):
         if not isinstance(message.channel, nextcord.Thread):
-            await imChecker.checkIm(message)
+            await imChecker.checkIm(message, bot.settings[message.guild.id])
             await haikuDetector.checkForHaiku(message)
             await musicDetector.detectMusic(message)
             await paywall_detector.detectPaywall(message)

@@ -17,10 +17,15 @@ class Scooby:
         self.bot = bot
 
     async def apod(self):
-        c1 = self.bot.get_channel(856919399789625376)
-        c2 = self.bot.get_channel(1105336042296463432)
-
-        channels = [c1, c2]
+        channels = []
+        
+        for server_id in self.bot.settings:
+            server_settings = self.bot.settings[server_id]
+            if server_settings.get("apod_enabled") == "True":
+                channel = self.bot.get_channel(int(server_settings["apod_channel"]))
+                if channel:
+                    channels.append(channel)
+            
 
         response = requests.get(
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"

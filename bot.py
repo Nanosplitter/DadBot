@@ -166,7 +166,7 @@ async def on_message(message: nextcord.Message) -> None:
     if not re.search("(\|\|[\S\s]*\|\|)", message.content):
         if not isinstance(message.channel, nextcord.Thread):
             await imChecker.checkIm(message, bot.settings[message.guild.id])
-            await haikuDetector.checkForHaiku(message)
+            await haikuDetector.checkForHaiku(message, bot.settings[message.guild.id])
             await musicDetector.detectMusic(message)
             await paywall_detector.detectPaywall(message)
 

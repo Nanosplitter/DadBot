@@ -42,13 +42,15 @@ class CategoriesView(nextcord.ui.View):
         self.server_id = server_id
         self.default_settings = config.get("server_settings", {})
         for category_name in self.default_settings.keys():
-            category_button = nextcord.ui.Button(label=to_title_case(category_name), custom_id=category_name)
+            is_enabled = str(self.bot.settings[self.server_id].get(f"{category_name}_enabled", self.default_settings[category_name]["enabled"])) == "True"
+            style = nextcord.ButtonStyle.success if is_enabled else nextcord.ButtonStyle.danger
+            category_button = nextcord.ui.Button(label=to_title_case(category_name), custom_id=category_name, style=style)
             category_button.callback = lambda i, c=category_name: self.select_category_callback(i, c)
             self.add_item(category_button)
 
     async def select_category_callback(self, interaction: nextcord.Interaction, cat: str):
         await interaction.response.send_message(
-            f"Settings for **{to_title_case(cat)}**:",
+            f"Settings for **{to_title_case(cat)}**:\n> {config['server_settings_descriptions'][cat]}",
             view=CategoryView(self.bot, self.server_id, cat),
             ephemeral=True
         )

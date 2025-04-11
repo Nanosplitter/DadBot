@@ -167,7 +167,7 @@ async def on_message(message: nextcord.Message) -> None:
         if not isinstance(message.channel, nextcord.Thread):
             await imChecker.checkIm(message, bot.settings[message.guild.id])
             await haikuDetector.checkForHaiku(message, bot.settings[message.guild.id])
-            await musicDetector.detectMusic(message)
+            await musicDetector.detectMusic(message, bot.settings[message.guild.id])
             await paywall_detector.detectPaywall(message)
 
         await chat.respond(message)

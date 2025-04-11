@@ -39,9 +39,8 @@ class ImChecker:
             r = re.compile(confusables_pattern)
             fake_string = " " + message.content
             res = r.match(fake_string)
-            rand = random.randint(0, 99)
 
-            if res and rand <= int(settings.get("im_checker_catch_chance")) - 1:
+            if res and random.randint(1, 100) <= int(settings.get("im_checker_catch_chance")):
                 typeIm = res.group().strip() + " "
                 await message.reply(
                     f"Hi {message.content.split(typeIm, 1)[1]}, I'm Dad"

@@ -11,8 +11,6 @@ with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 class PaywallDetector:
-    def __init__(self, settings):
-        self.settings = settings
     paywalled_sites = [
         "nytimes.com",
         "washingtonpost.com",
@@ -32,18 +30,18 @@ class PaywallDetector:
         940645588205187133,
         693254450055348294
     ]
+    
+    
 
-    async def detectPaywall(self, message):
+    async def detectPaywall(self, message, settings):
+        if not settings.get("paywall_detector_enabled") == "True":
+            return
+        
         if message.guild and message.guild.id not in self.enabled_guild_ids:
             return
 
         urls = URL_PATTERN.findall(message.content)
         if not urls:
-            return
-        
-        paywall_setting = self.settings.get(message.guild.id, {}).get("paywall_detector")
-
-        if not paywall_setting:
             return
 
         paywall_urls = [url for url in urls if any(site in url for site in self.paywalled_sites)]

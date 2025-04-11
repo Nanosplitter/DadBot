@@ -123,7 +123,7 @@ reminderChecker = reminderLoop.ReminderLoop()
 birthdayChecker = birthdayLoop.BirthdayLoop(bot)
 haikuDetector = haikudetector.HaikuDetector()
 musicDetector = musicdetector.MusicDetector()
-paywall_detector = paywall_detector.PaywallDetector(bot.settings)
+paywall_detector = paywall_detector.PaywallDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
 
@@ -168,7 +168,7 @@ async def on_message(message: nextcord.Message) -> None:
             await imChecker.checkIm(message, bot.settings[message.guild.id])
             await haikuDetector.checkForHaiku(message, bot.settings[message.guild.id])
             await musicDetector.detectMusic(message, bot.settings[message.guild.id])
-            await paywall_detector.detectPaywall(message)
+            await paywall_detector.detectPaywall(message, bot.settings[message.guild.id])
 
         await chat.respond(message)
 

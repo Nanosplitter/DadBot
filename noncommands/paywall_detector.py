@@ -24,21 +24,9 @@ class PaywallDetector:
         "wired.com"
     ]
     
-    enabled_guild_ids = [
-        856919397754470420,
-        850473081063211048,
-        408321710568505344,
-        940645588205187133,
-        693254450055348294
-    ]
-    
-    
 
     async def detectPaywall(self, message, settings):
         if not settings.get("paywall_detector_enabled") == "True":
-            return
-        
-        if message.guild and message.guild.id not in self.enabled_guild_ids:
             return
 
         urls = URL_PATTERN.findall(message.content)

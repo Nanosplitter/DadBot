@@ -12,11 +12,6 @@ with open("config.yaml") as file:
 
 class HaikuDetector:
     async def checkForHaiku(self, message, settings):
-        if message.guild and message.guild.id in [
-            693254450055348294
-        ]:
-            return
-        
         if settings.get("haiku_detector_enabled") != "True":
             return
         

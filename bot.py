@@ -1,4 +1,5 @@
 import asyncio
+from collections import defaultdict
 import os
 import platform
 import random
@@ -7,9 +8,10 @@ import re
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from models.server_settings import ServerSettings
 from noncommands import haikudetector
 from noncommands import musicdetector
-from noncommands import paywallDetector
+from noncommands import paywall_detector
 from noncommands import imchecker
 from noncommands import reminderLoop
 from noncommands import birthdayLoop
@@ -21,6 +23,7 @@ import yaml
 from nextcord import Interaction
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot, Context
+from cogwatch import Watcher
 
 
 with open("config.yaml") as file:
@@ -37,6 +40,32 @@ class DadBot(commands.Bot):
         self.logger: logging.Logger = loggingFormatter
         self.config: dict = botConfig
         self.super = super()
+        self.settings = defaultdict(dict)
+        self.load_all_settings()
+
+    def load_all_settings(self):
+        settings = ServerSettings.select()
+        for setting in settings:
+            self.settings[int(setting.server_id)][setting.setting_name] = setting.setting_value
+
+    def update_setting(self, server_id: str, setting_name: str, setting_value: bool) -> None:
+        self.settings[server_id][setting_name] = setting_value
+
+    def ensure_all_settings(self):
+        default_settings = self.config.get("server_settings", {})
+        for guild in self.guilds:
+            for setting_category, values in default_settings.items():
+                server_id = guild.id
+                for setting, default_value in values.items():
+                    setting_name = f"{setting_category}_{setting}"
+                    if setting_name not in self.settings[server_id]:
+                        ServerSettings.create(
+                            server_id=server_id,
+                            server_name=guild.name,
+                            setting_name=setting_name,
+                            setting_value=default_value
+                        )
+                        self.update_setting(server_id, setting_name, default_value)
 
 
 intents = nextcord.Intents.default().all()
@@ -94,7 +123,7 @@ reminderChecker = reminderLoop.ReminderLoop()
 birthdayChecker = birthdayLoop.BirthdayLoop(bot)
 haikuDetector = haikudetector.HaikuDetector()
 musicDetector = musicdetector.MusicDetector()
-paywallDetector = paywallDetector.PaywallDetector()
+paywall_detector = paywall_detector.PaywallDetector()
 scooby = scooby.Scooby(bot)
 chat = chat.Chat(bot)
 
@@ -102,7 +131,9 @@ chat = chat.Chat(bot)
 @bot.event
 async def on_ready() -> None:
     if bot.user is None:
-        sys.exit("Bot has no user!")
+        sys.exit("Bot has no user!")\
+    
+    bot.ensure_all_settings()
 
     bot.logger.info(f"Logged in as {bot.user.name}")
     bot.logger.info(f"nextcord.py API version: {nextcord.__version__}")
@@ -114,6 +145,9 @@ async def on_ready() -> None:
         bot.logger.info(f" - {i.name}")
     bot.logger.info(f"Users: {len(bot.users)}")
     bot.logger.info("-------------------")
+    
+    watcher = Watcher(bot, path="cogs")
+    await watcher.start()
     status_task.start()
 
 
@@ -130,12 +164,11 @@ async def on_message(message: nextcord.Message) -> None:
         return
 
     if not re.search("(\|\|[\S\s]*\|\|)", message.content):
-        # So that dad doesn't respond in a thread with im or haiku
         if not isinstance(message.channel, nextcord.Thread):
-            await imChecker.checkIm(message)
-            await haikuDetector.checkForHaiku(message)
-            await musicDetector.detectMusic(message)
-            await paywallDetector.detectPaywall(message)
+            await imChecker.checkIm(message, bot.settings[message.guild.id])
+            await haikuDetector.checkForHaiku(message, bot.settings[message.guild.id])
+            await musicDetector.detectMusic(message, bot.settings[message.guild.id])
+            await paywall_detector.detectPaywall(message, bot.settings[message.guild.id])
 
         await chat.respond(message)
 

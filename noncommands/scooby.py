@@ -5,6 +5,7 @@ from nextcord import Embed
 import aiohttp
 import io
 import nextcord
+from noncommands.constants import SETTINGS_HINT
 from services.step_log_service import (
     build_embed_for_server,
     build_step_logger_view,
@@ -17,10 +18,15 @@ class Scooby:
         self.bot = bot
 
     async def apod(self):
-        c1 = self.bot.get_channel(856919399789625376)
-        c2 = self.bot.get_channel(1105336042296463432)
-
-        channels = [c1, c2]
+        channels = []
+        
+        for server_id in self.bot.settings:
+            server_settings = self.bot.settings[server_id]
+            if server_settings.get("apod_enabled") == "True":
+                channel = self.bot.get_channel(int(server_settings["apod_channel"]))
+                if channel:
+                    channels.append(channel)
+            
 
         response = requests.get(
             "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
@@ -34,7 +40,7 @@ class Scooby:
 
         title = "# APOD - " + response.json()["title"] + "\n"
         explanation = ">>> " + response.json()["explanation"] + "\n"
-
+        
         url = (
             response.json()["hdurl"]
             if "hdurl" in response.json()
@@ -48,13 +54,14 @@ class Scooby:
                         data = await resp.read()
                         for channel in channels:
                             await channel.send(
-                                title + explanation,
+                                title + explanation + f"{SETTINGS_HINT}",
                                 file=nextcord.File(io.BytesIO(data), "image.png"),
                             )
                         return
         for channel in channels:
             await channel.send(title + explanation)
             await channel.send(url)
+            await channel.send(f"{SETTINGS_HINT}")
 
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)

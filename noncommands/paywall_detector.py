@@ -3,6 +3,8 @@ import yaml
 import nextcord
 
 from cogs.remove_paywall import RemovePaywall
+from services.settings_service import get_setting
+from noncommands.constants import SETTINGS_HINT
 
 URL_PATTERN = re.compile(r'https?://\S+')
 
@@ -29,8 +31,13 @@ class PaywallDetector:
         940645588205187133,
         693254450055348294
     ]
+    
+    
 
-    async def detectPaywall(self, message):
+    async def detectPaywall(self, message, settings):
+        if not settings.get("paywall_detector_enabled") == "True":
+            return
+        
         if message.guild and message.guild.id not in self.enabled_guild_ids:
             return
 
@@ -49,6 +56,7 @@ class PaywallDetector:
             delete_button.callback = delete_callback
             view.add_item(delete_button)
             await message.channel.send(
-                "It looks like a link in that message may contain a paywall - here's my attempt to remove it:",
+                f"It looks like a link in that message may contain a paywall - here's my attempt to remove it:\n{SETTINGS_HINT}",
                 view=view
             )
+            

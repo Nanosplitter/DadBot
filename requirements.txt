@@ -34,3 +34,4 @@ matplotlib
 pdfminer.six
 beautifulsoup4
 feedparser
+cogwatch

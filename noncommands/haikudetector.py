@@ -4,19 +4,22 @@ import sys
 import os
 import syllapy
 import random
+from noncommands.constants import SETTINGS_HINT
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 
 class HaikuDetector:
-
-    # Detect a haiku in the message
-    async def checkForHaiku(self, message):
+    async def checkForHaiku(self, message, settings):
         if message.guild and message.guild.id in [
             693254450055348294
         ]:
             return
+        
+        if settings.get("haiku_detector_enabled") != "True":
+            return
+        
         text = message.content
         words = text.split()[::-1]
         if len(words) < 3:
@@ -46,8 +49,8 @@ class HaikuDetector:
             else:
                 break
 
-        if line1 == 0 and line2 == 0 and line3 == 0 and len(line1words) + len(line2words) + len(line3words) == len(words) and random.randint(1, 100) <= 42:
-            await message.channel.send(f"You're a poet!\n\n*{' '.join(line3words[::-1])}\n{' '.join(line2words[::-1])}\n{' '.join(line1words[::-1])}*\n- {message.author.mention}")
+        if line1 == 0 and line2 == 0 and line3 == 0 and len(line1words) + len(line2words) + len(line3words) == len(words) and random.randint(1, 100) <= int(settings.get("haiku_detector_response_chance")):
+            await message.channel.send(f"You're a poet!\n\n*{' '.join(line3words[::-1])}\n{' '.join(line2words[::-1])}\n{' '.join(line1words[::-1])}*\n- {message.author.mention}\n{SETTINGS_HINT}")
             return True
         return False
         

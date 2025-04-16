@@ -3,6 +3,7 @@ import re
 import yaml
 import random
 from models.caught import Caught
+from noncommands.constants import SETTINGS_HINT, CAUGHT_HINT
 
 
 with open("config.yaml") as file:
@@ -31,18 +32,19 @@ class ImChecker:
         self.confusables = Confusables("./resources/likeness.txt")
         self.table = "caught"
 
-    async def checkIm(self, message):
+    async def checkIm(self, message, settings):
+        if not settings.get("im_checker_enabled") == "True":
+            return
         for string in self.imList:
             confusables_pattern = self.confusables.confusables_regex(string)
             r = re.compile(confusables_pattern)
             fake_string = " " + message.content
             res = r.match(fake_string)
-            rand = random.randint(0, 9)
 
-            if res and rand == 3:
+            if res and random.randint(1, 100) <= int(settings.get("im_checker_catch_chance")):
                 typeIm = res.group().strip() + " "
                 await message.reply(
-                    f"Hi {message.content.split(typeIm, 1)[1]}, I'm Dad"
+                    f"Hi {message.content.split(typeIm, 1)[1]}, I'm Dad\n\n{SETTINGS_HINT}\n{CAUGHT_HINT}"
                 )
 
                 caught_user, _ = Caught.get_or_create(

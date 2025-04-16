@@ -4,6 +4,8 @@ import nextcord
 
 from services import song_converter
 
+from noncommands.constants import SETTINGS_HINT
+
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -13,14 +15,17 @@ class MusicDetector:
     def __init__(self):
         pass
 
-    async def detectMusic(self, message):
-        if message.guild and message.guild.id not in [
-            856919397754470420,
-            850473081063211048,
-            408321710568505344,
-            940645588205187133,
-            693254450055348294,
-        ]:
+    async def detectMusic(self, message, settings):
+        # if message.guild and message.guild.id not in [
+        #     856919397754470420,
+        #     850473081063211048,
+        #     408321710568505344,
+        #     940645588205187133,
+        #     693254450055348294,
+        # ]:
+        #     return
+        
+        if not settings.get("music_detector_enabled") == "True":
             return
 
         urls = re.findall("(?P<url>https?://[^\s]+)", message.content)
@@ -35,7 +40,7 @@ class MusicDetector:
             if song is not None and song.isValid():
                 try:
                     await message.channel.send(
-                        f"Alternate links for {song.title}",
+                        f"Alternate links for {song.title}\n{SETTINGS_HINT}",
                         view=LinkView(song),
                         suppress_embeds=True,
                     )
@@ -52,3 +57,11 @@ class LinkView(nextcord.ui.View):
             self.add_item(nextcord.ui.Button(label="Spotify", url=song.spotify))
         if song.youtube is not None:
             self.add_item(nextcord.ui.Button(label="YouTube", url=song.youtube))
+        
+        delete_button = nextcord.ui.Button(label="Delete this message", style=nextcord.ButtonStyle.danger)
+
+        async def delete_callback(interaction: nextcord.Interaction):
+            await interaction.message.delete()
+        
+        delete_button.callback = delete_callback
+        self.add_item(delete_button)

@@ -5,6 +5,7 @@ from nextcord import Embed
 import aiohttp
 import io
 import nextcord
+from noncommands.constants import SETTINGS_HINT
 from services.step_log_service import (
     build_embed_for_server,
     build_step_logger_view,
@@ -39,7 +40,7 @@ class Scooby:
 
         title = "# APOD - " + response.json()["title"] + "\n"
         explanation = ">>> " + response.json()["explanation"] + "\n"
-
+        
         url = (
             response.json()["hdurl"]
             if "hdurl" in response.json()
@@ -53,13 +54,14 @@ class Scooby:
                         data = await resp.read()
                         for channel in channels:
                             await channel.send(
-                                title + explanation,
+                                title + explanation + f"{SETTINGS_HINT}",
                                 file=nextcord.File(io.BytesIO(data), "image.png"),
                             )
                         return
         for channel in channels:
             await channel.send(title + explanation)
             await channel.send(url)
+            await channel.send(f"{SETTINGS_HINT}")
 
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)

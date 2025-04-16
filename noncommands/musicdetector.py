@@ -4,6 +4,8 @@ import nextcord
 
 from services import song_converter
 
+from noncommands.constants import SETTINGS_HINT
+
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -38,7 +40,7 @@ class MusicDetector:
             if song is not None and song.isValid():
                 try:
                     await message.channel.send(
-                        f"Alternate links for {song.title}",
+                        f"Alternate links for {song.title}\n{SETTINGS_HINT}",
                         view=LinkView(song),
                         suppress_embeds=True,
                     )
@@ -55,3 +57,11 @@ class LinkView(nextcord.ui.View):
             self.add_item(nextcord.ui.Button(label="Spotify", url=song.spotify))
         if song.youtube is not None:
             self.add_item(nextcord.ui.Button(label="YouTube", url=song.youtube))
+        
+        delete_button = nextcord.ui.Button(label="Delete this message", style=nextcord.ButtonStyle.danger)
+
+        async def delete_callback(interaction: nextcord.Interaction):
+            await interaction.message.delete()
+        
+        delete_button.callback = delete_callback
+        self.add_item(delete_button)

@@ -3,6 +3,7 @@ import re
 import yaml
 import random
 from models.caught import Caught
+from noncommands.constants import SETTINGS_HINT, CAUGHT_HINT
 
 
 with open("config.yaml") as file:
@@ -43,7 +44,7 @@ class ImChecker:
             if res and random.randint(1, 100) <= int(settings.get("im_checker_catch_chance")):
                 typeIm = res.group().strip() + " "
                 await message.reply(
-                    f"Hi {message.content.split(typeIm, 1)[1]}, I'm Dad"
+                    f"Hi {message.content.split(typeIm, 1)[1]}, I'm Dad\n\n{SETTINGS_HINT}\n{CAUGHT_HINT}"
                 )
 
                 caught_user, _ = Caught.get_or_create(

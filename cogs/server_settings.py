@@ -11,7 +11,7 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="settings", description="Manage server settings.", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="settings", description="Manage server settings.")
     async def settings(self, interaction: nextcord.Interaction):
         pass
 

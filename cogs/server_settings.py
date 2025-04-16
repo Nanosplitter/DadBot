@@ -15,12 +15,12 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
     async def settings(self, interaction: nextcord.Interaction):
         pass
 
-    @settings.subcommand(name="view", description="View the current server settings.")
+    @settings.subcommand(name="edit", description="View the current server settings.")
     @commands.has_permissions(administrator=True)
     async def view_settings(self, interaction: nextcord.Interaction):
         server_id = interaction.guild.id
         await interaction.response.send_message(
-            "Choose a setting category:",
+            "Choose a setting category to edit:",
             view=CategoriesView(self.bot, server_id),
             ephemeral=True
         )

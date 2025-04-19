@@ -17,6 +17,7 @@ from noncommands import reminderLoop
 from noncommands import birthdayLoop
 from noncommands import scooby
 from noncommands import chat
+from services import command_log_service
 
 import nextcord
 import yaml
@@ -184,6 +185,20 @@ async def on_application_command_completion(interaction: Interaction) -> None:
     full_command_name = ".".join(full_command_path)
     
     bot.logger.info(f"Command completed: {full_command_name}")
+    
+    # Log command to database
+    server_id = str(interaction.guild.id) if interaction.guild else None
+    server_name = interaction.guild.name if interaction.guild else None
+    user_id = str(interaction.user.id)
+    user_name = str(interaction.user)
+    
+    command_log_service.log_command(
+        server_id=server_id,
+        server_name=server_name,
+        user_id=user_id,
+        user_name=user_name,
+        command_name=full_command_name
+    )
     
     if interaction.guild is not None:
         bot.logger.info(

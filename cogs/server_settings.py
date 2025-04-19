@@ -12,14 +12,15 @@ class ServerSettingsCog(commands.Cog, name="server_settings"):
         self.bot = bot
 
     @nextcord.slash_command(name="settings", description="Manage server settings.")
-    async def settings(self, interaction: nextcord.Interaction):
+    async def settings(self, _: nextcord.Interaction):
         pass
 
     @settings.subcommand(name="edit", description="Edit the current server settings.")
     @commands.has_permissions(administrator=True)
-    async def view_settings(self, interaction: nextcord.Interaction):
+    async def edit_settings(self, interaction: nextcord.Interaction):
+        await interaction.response.defer(ephemeral=True)
         server_id = interaction.guild.id
-        await interaction.response.send_message(
+        await interaction.followup.send(
             "Choose a setting category to edit:\n-# Colors of buttons won't update until this command is run again. Setting changes will be applied immediately.",
             view=CategoriesView(self.bot, server_id),
             ephemeral=True

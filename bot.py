@@ -157,7 +157,6 @@ async def status_task():
 
 @bot.event
 async def on_message(message: nextcord.Message) -> None:
-    print("Message received")
     if message.author == bot.user or message.author.bot:
         return
 
@@ -174,17 +173,25 @@ async def on_message(message: nextcord.Message) -> None:
 
 @bot.event
 async def on_application_command_completion(interaction: Interaction) -> None:
-    bot.logger.info(f"Command completed: {interaction.application_command.name}")
-    
     command_name = interaction.application_command.name
+
+    full_command_path = [command_name]
+
+    parent_command = getattr(interaction.application_command, 'parent_cmd', None)
+    if parent_command is not None:
+        full_command_path.insert(0, parent_command.name)
+
+    full_command_name = ".".join(full_command_path)
+    
+    bot.logger.info(f"Command completed: {full_command_name}")
     
     if interaction.guild is not None:
         bot.logger.info(
-            f"Executed {command_name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.user} (ID: {interaction.user.id})"
+            f"Executed {full_command_name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.user} (ID: {interaction.user.id})"
         )
     else:
         bot.logger.info(
-            f"Executed {command_name} command by {interaction.user} (ID: {interaction.user.id}) in DMs"
+            f"Executed {full_command_name} command by {interaction.user} (ID: {interaction.user.id}) in DMs"
         )
 
 

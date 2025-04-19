@@ -23,7 +23,6 @@ import yaml
 from nextcord import Interaction
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot, Context
-from cogwatch import Watcher
 
 
 with open("config.yaml") as file:
@@ -131,7 +130,7 @@ chat = chat.Chat(bot)
 @bot.event
 async def on_ready() -> None:
     if bot.user is None:
-        sys.exit("Bot has no user!")\
+        sys.exit("Bot has no user!")
     
     bot.ensure_all_settings()
 
@@ -145,9 +144,7 @@ async def on_ready() -> None:
         bot.logger.info(f" - {i.name}")
     bot.logger.info(f"Users: {len(bot.users)}")
     bot.logger.info("-------------------")
-    
-    watcher = Watcher(bot, path="cogs")
-    await watcher.start()
+
     status_task.start()
 
 
@@ -160,6 +157,7 @@ async def status_task():
 
 @bot.event
 async def on_message(message: nextcord.Message) -> None:
+    print("Message received")
     if message.author == bot.user or message.author.bot:
         return
 
@@ -174,27 +172,24 @@ async def on_message(message: nextcord.Message) -> None:
 
     await bot.process_commands(message)
 
-
 @bot.event
-async def on_command_completion(context: Context) -> None:
-    if context.command is None:
-        bot.logger.warning(f"Command is None: {context}")
-        return
-    full_command_name: str = context.command.qualified_name
-    split: list[str] = full_command_name.split(" ")
-    executed_command = str(split[0])
-    if context.guild is not None:
+async def on_application_command_completion(interaction: Interaction) -> None:
+    bot.logger.info(f"Command completed: {interaction.application_command.name}")
+    
+    command_name = interaction.application_command.name
+    
+    if interaction.guild is not None:
         bot.logger.info(
-            f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})"
+            f"Executed {command_name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.user} (ID: {interaction.user.id})"
         )
     else:
         bot.logger.info(
-            f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
+            f"Executed {command_name} command by {interaction.user} (ID: {interaction.user.id}) in DMs"
         )
 
 
 @bot.event
-async def on_command_error(context: Context, error) -> None:
+async def on_application_command_error(interaction: Interaction, error) -> None:
     if isinstance(error, commands.CommandOnCooldown):
         minutes, seconds = divmod(error.retry_after, 60)
         hours, minutes = divmod(minutes, 60)
@@ -203,7 +198,7 @@ async def on_command_error(context: Context, error) -> None:
             description=f"**Please slow down** - You can use this command again in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
             color=0xE02B2B,
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     elif isinstance(error, commands.MissingPermissions):
         embed = nextcord.Embed(
@@ -212,7 +207,7 @@ async def on_command_error(context: Context, error) -> None:
             + "` to execute this command!",
             color=0xE02B2B,
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     elif isinstance(error, commands.BotMissingPermissions):
         embed = nextcord.Embed(
             description="I am missing the permission(s) `"
@@ -220,16 +215,31 @@ async def on_command_error(context: Context, error) -> None:
             + "` to fully perform this command!",
             color=0xE02B2B,
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     elif isinstance(error, commands.MissingRequiredArgument):
         embed = nextcord.Embed(
             title="Error!",
-            # We need to capitalize because the command arguments have no capital letter in the code.
             description=str(error).capitalize(),
             color=0xE02B2B,
         )
-        await context.send(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     else:
+        bot.logger.error(f"Unhandled application command error: {error}")
+        
+        try:
+            embed = nextcord.Embed(
+                title="Error!",
+                description="An unexpected error occurred while executing the command.",
+                color=0xE02B2B,
+            )
+
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+            else:
+                await interaction.followup.send(embed=embed, ephemeral=True)
+        except Exception as e:
+            bot.logger.error(f"Failed to send error message: {e}")
+            
         raise error
 
 

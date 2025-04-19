@@ -154,7 +154,7 @@ async def on_ready() -> None:
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
-    statuses = ["with your mom"]
+    statuses = ["with your mom", "/help", "/settings edit", "with your mom"]
     await bot.change_presence(activity=nextcord.Game(random.choice(statuses)))
 
 

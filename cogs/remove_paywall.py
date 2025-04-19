@@ -19,6 +19,9 @@ class RemovePaywall(commands.Cog, name="remove_paywall"):
 
     @nextcord.message_command(name="remove paywall")
     async def remove_paywall(self, interaction: nextcord.Interaction, message: nextcord.Message):
+        """
+        Remove paywall from a message
+        """
         pattern = r'(https?://\S+)'
         urls = re.findall(pattern, message.content)
         if urls:

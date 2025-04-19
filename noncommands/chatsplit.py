@@ -42,7 +42,7 @@ def processCodeBlock(text: str, chunks: List[str]) -> None:
 
 def processHelpBlock(text: str, chunks: List[str]) -> None:
     while len(text) > 2000:
-        index = text[:2000].rfind("--------------\n")
+        index = text[:2000].rfind("## ")
         if index == 0:
             index = text[:2000].rfind("- **`/")
         if index == -1:

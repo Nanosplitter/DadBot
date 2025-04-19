@@ -18,7 +18,7 @@ with open("config.yaml") as file:
 class TLDR(commands.Cog, name="tldr"):
     def __init__(self, bot):
         self.bot = bot
-        self.client = openai.OpenAI(api_key=config["openapi_token"])
+        self.client = openai.OpenAI(api_key=config["openai_token"])
 
     @nextcord.slash_command(
         name="tldrchannel",

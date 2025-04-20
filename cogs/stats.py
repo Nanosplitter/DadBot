@@ -14,7 +14,7 @@ class Stats(commands.Cog, name="stats"):
     def __init__(self, bot):
         self.bot = bot
     
-    @nextcord.slash_command(name="stats", description="View bot usage statistics", guild_ids=[850473081063211048])
+    @nextcord.slash_command(name="stats", description="View bot usage statistics")
     async def stats(self, interaction: Interaction):
         """Command group for viewing bot statistics"""
         pass

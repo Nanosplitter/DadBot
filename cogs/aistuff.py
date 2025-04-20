@@ -6,7 +6,6 @@ import nextcord
 import io
 import os
 import base64
-from moviepy.editor import AudioFileClip, ImageClip
 from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
@@ -654,54 +653,6 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         for message in messages:
             await thread.send(message)
-
-    @nextcord.slash_command(
-        "talk",
-        description="Get dad to talk with his voice",
-        guild_ids=[856919397754470420, 850473081063211048, 408321710568505344],
-    )
-    async def talk(
-        self,
-        interaction: Interaction,
-        prompt: Optional[str] = SlashOption(
-            description="What you want dad to say",
-            required=True,
-        ),
-    ):
-        """
-        [prompt] Get dad to talk with his voice.
-        """
-        await interaction.response.defer()
-
-        response = self.client.audio.speech.create(
-            model="tts-1-hd", voice="onyx", input=prompt
-        )
-
-        filename = f"speech-{random.randint(1, 10000)}.m4a"
-        video_filename = f"video-{random.randint(1, 10000)}.mp4"
-
-        response.stream_to_file(filename)
-
-        audio_clip = AudioFileClip(filename)
-
-        video_clip = ImageClip("./resources/dad.jpg", duration=audio_clip.duration)
-
-        video_clip = video_clip.set_audio(audio_clip)
-
-        video_clip.write_videofile(
-            video_filename,
-            audio_codec="aac",
-            codec="mpeg4",
-            audio=True,
-            fps=24,
-            verbose=False,
-            logger=None,
-        )
-
-        await interaction.followup.send(file=nextcord.File(video_filename))
-
-        os.remove(filename)
-        os.remove(video_filename)
     
     @nextcord.slash_command(name="summarize_pdf", description="Summarize a PDF", guild_ids=[850473081063211048])
     async def summarize_pdf(

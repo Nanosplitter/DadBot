@@ -25,6 +25,8 @@ from nextcord import Interaction
 from nextcord.ext import commands, tasks
 from nextcord.ext.commands import Bot, Context
 
+from cogwatch import Watcher
+
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -150,6 +152,9 @@ async def on_ready() -> None:
     bot.logger.info("-------------------")
 
     status_task.start()
+    
+    watcher = Watcher(bot, path="cogs")
+    await watcher.start()
 
 
 # Setup the game status task of the bot

@@ -30,21 +30,13 @@ class Stats(commands.Cog, name="stats"):
         if not top_commands:
             await interaction.followup.send("No command usage data available yet!")
             return
-            
-        embed = nextcord.Embed(
-            title="Most Popular Commands",
-            description=f"Top {len(top_commands)} most used commands",
-            color=0x3498db
-        )
         
+        lines = [f"Top {len(top_commands)} most used commands:"]
         for i, cmd in enumerate(top_commands, 1):
-            embed.add_field(
-                name=f"{i}. {cmd['command_name']}",
-                value=f"{cmd['count']} uses",
-                inline=False
-            )
-            
-        await interaction.followup.send(embed=embed)
+            lines.append(f"{i}. **{cmd['command_name']}** — {cmd['count']} uses")
+        message = "\n".join(lines)
+        
+        await interaction.followup.send(message)
     
     @stats.subcommand(name="servers", description="View the servers with most bot usage")
     @commands.is_owner()
@@ -58,24 +50,17 @@ class Stats(commands.Cog, name="stats"):
         if not top_servers:
             await interaction.followup.send("No server usage data available yet!", ephemeral=True)
             return
-            
-        embed = nextcord.Embed(
-            title="Most Active Servers",
-            description=f"Top {len(top_servers)} most active servers",
-            color=0x3498db
-        )
         
+        # Build a plain text message instead of an embed
+        lines = [f"Top {len(top_servers)} most active servers:"]
         for i, server in enumerate(top_servers, 1):
-            embed.add_field(
-                name=f"{i}. {server['server_name']}",
-                value=f"{server['count']} commands",
-                inline=False
-            )
-            
-        await interaction.followup.send(embed=embed, ephemeral=True)
-    
+            lines.append(f"{i}. {server['server_name']} — {server['count']} commands")
+        message = "\n".join(lines)
+        
+        await interaction.followup.send(message, ephemeral=True)
+
     @stats.subcommand(name="users", description="View the users with most bot usage")
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def top_users(self, interaction: Interaction,
                        count: int = SlashOption(description="Number of users to show", required=False, default=10)):
         """View the users with the most command usage (admin only)"""
@@ -86,22 +71,14 @@ class Stats(commands.Cog, name="stats"):
         if not top_users:
             await interaction.followup.send("No user usage data available yet!")
             return
-            
-        embed = nextcord.Embed(
-            title="Most Active Users",
-            description=f"Top {len(top_users)} most active users",
-            color=0x3498db
-        )
         
+        lines = [f"Top {len(top_users)} most active users:"]
         for i, user in enumerate(top_users, 1):
-            embed.add_field(
-                name=f"{i}. {user['user_name']}",
-                value=f"{user['count']} commands",
-                inline=False
-            )
-            
-        await interaction.followup.send(embed=embed)
-    
+            lines.append(f"{i}. **{user['user_name']}** — {user['count']} commands")
+        message = "\n".join(lines)
+        
+        await interaction.followup.send(message)
+
     @stats.subcommand(name="server", description="View command usage for this server")
     @commands.has_permissions(administrator=True)
     async def server_stats(self, interaction: Interaction,
@@ -112,31 +89,24 @@ class Stats(commands.Cog, name="stats"):
         if not interaction.guild:
             await interaction.followup.send("This command can only be used in a server!")
             return
-            
+        
         server_id = str(interaction.guild.id)
         top_commands = command_log_service.get_top_commands_by_server(server_id, limit=count)
         
         if not top_commands:
             await interaction.followup.send("No command usage data available for this server yet!")
             return
-            
-        embed = nextcord.Embed(
-            title=f"Most Popular Commands in {interaction.guild.name}",
-            description=f"Top {len(top_commands)} most used commands in this server",
-            color=0x3498db
-        )
         
+        # Build a plain text message instead of an embed
+        lines = [f"Top {len(top_commands)} most used commands in **{interaction.guild.name}**:"]
         for i, cmd in enumerate(top_commands, 1):
-            embed.add_field(
-                name=f"{i}. {cmd['command_name']}",
-                value=f"{cmd['count']} uses",
-                inline=False
-            )
-            
-        await interaction.followup.send(embed=embed)
+            lines.append(f"{i}. **{cmd['command_name']}** — {cmd['count']} uses")
+        message = "\n".join(lines)
+        
+        await interaction.followup.send(message)
     
     @stats.subcommand(name="graph", description="View a graph of command usage over time")
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def usage_graph(self, interaction: Interaction,
                          days: int = SlashOption(description="Number of days to show", required=False, default=30)):
         """Generate a graph of command usage over time (admin only)"""

@@ -130,6 +130,9 @@ chat = chat.Chat(bot)
 
 @bot.event
 async def on_ready() -> None:
+    if not scheduler.running:
+        scheduler.start()
+        
     if bot.user is None:
         sys.exit("Bot has no user!")
     
@@ -303,5 +306,5 @@ scheduler.add_job(
 #     scooby.advent_of_code,
 #     CronTrigger(hour="9", minute="0", second="0", timezone="EST"),
 # )
-scheduler.start()
+
 bot.run(config["token"])

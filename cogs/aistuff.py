@@ -356,7 +356,7 @@ class AiStuff(commands.Cog, name="aistuff"):
         await interaction.response.defer()
 
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4.1",
             messages=[
                 {
                     "role": "system",
@@ -379,7 +379,7 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         # Ask gpt3.5 to come up with a title for the APOD
         titleCompletion = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1",
             messages=[
                 {
                     "role": "system",
@@ -422,7 +422,6 @@ class AiStuff(commands.Cog, name="aistuff"):
             default="This is my kitchen and ingredients. I want to make something for dinner with these ingredients.",
         ),
     ):
-
         response = "## Yes Chef! Let's get cooking!"
 
         partial_message = await interaction.response.send_message(response)
@@ -460,7 +459,7 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         await thread.trigger_typing()
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4.1",
             messages=[
                 {
                     "role": "system",
@@ -653,8 +652,12 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         for message in messages:
             await thread.send(message)
-    
-    @nextcord.slash_command(name="summarize_pdf", description="Summarize a PDF", guild_ids=[850473081063211048])
+
+    @nextcord.slash_command(
+        name="summarize_pdf",
+        description="Summarize a PDF",
+        guild_ids=[850473081063211048],
+    )
     async def summarize_pdf(
         self,
         interaction: Interaction,
@@ -670,9 +673,8 @@ class AiStuff(commands.Cog, name="aistuff"):
             print(text)
         except Exception as e:
             print(e)
-        
-        prompt = f"Summarize the extraction of a PDF that is coming after this. Try to keep the response relatively short, but make sure it's informative.\n\n{text}"
 
+        prompt = f"Summarize the extraction of a PDF that is coming after this. Try to keep the response relatively short, but make sure it's informative.\n\n{text}"
 
         await dadroid_single(
             "",

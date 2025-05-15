@@ -33,7 +33,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             required=True,
         ),
     ):
-        await interaction.defer()
+        await interaction.response.defer()
         img = self.client.images.generate(
             model="gpt-image-1", prompt=prompt, n=1, size="auto", quality="high"
         )

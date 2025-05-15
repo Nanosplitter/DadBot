@@ -24,6 +24,27 @@ class AiStuff(commands.Cog, name="aistuff"):
         openai.api_key = config["openapi_token"]
         self.client = openai.OpenAI(api_key=config["openapi_token"])
 
+    @nextcord.slash_command(name="image", description="Get an image from a prompt")
+    async def image(
+        self,
+        interaction: Interaction,
+        prompt: Optional[str] = SlashOption(
+            description="The prompt to generate the image from.",
+            required=True,
+        ),
+    ):
+        await interaction.defer()
+        img = self.client.images.generate(
+            model="gpt-image-1", prompt=prompt, n=1, size="auto", quality="high"
+        )
+        image_bytes = base64.b64decode(img.data[0].b64_json)
+        image_file = io.BytesIO(image_bytes)
+        image_file.seek(0)
+        await interaction.followup.send(
+            f"**Prompt:** {prompt}",
+            file=nextcord.File(image_file, filename="image.png"),
+        )
+
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
     async def dalle(
         self,

@@ -34,21 +34,24 @@ class AiStuff(commands.Cog, name="aistuff"):
         ),
     ):
         await interaction.response.defer()
-        img = self.client.images.generate(
-            model="gpt-image-1",
-            prompt=prompt,
-            n=1,
-            size="auto",
-            quality="low",
-            moderation="low",
-        )
-        image_bytes = base64.b64decode(img.data[0].b64_json)
-        image_file = io.BytesIO(image_bytes)
-        image_file.seek(0)
-        await interaction.followup.send(
-            f"**Prompt:** {prompt}",
-            file=nextcord.File(image_file, filename="image.png"),
-        )
+        try:
+            img = self.client.images.generate(
+                model="gpt-image-1",
+                prompt=prompt,
+                n=1,
+                size="auto",
+                quality="low",
+            )
+            image_bytes = base64.b64decode(img.data[0].b64_json)
+            image_file = io.BytesIO(image_bytes)
+            await interaction.followup.send(
+                f"**Prompt:** {prompt}",
+                file=nextcord.File(image_file, filename="image.png"),
+            )
+        except openai.BadRequestError as e:
+            await interaction.followup.send(
+                f"An error occurred while generating the image: {e['error']['message']}"
+            )
 
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
     async def dalle(

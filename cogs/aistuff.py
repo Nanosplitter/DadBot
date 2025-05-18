@@ -35,7 +35,12 @@ class AiStuff(commands.Cog, name="aistuff"):
     ):
         await interaction.response.defer()
         img = self.client.images.generate(
-            model="gpt-image-1", prompt=prompt, n=1, size="auto", quality="high"
+            model="gpt-image-1",
+            prompt=prompt,
+            n=1,
+            size="auto",
+            quality="low",
+            moderation="low",
         )
         image_bytes = base64.b64decode(img.data[0].b64_json)
         image_file = io.BytesIO(image_bytes)

@@ -61,7 +61,8 @@ class AiStuff(commands.Cog, name="aistuff"):
         interaction: Interaction,
     ):
         await interaction.response.send_message(
-            "This command is deprecated. Use </image:1372592282456555550>"
+            "This command is deprecated. Use </image:1372592282456555550> instead!",
+            ephemeral=True,
         )
 
     @nextcord.slash_command(
@@ -69,7 +70,8 @@ class AiStuff(commands.Cog, name="aistuff"):
     )
     async def dadroid(self, interaction: Interaction):
         await interaction.response.send_message(
-            "This command is deprecated. Use </chat:1205212799597547633>"
+            "This command is deprecated. Use </chat:1205212799597547633> instead!",
+            ephemeral=True,
         )
 
     @nextcord.slash_command(

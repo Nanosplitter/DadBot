@@ -50,7 +50,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             )
         except openai.BadRequestError as e:
             await interaction.followup.send(
-                f"An error occurred while generating the image: {e['error']['message']}"
+                f"An error occurred while generating the image: {e}"
             )
 
     @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")

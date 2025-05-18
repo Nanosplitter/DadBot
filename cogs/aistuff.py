@@ -53,154 +53,23 @@ class AiStuff(commands.Cog, name="aistuff"):
                 f"An error occurred while generating the image: {e}"
             )
 
-    @nextcord.slash_command(name="dalle", description="Create a DALL-E 3 image.")
+    @nextcord.slash_command(
+        name="dalle", description="Deprecated commad for DALL-E, use /image instead"
+    )
     async def dalle(
         self,
         interaction: Interaction,
-        prompt: Optional[str] = SlashOption(
-            description="The prompt to generate the image from.",
-            required=True,
-        ),
-        style: Optional[str] = SlashOption(
-            description="The style of image to generate, vivid will make more dramatic images.",
-            choices=["vivid", "natural"],
-            default="vivid",
-            required=False,
-        ),
     ):
-        print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
-
-        await interaction.response.defer()
-
-        if len(prompt) > 4000:
-            await interaction.followup.send("Prompt must be less than 4000 characters.")
-            return
-
-        try:
-            response = self.client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                style=style,
-                n=1,
-                size="1024x1024",
-                quality="standard",
-                response_format="b64_json",
-            )
-        except:
-            if len(prompt) > 200:
-                embed = Embed(
-                    title=f'Prompt: "{prompt[:200]}..."',
-                    description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.",
-                )
-            embed = Embed(
-                title=f'Prompt: "{prompt}"',
-                description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.",
-            )
-            await interaction.followup.send(embed=embed)
-            return
-
-        imageData = f"{response.data[0].b64_json}"
-        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        await interaction.followup.send(f"**{prompt}**\n[style: {style}]", file=file)
-
-    @nextcord.slash_command(
-        name="beefydalle",
-        description="Create a BEEFY DALL-E 3 image.",
-        guild_ids=[856919397754470420, 850473081063211048],
-    )
-    async def beefydalle(
-        self,
-        interaction: Interaction,
-        prompt: Optional[str] = SlashOption(
-            description="The prompt to generate the image from.",
-            required=True,
-        ),
-        style: Optional[str] = SlashOption(
-            description="The style of image to generate, vivid will make more dramatic images.",
-            choices=["vivid", "natural"],
-            default="vivid",
-            required=False,
-        ),
-        size: Optional[str] = SlashOption(
-            description="The size of the image to generate.",
-            choices=["1024x1024", "1792x1024"],
-            default="1024x1024",
-            required=False,
-        ),
-        quality: Optional[str] = SlashOption(
-            description="The quality of the image to generate.",
-            choices=["standard", "hd"],
-            default="standard",
-            required=False,
-        ),
-    ):
-        print(f"Dalle Request - User: {interaction.user} | Prompt: {prompt}")
-
-        await interaction.response.defer()
-
-        if len(prompt) > 4000:
-            await interaction.followup.send("Prompt must be less than 4000 characters.")
-            return
-
-        try:
-            response = self.client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                style=style,
-                n=1,
-                size=size,
-                quality=quality,
-                response_format="b64_json",
-            )
-        except:
-            if len(prompt) > 200:
-                embed = Embed(
-                    title=f'Prompt: "{prompt[:200]}..."',
-                    description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.",
-                )
-            embed = Embed(
-                title=f'Prompt: "{prompt}"',
-                description="Your prompt was flagged by the safety system. This usually happens with profanity, real names, or other sensitive keywords. Please try again but with different words that are less sensitive.",
-            )
-            await interaction.followup.send(embed=embed)
-            return
-        if len(prompt) > 200:
-            embed = Embed(title=f"DALLE Image", description=f'Prompt: "{prompt}"')
-        else:
-            embed = Embed(title=f'Prompt: "{prompt}"')
-
-        imageData = f"{response.data[0].b64_json}"
-        file = nextcord.File(io.BytesIO(base64.b64decode(imageData)), "image.png")
-        await interaction.followup.send(
-            f"**{prompt}**\n[style: {style}] [size: {size}] [quality: {quality}]",
-            file=file,
+        await interaction.response.send_message(
+            "This command is deprecated. Use </image:1372592282456555550>"
         )
 
-    @nextcord.slash_command(name="dadroid", description="Talk to Dad")
-    async def dadroid(
-        self,
-        interaction: Interaction,
-        prompt: Optional[str] = SlashOption(
-            description="The prompt to generate the response from.",
-            required=True,
-        ),
-        personality: Optional[str] = SlashOption(
-            description="The personality dad should have when answering",
-            default="You are a Discord bot, your goal is to help the server members have a good time by answering their questions or fulfilling their requests. You are operating in discord so you can use discord formatting if you want formatting, it is a form of markdown.",
-            required=False,
-        ),
-    ):
-        """
-        [prompt] Ask dadroid a question.
-        """
-        await interaction.response.defer()
-
-        await dadroid_single(
-            personality,
-            prompt,
-            interaction.followup.send,
-            interaction.channel.send,
-            response_starter=f"## {prompt} \n\n",
+    @nextcord.slash_command(
+        name="dadroid", description="Deprecated command, use /chat instead"
+    )
+    async def dadroid(self, interaction: Interaction):
+        await interaction.response.send_message(
+            "This command is deprecated. Use </chat:1205212799597547633>"
         )
 
     @nextcord.slash_command(
@@ -406,7 +275,6 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         apodContent = chatCompletion.choices[0].message.content
 
-        # Ask gpt3.5 to come up with a title for the APOD
         titleCompletion = self.client.chat.completions.create(
             model="gpt-4.1",
             messages=[

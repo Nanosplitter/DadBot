@@ -1,5 +1,4 @@
 aiohttp
-asyncio
 nextcord
 pyyaml
 pandas
@@ -35,3 +34,4 @@ pdfminer.six
 beautifulsoup4
 feedparser
 cogwatch
+setuptools

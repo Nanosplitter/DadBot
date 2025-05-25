@@ -22,7 +22,7 @@ class Chat:
         thread = message.channel
         await thread.trigger_typing()
 
-        messages = await thread.history(limit=30, oldest_first=False).flatten()
+        messages = [msg async for msg in thread.history(limit=30, oldest_first=False)]
         messages.reverse()
         first_message = await self.get_first_message(thread)
         if not first_message:
@@ -61,7 +61,9 @@ class Chat:
         return True
 
     async def get_first_message(self, thread) -> str:
-        first_message = await thread.history(limit=1, oldest_first=True).flatten()
+        first_message = [
+            msg async for msg in thread.history(limit=1, oldest_first=True)
+        ]
         if len(first_message) == 0:
             self.bot.logger.error("No first message found in thread")
             return None
@@ -101,7 +103,9 @@ class Chat:
                 role = "assistant"
             else:
                 role = "user"
-                content.extend(await self.prepare_attachment_content(message.attachments))
+                content.extend(
+                    await self.prepare_attachment_content(message.attachments)
+                )
 
             content.append({"type": "text", "text": message.clean_content})
             chat_messages.append({"role": role, "content": content})
@@ -119,17 +123,17 @@ class Chat:
                         "image_url": {"url": attachment.url, "detail": "high"},
                     }
                 )
-            elif "pdf" in attachment.content_type: 
+            elif "pdf" in attachment.content_type:
                 await attachment.save("temp.pdf")
 
                 try:
                     text = extract_text("temp.pdf")
                     content.append(
-                    {
-                        "type": "text",
-                        "text": f"Text of PDF the user uploaded:\n\n {text}",
-                    }
-                )
+                        {
+                            "type": "text",
+                            "text": f"Text of PDF the user uploaded:\n\n {text}",
+                        }
+                    )
                 except Exception as e:
                     print(e)
                     content.append(
@@ -145,5 +149,5 @@ class Chat:
                         "text": f"Attachment: {attachment.url}",
                     }
                 )
-                
+
         return content

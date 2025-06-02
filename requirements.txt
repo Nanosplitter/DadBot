@@ -35,3 +35,4 @@ beautifulsoup4
 feedparser
 cogwatch
 setuptools
+wikipedia-api

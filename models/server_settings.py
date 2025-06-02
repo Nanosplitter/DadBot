@@ -1,4 +1,4 @@
-from peewee import Model, CharField, BooleanField, CompositeKey
+from peewee import Model, CharField, CompositeKey
 from services.db_service import get_db
 
 class ServerSettings(Model):

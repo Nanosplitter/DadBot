@@ -17,7 +17,7 @@ class StepLoggerModal(Modal):
     def __init__(self, step_message):
         super().__init__("Log your steps!")
         steps_input = TextInput(
-            label="Steps", placeholder=f"10000", max_length=7, required=True
+            label="Steps", placeholder="10000", max_length=7, required=True
         )
         self.add_item(steps_input)
         self.step_message = step_message

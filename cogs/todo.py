@@ -1,11 +1,9 @@
 import nextcord
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, Embed
+from nextcord import Interaction, SlashOption
 from nextcord.utils import format_dt
 import dateparser as dp
-from pytz import timezone
 import pytz
-from datetime import datetime
 
 from models.todo import Todo
 from noncommands.reminderutils import DeleteButton, SnoozeButton
@@ -41,7 +39,7 @@ class TodoCog(commands.Cog, name="todo"):
     ):
 
         embed = nextcord.Embed(
-            title=f":hammer: New Todo item Created! :hammer:", color=0x00FF00
+            title=":hammer: New Todo item Created! :hammer:", color=0x00FF00
         )
         embed.add_field(name="What", value=what, inline=False)
 

@@ -1,5 +1,4 @@
 from typing import Callable, List, Optional
-from nextcord import Interaction
 from openai import OpenAI
 import yaml
 from noncommands.chatsplit import chat_split

@@ -2,10 +2,9 @@ import nextcord
 from models.book import Book
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, Embed, SlashOption
+from nextcord import Interaction, SlashOption
 from noncommands.booktrackutils import DeleteButton, FinishButton, EditButton
 import pytz
-import datetime
 from datetime import datetime as dt
 
 import yaml

@@ -14,7 +14,7 @@ class ReconnectMySQLDatabase(MySQLDatabase):
         for attempt in range(self.max_retries):
             try:
                 return super().execute_sql(sql, params, commit)
-            except (InterfaceError, OperationalError) as e:
+            except (InterfaceError, OperationalError):
                 if attempt < self.max_retries - 1:
                     self._reconnect()
                     time.sleep(self.retry_delay)

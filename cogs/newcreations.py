@@ -1,18 +1,8 @@
-import hashlib
-import os
-import random
-import sys
-import uuid
-import aiofiles
-import aiohttp
 import nextcord
 import requests
 import yaml
-import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction, SlashOption
 
 from noncommands.dadroid import dadroid_single
 

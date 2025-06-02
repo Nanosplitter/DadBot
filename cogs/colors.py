@@ -1,13 +1,9 @@
-import os
-import sys
 import yaml
 from colour import Color
 from nextcord.ui import Button, View
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction, SlashOption
 import random
 
 

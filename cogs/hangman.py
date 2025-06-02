@@ -1,24 +1,14 @@
-from io import BytesIO
-import os
-import re
-import sys
-import aiofiles
 from nextcord import Embed
 import requests
 import nextcord
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
-import urllib.request
-import urllib.parse
+from nextcord import Interaction, SlashOption
 import random
-import json
 import asyncio
 
 
 import yaml
-from nextcord.ext import commands
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)

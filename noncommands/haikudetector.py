@@ -1,7 +1,4 @@
-import re
 import yaml
-import sys
-import os
 import syllapy
 import random
 from noncommands.constants import SETTINGS_HINT

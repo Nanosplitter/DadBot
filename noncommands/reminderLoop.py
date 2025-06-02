@@ -1,9 +1,7 @@
 import nextcord
-from nextcord.utils import format_dt
 from noncommands.reminderutils import SnoozeButton
 import pytz
 from datetime import datetime as dt
-import datetime
 
 from models.todo import Todo  # Adjust the import path as needed
 

@@ -3,7 +3,6 @@ import yaml
 import nextcord
 
 from cogs.remove_paywall import RemovePaywall
-from services.settings_service import get_setting
 from noncommands.constants import SETTINGS_HINT
 
 URL_PATTERN = re.compile(r'https?://\S+')

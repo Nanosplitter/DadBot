@@ -4,7 +4,6 @@ import nextcord
 from nextcord.utils import format_dt
 import pytz
 from datetime import datetime as dt
-import datetime
 
 
 class Todo(Model):
@@ -32,7 +31,7 @@ class Todo(Model):
         if self.time is not None:
             utc_time = self.time.replace(tzinfo=pytz.utc)
             embed.add_field(
-                name=f"",
+                name="",
                 value=f'{format_dt(utc_time, "f")} ({format_dt(utc_time, "R")})',
                 inline=False,
             )

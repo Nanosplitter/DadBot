@@ -1,14 +1,9 @@
-import os
-import sys
 import aiohttp
 import nextcord
 import requests
 import yaml
-import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction
 import inspirobot
 
 

@@ -1,13 +1,11 @@
 import nextcord
 from nextcord import Interaction
 from nextcord.ui import TextInput
-from nextcord.utils import format_dt
 import yaml
 import dateparser as dp
 from pytz import timezone
 import pytz
 from datetime import datetime as dt
-import datetime
 from models.book import Book
 
 with open("config.yaml") as file:

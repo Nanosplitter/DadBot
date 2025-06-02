@@ -2,7 +2,6 @@ import yaml
 import nextcord
 from nextcord.ext import commands
 from nextcord import Interaction
-import akinator
 
 from akinator import CantGoBackAnyFurther, AsyncAkinator, Answer, Theme
 

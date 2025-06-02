@@ -1,7 +1,6 @@
 from models.command_log import CommandLog
 from typing import Optional, List, Dict, Any
 import datetime
-from collections import defaultdict
 from peewee import fn
 
 

@@ -1,7 +1,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
-from nextcord import Embed
 import aiohttp
 import io
 import nextcord

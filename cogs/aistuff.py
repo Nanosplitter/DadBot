@@ -1,10 +1,8 @@
-import random
 from typing import Optional
 import openai
 import yaml
 import nextcord
 import io
-import os
 import base64
 from nextcord import Interaction, Embed, SlashOption
 from nextcord.ext import commands
@@ -236,7 +234,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             None,
             interaction.followup.send,
             interaction.channel.send,
-            response_starter=f"",
+            response_starter="",
             chats=chats,
         )
 
@@ -435,7 +433,7 @@ class AiStuff(commands.Cog, name="aistuff"):
         if topic != "Make a new one up!":
             response = f"## Writing Onion article!\n\nTopic: {topic}"
         else:
-            response = f"## Writing Onion article!"
+            response = "## Writing Onion article!"
 
         partial_message = await interaction.response.send_message(response)
 
@@ -467,7 +465,7 @@ class AiStuff(commands.Cog, name="aistuff"):
                 return
             await message.edit(content=f"## {title_response}")
             thread = await message.create_thread(
-                name=f"Onion Article",
+                name="Onion Article",
                 auto_archive_duration=60,
             )
         except Exception as e:
@@ -525,7 +523,7 @@ class AiStuff(commands.Cog, name="aistuff"):
                 )
                 return
             thread = await message.create_thread(
-                name=f"Monkey's Paw",
+                name="Monkey's Paw",
                 auto_archive_duration=60,
             )
         except Exception as e:

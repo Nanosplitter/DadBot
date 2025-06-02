@@ -1,23 +1,15 @@
-import asyncio
 from datetime import date
-import os
 import io
 import random
-import sys
 import aiohttp
-import aiofiles
-import hashlib
 import yaml
 import requests
-import uuid
-import inspirobot
-import uwuify
 import json
 
 import nextcord
 from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, Embed
+from nextcord import Interaction, SlashOption
 
 from noncommands.dadroid import dadroid_single
 from noncommands.adventofcode_service import create_advent_of_code_messages

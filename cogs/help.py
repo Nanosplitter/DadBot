@@ -1,15 +1,8 @@
-import os
-import sys
-import inspect
 
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction
 import yaml
-from nextcord.ext import commands
-from nextcord.ui import Button, View
 
 from noncommands.chatsplit import chat_split
 

@@ -1,7 +1,5 @@
 import asyncio
-import os
 import random
-import sys
 import nextcord
 import yaml
 from nextcord.ext import commands

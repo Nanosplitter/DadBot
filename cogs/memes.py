@@ -1,13 +1,10 @@
-import os
 import random
 import requests
 import yaml
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, SelectOption
-from nextcord.abc import GuildChannel
-from nextcord.ui import Button, View, Modal, TextInput, StringSelect
+from nextcord import Interaction, SlashOption
+from nextcord.ui import Button, View, TextInput
 import uwuify
 import json
 import time

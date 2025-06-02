@@ -1,28 +1,16 @@
-from io import BytesIO
 import io
-import os
-import re
-import sys
-import aiofiles
 import requests
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
 from nextcord import Interaction, Embed
-import urllib.request
-import urllib.parse
 import random
 import json
-from geopy.geocoders import Nominatim
-import haversine as hs
 import asyncio
 import pyshorteners
-import base64
-from nextcord.ui import Button, View, Modal, TextInput, StringSelect
+from nextcord.ui import Button, View, TextInput
 
 
 import yaml
-from nextcord.ext import commands
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -44,7 +32,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
             self.correctYear = correctYear
             outer_instance.message_to_edit = message_to_edit
             text_input = TextInput(
-                label="Year", placeholder=f"e.g. 1960", max_length=4, required=True
+                label="Year", placeholder="e.g. 1960", max_length=4, required=True
             )
             self.add_item(text_input)
 
@@ -72,7 +60,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
                 ),
             )
 
-            newEmbed = nextcord.Embed(title=f"Guesses will go here!")
+            newEmbed = nextcord.Embed(title="Guesses will go here!")
             for i, author in enumerate(players):
                 newEmbed.add_field(name=i + 1, value=f"{author}", inline=True)
             loop = asyncio.get_event_loop()
@@ -104,7 +92,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
 
         await interaction.response.send_message(file=file, embed=rulesEmbed)
 
-        embed = nextcord.Embed(title=f"Guesses will go here!")
+        embed = nextcord.Embed(title="Guesses will go here!")
         message_to_edit = await interaction.followup.send(embed=embed)
 
         make_guess_button = Button(
@@ -133,7 +121,7 @@ class Chronophoto(commands.Cog, name="chronophoto"):
                 )
             loop = asyncio.get_event_loop()
             loop.create_task(message_to_edit.edit(embed=newEmbed))
-            await interaction.followup.send(f"Guessing is done!")
+            await interaction.followup.send("Guessing is done!")
 
         view = View(timeout=20)
         view.on_timeout = view_timeout_callback

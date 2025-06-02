@@ -1,17 +1,12 @@
 import json
-import os
 import random
 
 import requests
-import dateparser as dp
-from dateparser.search import search_dates
 import yaml
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
+from nextcord import Interaction, SlashOption
 from nextcord.ui import Button, View
-from nextcord.abc import GuildChannel
 import re
 
 CLEANR = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
@@ -136,7 +131,7 @@ class DnD(commands.Cog, name="dnd"):
 
         total = sum(diceRolls)
         resString = (
-            f"Rolling {dice}:\n" + "(" + " + ".join([str(i) for i in diceRolls]) + f")"
+            f"Rolling {dice}:\n" + "(" + " + ".join([str(i) for i in diceRolls]) + ")"
         )
         if modifier != None and modifier != 0:
             total += modifier
@@ -151,7 +146,7 @@ class DnD(commands.Cog, name="dnd"):
             resString = f"Holy moly that's a lot characters. I can't send that. Here's the total instead: **{total}**"
 
         if len(resString) > 2000:
-            resString = f"Jesus Christ you are dedicated. Congrats, you broke me. Your reward? You don't get the answer to your dice roll."
+            resString = "Jesus Christ you are dedicated. Congrats, you broke me. Your reward? You don't get the answer to your dice roll."
 
         await interaction.response.send_message(resString)
 

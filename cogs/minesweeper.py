@@ -1,11 +1,7 @@
-import os
-from numpy import number
 import yaml
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction, SlashOption
 import random
 
 

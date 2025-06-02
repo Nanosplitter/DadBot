@@ -1,4 +1,3 @@
-import asyncio
 from collections import defaultdict
 import os
 import platform
@@ -23,7 +22,6 @@ import nextcord
 import yaml
 from nextcord import Interaction
 from nextcord.ext import commands, tasks
-from nextcord.ext.commands import Bot, Context
 
 from cogwatch import Watcher
 

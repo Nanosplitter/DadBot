@@ -3,7 +3,6 @@ from nextcord.ext import commands
 from nextcord import Interaction, SlashOption
 import matplotlib.pyplot as plt
 import io
-import datetime
 from services import command_log_service
 import yaml
 

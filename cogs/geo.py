@@ -1,11 +1,7 @@
-from io import BytesIO
 import os
 import re
-import sys
-import aiofiles
 import requests
 import nextcord
-from typing import Optional
 from nextcord.ext import commands
 from nextcord import Interaction, Embed
 import urllib.request
@@ -19,7 +15,6 @@ import asyncio
 geolocator = Nominatim(user_agent="dad-bot")
 
 import yaml
-from nextcord.ext import commands
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -62,7 +57,7 @@ class Geo(commands.Cog, name="geo"):
         correctLocation = (loc.latitude, loc.longitude)  # type: ignore
 
         guesses = dict()
-        embed = nextcord.Embed(title=f"Guesses will go here!")
+        embed = nextcord.Embed(title="Guesses will go here!")
         embedMessage = await interaction.followup.send(embed=embed)
 
         def check(m):
@@ -95,7 +90,7 @@ class Geo(commands.Cog, name="geo"):
                 guesses.keys(), key=lambda x: (guesses[x][0], guesses[x][2])
             )
 
-            newEmbed = nextcord.Embed(title=f"Guesses will go here!")
+            newEmbed = nextcord.Embed(title="Guesses will go here!")
             for i, author in enumerate(players):
                 newEmbed.add_field(name=i + 1, value=f"{author}", inline=True)
             loop = asyncio.get_event_loop()
@@ -120,7 +115,7 @@ class Geo(commands.Cog, name="geo"):
             newEmbed.add_field(name=i + 1, value=f"{author}: {guesses[author][1]} ({round(guesses[author][0], 2)} miles away)\n[maps link](https://maps.google.com/?q={authorloc.latitude},{authorloc.longitude})", inline=True)  # type: ignore
         loop = asyncio.get_event_loop()
         loop.create_task(embedMessage.edit(embed=newEmbed))
-        await interaction.followup.send(f"Guessing is done!")
+        await interaction.followup.send("Guessing is done!")
 
         urllib.request.urlretrieve(
             f"{mapurl}&key={ config['maps_api_key'] }", f"answer{rand}.png"

@@ -1,13 +1,8 @@
-import os
-import sys
 import nextcord
 import yaml
-import nextcord
-from typing import Optional
 from nextcord.ext import commands
 from nextcord.ui import Button, TextInput
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
+from nextcord import Interaction
 
 
 with open("config.yaml") as file:
@@ -88,7 +83,7 @@ class Poll(commands.Cog, name="poll"):
         """
         embed = nextcord.Embed(
             title="Time to create a poll!",
-            description=f"Select the number of options you want to have in your poll.",
+            description="Select the number of options you want to have in your poll.",
         )
         embed.add_field(
             name="Custom Poll",

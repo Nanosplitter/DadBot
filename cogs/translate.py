@@ -1,8 +1,4 @@
-import os
-from urllib import response
-import openai
 import yaml
-import json
 import nextcord
 from nextcord import Interaction
 from nextcord.ext import commands

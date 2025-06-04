@@ -4,6 +4,8 @@ from nextcord.ext import commands
 import wikipediaapi
 import difflib
 import random
+import requests
+import datetime
 
 
 with open("config.yaml") as file:
@@ -12,9 +14,12 @@ with open("config.yaml") as file:
 
 class Wikiguess(commands.Cog, name="wikiguess"):
     class WikiGuessModal(nextcord.ui.Modal):
-        def __init__(self, article: wikipediaapi.WikipediaPage):
+        def __init__(
+            self, article: wikipediaapi.WikipediaPage, view: "Wikiguess.WikiGuessView"
+        ):
             super().__init__(title="WikiGuess")
             self.article = article
+            self.view = view
             self.add_item(
                 nextcord.ui.TextInput(
                     label="Your Guess", placeholder="Type your guess here"
@@ -37,20 +42,54 @@ class Wikiguess(commands.Cog, name="wikiguess"):
                         "Close! You're almost there!", ephemeral=True
                     )
                 else:
+                    # Reveal a new letter in the hint
+                    self.view.reveal_letter()
+                    # Edit the original message to show the updated hint
+                    await self.view.message.edit(content=self.view.build_message())
                     await interaction.response.send_message(
                         "Incorrect. Try again!", ephemeral=True
                     )
 
     class WikiGuessView(nextcord.ui.View):
-        def __init__(self, article: wikipediaapi.WikipediaPage):
+        def __init__(
+            self, article: wikipediaapi.WikipediaPage, message: nextcord.Message
+        ):
             super().__init__(timeout=None)
             self.article = article
+            self.message = message
+            self.hint = [
+                "\_" if letter.isalpha() else letter for letter in article.title
+            ]
+            self.revealed_indices = set()
+
+        def reveal_letter(self):
+            unrevealed = [
+                i
+                for i, c in enumerate(self.hint)
+                if self.hint[i] == "\_" and self.article.title[i].isalpha()
+            ]
+            if unrevealed:
+                idx = random.choice(unrevealed)
+                self.hint[idx] = self.article.title[idx]
+                self.revealed_indices.add(idx)
+
+        def build_message(self):
+            categories = self.article.categories
+            categories = [
+                categories[category].title.replace("Category:", "").strip()
+                for category in categories
+            ]
+            message = "# WikiGuess\n\n You will be given a random Wikipedia article's categories. Guess the article by clicking the guess button. The winner will be the first with a correct guess!"
+            message += "\n\n**Categories:** \n"
+            message += "\n".join(f"- {category}" for category in categories)
+            message += f"\n\n**Hint:** {' '.join(self.hint)}"
+            return message
 
         @nextcord.ui.button(label="Guess", style=nextcord.ButtonStyle.primary)
         async def guess_button(
             self, button: nextcord.ui.Button, interaction: nextcord.Interaction
         ):
-            modal = Wikiguess.WikiGuessModal(article=self.article)
+            modal = Wikiguess.WikiGuessModal(article=self.article, view=self)
             await interaction.response.send_modal(modal)
 
     def __init__(self, bot):
@@ -60,34 +99,35 @@ class Wikiguess(commands.Cog, name="wikiguess"):
         )
 
     def get_wiki_article(self):
-        featured_category = self.wiki.page("Category:Featured articles")
-        members = featured_category.categorymembers
-        print(f"Found {len(members)} featured articles.")
-        print(members.keys())
-        articles = [page for page in members.values() if page.ns == 0]
-        if not articles:
-            return self.wiki.page(self.wiki.random(pages=1))
-        page = random.choice(articles)
+        today = datetime.date.today()
+        year = today.year
+        month = today.month
+        day = today.day
+        url = f"https://en.wikipedia.org/api/rest_v1/feed/featured/{year}/{month:02d}/{day:02d}"
+        headers = {"User-Agent": "DadBot (dadbot@colinwilson.dev)"}
+        response = requests.get(url, headers=headers)
+        data = response.json()
 
-        print(f"Selected article: {page.title}")
-        return page
+        articles = data["mostread"]["articles"]
+        pick = random.choice([article.get("title") for article in articles]).replace(
+            "_", " "
+        )
+
+        self.bot.logger.info(f"Selected featured article: {pick}")
+
+        return self.wiki.page(pick)
 
     @nextcord.slash_command(name="wikiguess", description="Play wikiguess")
     async def wikiguess(self, interaction: nextcord.Interaction):
         article = self.get_wiki_article()
-        categories = self.wiki.categories(article, clshow="!hidden")
-        categories = [
-            categories[category].title.replace("Category:", "").strip()
-            for category in categories
-        ]
-
-        message = "# WikiGuess\n\n You will be given a random Wikipedia article's categories. Guess the article by clicking the guess button. The winner will be the first with a correct guess!"
-        message += "\n\n**Categories:** \n"
-        message += "\n".join(f"- {category}" for category in categories)
+        view = self.WikiGuessView(article=article, message=None)
+        message = view.build_message()
         await interaction.response.send_message(
             message,
-            view=self.WikiGuessView(article=article),
+            view=view,
         )
+        # Set the message object in the view for editing later
+        view.message = await interaction.original_message()
 
 
 def setup(bot):

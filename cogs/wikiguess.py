@@ -30,25 +30,20 @@ class Wikiguess(commands.Cog, name="wikiguess"):
             guess = self.children[0].value
             answer = self.article.title
             if guess.lower() == answer.lower():
-                await interaction.response.send_message(
-                    "Correct! You guessed the article.", ephemeral=True
-                )
+                self.view.add_winner(interaction.user)
             else:
                 similarity = difflib.SequenceMatcher(
                     None, guess.lower(), answer.lower()
                 ).ratio()
                 if similarity > 0.7:
-                    await interaction.response.send_message(
-                        "Close! You're almost there!", ephemeral=True
-                    )
-                else:
-                    # Reveal a new letter in the hint
-                    self.view.reveal_letter()
-                    # Edit the original message to show the updated hint
-                    await self.view.message.edit(content=self.view.build_message())
-                    await interaction.response.send_message(
-                        "Incorrect. Try again!", ephemeral=True
-                    )
+                    self.view.add_close_guess(interaction.user, guess)
+                self.view.reveal_letter()
+            if self.view.winner:
+                await self.view.message.edit(
+                    content=self.view.build_message(), view=self.view
+                )
+            else:
+                await self.view.message.edit(content=self.view.build_message())
 
     class WikiGuessView(nextcord.ui.View):
         def __init__(
@@ -62,15 +57,25 @@ class Wikiguess(commands.Cog, name="wikiguess"):
             self.categories = categories
             self.message = message
             self.hint = [
-                "\_" if letter.isalpha() else letter for letter in article.title
+                "_" if letter.isalpha() or letter.isdigit() else letter
+                for letter in article.title
             ]
             self.revealed_indices = set()
+            self.close_guesses = []
+            self.winner = None
+
+        def add_winner(self, user: nextcord.User):
+            self.winner = user
+
+        def add_close_guess(self, user: nextcord.User, guess: str):
+            self.close_guesses.append((user, guess))
 
         def reveal_letter(self):
             unrevealed = [
                 i
                 for i, c in enumerate(self.hint)
-                if self.hint[i] == "_" and self.article.title[i].isalpha()
+                if self.hint[i] == "_"
+                and (self.article.title[i].isalpha() or self.article.title[i].isdigit())
             ]
             if unrevealed:
                 idx = random.choice(unrevealed)
@@ -90,10 +95,27 @@ class Wikiguess(commands.Cog, name="wikiguess"):
                 for category in filtered_categories
                 if category != self.article.title
             ]
-            message = "# WikiGuess\n\n You will be given a random Wikipedia article's categories. Guess the article by clicking the guess button. The winner will be the first with a correct guess!"
+            filtered_categories = filtered_categories[:20]
+            message = "# WikiGuess\n\nYou will be given a random Wikipedia article's categories. Guess the article by clicking the guess button. Every wrong guess will reveal more of the answer. The winner will be the first with a correct guess!"
             message += "\n\n**Categories:** \n"
-            message += "\n".join(f"- {category}" for category in filtered_categories)
-            message += f"\n\n**Hint:** {' '.join(self.hint)}"
+            message += " :white_small_square: ".join(
+                f"{category}" for category in filtered_categories
+            )
+
+            if self.close_guesses:
+                message += "\n\n**Close Guesses:**\n"
+                for user, guess in self.close_guesses:
+                    message += f"{user.mention}: {guess}\n"
+
+            if self.winner:
+                self.clear_items()
+                message += f"\n\n**Winner:** {self.winner.mention} 🎉"
+                message += (
+                    f"\n\n**Article:** [{self.article.title}]({self.article.fullurl})"
+                )
+            else:
+                message += f"\n\n**Hint:** {' '.join(c if c != '_' else '\\_' for c in self.hint)}"
+
             return message
 
         @nextcord.ui.button(label="Guess", style=nextcord.ButtonStyle.primary)
@@ -110,23 +132,14 @@ class Wikiguess(commands.Cog, name="wikiguess"):
         )
 
     def get_wiki_article(self):
-        today = datetime.date.today()
-        year = today.year
-        month = today.month
-        day = today.day
-        url = f"https://en.wikipedia.org/api/rest_v1/feed/featured/{year}/{month:02d}/{day:02d}"
-        headers = {"User-Agent": "DadBot (dadbot@colinwilson.dev)"}
-        response = requests.get(url, headers=headers)
-        data = response.json()
+        featured_category = self.wiki.page("Category:Featured articles")
+        members = featured_category.categorymembers
+        articles = [page for page in members.values() if page.ns == 0]
 
-        articles = data["mostread"]["articles"]
-        pick = random.choice([article.get("title") for article in articles]).replace(
-            "_", " "
-        )
+        page = random.choice(articles)
 
-        self.bot.logger.info(f"Selected featured article: {pick}")
-
-        return self.wiki.page(pick)
+        print(f"Selected article: {page.title}")
+        return page
 
     @nextcord.slash_command(name="wikiguess", description="Play wikiguess")
     async def wikiguess(self, interaction: nextcord.Interaction):

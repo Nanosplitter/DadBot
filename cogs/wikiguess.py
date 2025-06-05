@@ -52,10 +52,14 @@ class Wikiguess(commands.Cog, name="wikiguess"):
 
     class WikiGuessView(nextcord.ui.View):
         def __init__(
-            self, article: wikipediaapi.WikipediaPage, message: nextcord.Message
+            self,
+            article: wikipediaapi.WikipediaPage,
+            categories: list,
+            message: nextcord.Message,
         ):
             super().__init__(timeout=None)
             self.article = article
+            self.categories = categories
             self.message = message
             self.hint = [
                 "\_" if letter.isalpha() else letter for letter in article.title
@@ -66,22 +70,29 @@ class Wikiguess(commands.Cog, name="wikiguess"):
             unrevealed = [
                 i
                 for i, c in enumerate(self.hint)
-                if self.hint[i] == "\_" and self.article.title[i].isalpha()
+                if self.hint[i] == "_" and self.article.title[i].isalpha()
             ]
             if unrevealed:
                 idx = random.choice(unrevealed)
-                self.hint[idx] = self.article.title[idx]
-                self.revealed_indices.add(idx)
+                letter_to_reveal = self.article.title[idx]
+                for i, char in enumerate(self.article.title):
+                    if char.lower() == letter_to_reveal.lower() and self.hint[i] == "_":
+                        self.hint[i] = char
+                        self.revealed_indices.add(i)
 
         def build_message(self):
-            categories = self.article.categories
-            categories = [
-                categories[category].title.replace("Category:", "").strip()
-                for category in categories
+            filtered_categories = [
+                category.replace("Category:", "").strip()
+                for category in self.categories
+            ]
+            filtered_categories = [
+                category
+                for category in filtered_categories
+                if category != self.article.title
             ]
             message = "# WikiGuess\n\n You will be given a random Wikipedia article's categories. Guess the article by clicking the guess button. The winner will be the first with a correct guess!"
             message += "\n\n**Categories:** \n"
-            message += "\n".join(f"- {category}" for category in categories)
+            message += "\n".join(f"- {category}" for category in filtered_categories)
             message += f"\n\n**Hint:** {' '.join(self.hint)}"
             return message
 
@@ -120,13 +131,14 @@ class Wikiguess(commands.Cog, name="wikiguess"):
     @nextcord.slash_command(name="wikiguess", description="Play wikiguess")
     async def wikiguess(self, interaction: nextcord.Interaction):
         article = self.get_wiki_article()
-        view = self.WikiGuessView(article=article, message=None)
+        categories = self.wiki.categories(article, clshow="!hidden")
+        view = self.WikiGuessView(article=article, categories=categories, message=None)
         message = view.build_message()
         await interaction.response.send_message(
             message,
             view=view,
         )
-        # Set the message object in the view for editing later
+
         view.message = await interaction.original_message()
 
 

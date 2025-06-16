@@ -28,7 +28,7 @@ class Chat:
         if not first_message:
             return
 
-        personality, beef = self.determine_personality(
+        personality, beef, model = self.determine_personality(
             thread, first_message.system_content
         )
 
@@ -38,7 +38,7 @@ class Chat:
             beef = True
 
         await dadroid_multiple(
-            personality, chat_messages, thread.send, thread.send, beef
+            personality, chat_messages, thread.send, thread.send, beef, "", model
         )
 
     def is_valid_thread(self, message) -> bool:
@@ -61,9 +61,7 @@ class Chat:
         return True
 
     async def get_first_message(self, thread) -> str:
-        first_message = [
-            msg async for msg in thread.history(limit=1, oldest_first=True)
-        ]
+        first_message = [msg async for msg in thread.history(oldest_first=True)]
         if len(first_message) == 0:
             self.bot.logger.error("No first message found in thread")
             return None
@@ -72,6 +70,7 @@ class Chat:
     def determine_personality(self, thread, first_message_content):
         beef = True
         personality = self.config["default_personality"]
+        model = self.extract_model(first_message_content)
 
         if "having for dinner?" in thread.name:
             personality = self.config["chef_personality"]
@@ -81,12 +80,18 @@ class Chat:
                 + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown. Try and avoid mentioning that you are talking on discord unless you are asked."
             )
 
-        return personality, beef
+        return personality, beef, model
 
     @staticmethod
     def extract_custom_personality(input_string):
         match = re.search(r"\[(.*?)\]", input_string, re.DOTALL)
         return match.group(1) if match else None
+
+    @staticmethod
+    def extract_model(input_string):
+        """Extract model from first message content"""
+        match = re.search(r"Model: \[(.*?)\]", input_string)
+        return match.group(1) if match else "gpt-4.1"  # Default to gpt-4.1
 
     async def prepare_chat_messages(self, messages):
         chat_messages = []

@@ -31,6 +31,12 @@ class Chat(commands.Cog, name="chat"):
             description="The personality or 'job' dad should have in this conversation",
             required=False,
         ),
+        model: str = SlashOption(
+            description="The AI model to use for the conversation",
+            required=False,
+            default="gpt-4.1",
+            choices=["gpt-4.1", "o3", "gpt-4.5-preview"],
+        ),
     ):
         response = "## Hey there, let's chat!"
 
@@ -46,6 +52,9 @@ class Chat(commands.Cog, name="chat"):
                 personality = personality.personality
 
             response += f"\n\nCustom Personality: [{personality}]"
+
+        # Add model information to the response
+        response += f"\n\nModel: [{model}]"
 
         partial_message = await interaction.response.send_message(response)
 
@@ -186,7 +195,7 @@ class Chat(commands.Cog, name="chat"):
         view.add_item(DeleteButton(personality_object.id, interaction.user.id))
 
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-        
+
 
 def setup(bot):
     bot.add_cog(Chat(bot))

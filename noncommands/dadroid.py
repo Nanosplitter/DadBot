@@ -18,6 +18,7 @@ async def dadroid_single(
     response_starter: str = "",
     chats: List[dict] = [],
     beef: bool = False,
+    model: str = "gpt-4.1",
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
@@ -29,7 +30,7 @@ async def dadroid_single(
         ]
     )
 
-    chat_completion = create_chat_completion(messages, beef=beef)
+    chat_completion = create_chat_completion(messages, model, beef)
     await respond_from_chat_completion(
         chat_completion, first_send_method, send_method, response_starter
     )
@@ -40,6 +41,7 @@ async def dadroid_response(
     response: str,
     chats: List[dict] = [],
     beef: bool = False,
+    model: str = "gpt-4.1",
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
@@ -51,7 +53,7 @@ async def dadroid_response(
         ]
     )
 
-    chat_completion = create_chat_completion(messages, beef=beef)
+    chat_completion = create_chat_completion(messages, model, beef)
 
     return chat_completion.choices[0].message.content
 
@@ -63,9 +65,10 @@ async def dadroid_multiple(
     send_method: SendMethod,
     beef: bool = False,
     response_starter: str = "",
+    model: str = "gpt-4.1",
 ) -> None:
     """Handles multiple messages interaction with the chat model."""
-    model = "gpt-4.1" if beef else "gpt-4.1"
+    # Use the provided model parameter instead of hardcoded logic
     messages_with_personality = [{"role": "system", "content": personality}] + messages
 
     chat_completion = create_chat_completion(messages_with_personality, model)
@@ -81,15 +84,11 @@ def create_chat_completion(
 
     client = OpenAI(api_key=config["openapi_token"])
 
-    if beef:
+    # If beef is True and no specific model is provided, use gpt-4.1
+    if beef and model == "gpt-4.1":
         model = "gpt-4.1"
 
-    return client.chat.completions.create(
-        model=model,
-        messages=messages,
-        stream=False,
-        max_tokens=4000,
-    )
+    return client.chat.completions.create(model=model, messages=messages, stream=False)
 
 
 async def respond_from_chat_completion(

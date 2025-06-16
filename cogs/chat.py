@@ -35,7 +35,11 @@ class Chat(commands.Cog, name="chat"):
             description="The AI model to use for the conversation",
             required=False,
             default="gpt-4.1",
-            choices=["gpt-4.1", "o3", "gpt-4.5-preview"],
+            choices=[
+                "gpt-4.1 (Fast and powerful)",
+                "o3 (Most powerful, but can be very slow)",
+                "gpt-4.5-preview (Fast, focused on conversational ability)",
+            ],
         ),
     ):
         response = "## Hey there, let's chat!"
@@ -53,8 +57,9 @@ class Chat(commands.Cog, name="chat"):
 
             response += f"\n\nCustom Personality: [{personality}]"
 
+        model_id = model.split(" (")[0]
         # Add model information to the response
-        response += f"\n\nModel: [{model}]"
+        response += f"\n\nModel: [{model_id}]"
 
         partial_message = await interaction.response.send_message(response)
 

@@ -1,8 +1,12 @@
 import re
 import yaml
 from nextcord import Thread, MessageType
-from noncommands.dadroid import dadroid_multiple
+from noncommands.chatsplit import chat_split
 from pdfminer.high_level import extract_text
+import openai
+
+with open("config.yaml") as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
 
 
 class Chat:
@@ -22,24 +26,35 @@ class Chat:
         thread = message.channel
         await thread.trigger_typing()
 
-        messages = [msg async for msg in thread.history(limit=30, oldest_first=False)]
-        messages.reverse()
+        messages = [msg async for msg in thread.history(oldest_first=True)]
         first_message = await self.get_first_message(thread)
         if not first_message:
             return
 
-        personality, beef, model = self.determine_personality(
+        personality, model = self.determine_personality(
             thread, first_message.system_content
         )
 
         chat_messages, hasImages = await self.prepare_chat_messages(messages)
 
-        if hasImages:
-            beef = True
+        client = openai.OpenAI(api_key=config["openapi_token"])
 
-        await dadroid_multiple(
-            personality, chat_messages, thread.send, thread.send, beef, "", model
-        )
+        supported_tools = {
+            "o3": [],
+            "gpt-4.1": [{"type": "web_search_preview"}],
+            "gpt-4.5-preview": [],
+        }
+
+        async with thread.typing():
+            response = client.responses.create(
+                model=model,
+                tools=supported_tools.get(model, []),
+                instructions=personality,
+                input=chat_messages,
+            )
+
+        for message in chat_split(response.output_text):
+            await thread.send(message, suppress_embeds=True)
 
     def is_valid_thread(self, message) -> bool:
         if not isinstance(message.channel, Thread):
@@ -68,8 +83,7 @@ class Chat:
         return first_message[0]
 
     def determine_personality(self, thread, first_message_content):
-        beef = True
-        personality = self.config["default_personality"]
+        personality = None
         model = self.extract_model(first_message_content)
 
         if "having for dinner?" in thread.name:
@@ -80,7 +94,7 @@ class Chat:
                 + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown. Try and avoid mentioning that you are talking on discord unless you are asked."
             )
 
-        return personality, beef, model
+        return personality, model
 
     @staticmethod
     def extract_custom_personality(input_string):
@@ -112,7 +126,12 @@ class Chat:
                     await self.prepare_attachment_content(message.attachments)
                 )
 
-            content.append({"type": "text", "text": message.clean_content})
+            content.append(
+                {
+                    "type": "input_text" if role == "user" else "output_text",
+                    "text": message.clean_content,
+                }
+            )
             chat_messages.append({"role": role, "content": content})
 
         return chat_messages, hasImages
@@ -135,7 +154,7 @@ class Chat:
                     text = extract_text("temp.pdf")
                     content.append(
                         {
-                            "type": "text",
+                            "type": "input_text",
                             "text": f"Text of PDF the user uploaded:\n\n {text}",
                         }
                     )
@@ -143,14 +162,14 @@ class Chat:
                     print(e)
                     content.append(
                         {
-                            "type": "text",
+                            "type": "input_text",
                             "text": f"There was an error parsing the user's PDF: {attachment.url}",
                         }
                     )
             else:
                 content.append(
                     {
-                        "type": "text",
+                        "type": "input_text",
                         "text": f"Attachment: {attachment.url}",
                     }
                 )

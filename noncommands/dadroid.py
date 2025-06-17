@@ -82,7 +82,7 @@ def create_chat_completion(
 ) -> dict:
     """Creates a chat completion using OpenAI's API."""
 
-    client = OpenAI(api_key=config["openapi_token"])
+    client = OpenAI(api_key=config["openai_token"])
 
     # If beef is True and no specific model is provided, use gpt-4.1
     if beef and model == "gpt-4.1":

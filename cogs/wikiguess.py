@@ -4,8 +4,6 @@ from nextcord.ext import commands
 import wikipediaapi
 import difflib
 import random
-import requests
-import datetime
 
 
 with open("config.yaml") as file:

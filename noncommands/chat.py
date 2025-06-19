@@ -143,8 +143,9 @@ class Chat:
             if "image" in attachment.content_type:
                 content.append(
                     {
-                        "type": "image_url",
-                        "image_url": {"url": attachment.url, "detail": "high"},
+                        "type": "input_image",
+                        "image_url": attachment.url,
+                        "detail": "high",
                     }
                 )
             elif "pdf" in attachment.content_type:

@@ -20,8 +20,8 @@ with open("config.yaml") as file:
 class Chat(commands.Cog, name="chat"):
     def __init__(self, bot):
         self.bot = bot
-        openai.api_key = config["openapi_token"]
-        self.client = openai.OpenAI(api_key=config["openapi_token"])
+        openai.api_key = config["openai_token"]
+        self.client = openai.OpenAI(api_key=config["openai_token"])
 
     @nextcord.slash_command(name="chat", description="Chat with Dad")
     async def chat(

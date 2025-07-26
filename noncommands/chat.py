@@ -42,7 +42,6 @@ class Chat:
         supported_tools = {
             "o3": [],
             "gpt-4.1": [{"type": "web_search_preview"}],
-            "gpt-4.5-preview": [],
         }
 
         async with thread.typing():

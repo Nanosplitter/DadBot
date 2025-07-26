@@ -38,7 +38,6 @@ class Chat(commands.Cog, name="chat"):
             choices=[
                 "gpt-4.1 (Fast and powerful)",
                 "o3 (Most powerful, but can be very slow)",
-                "gpt-4.5-preview (Fast, focused on conversational ability)",
             ],
         ),
     ):

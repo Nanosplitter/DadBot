@@ -41,7 +41,7 @@ class Chat:
 
         supported_tools = {
             "o3": [],
-            "gpt-4.1": [{"type": "web_search_preview"}],
+            "gpt-5": [{"type": "web_search_preview"}],
         }
 
         async with thread.typing():
@@ -104,7 +104,7 @@ class Chat:
     def extract_model(input_string):
         """Extract model from first message content"""
         match = re.search(r"Model: \[(.*?)\]", input_string)
-        return match.group(1) if match else "gpt-4.1"  # Default to gpt-4.1
+        return match.group(1) if match else "gpt-5"  # Default to gpt-5
 
     async def prepare_chat_messages(self, messages):
         chat_messages = []

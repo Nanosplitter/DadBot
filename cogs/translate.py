@@ -27,7 +27,7 @@ class Translate(commands.Cog, name="translate"):
         prepared_messages = await chat.prepare_chat_messages([message])
 
         response = client.responses.create(
-            model="gpt-4.1",
+            model="gpt-5",
             instructions="You are a translator. Your goal is to translate the following message to english. Only reply with the translation and nothing else. If the message is an image, translate the text in the image to english.",
             input=prepared_messages[0],
         )

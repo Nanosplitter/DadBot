@@ -59,7 +59,7 @@ class TLDR(commands.Cog, name="tldr"):
         )
 
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-4.1", messages=chats
+            model="gpt-5", messages=chats
         )
         response = chatCompletion.choices[0].message.content
 

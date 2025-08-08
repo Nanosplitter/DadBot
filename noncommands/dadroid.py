@@ -18,7 +18,7 @@ async def dadroid_single(
     response_starter: str = "",
     chats: List[dict] = [],
     beef: bool = False,
-    model: str = "gpt-4.1",
+    model: str = "gpt-5",
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
@@ -41,7 +41,7 @@ async def dadroid_response(
     response: str,
     chats: List[dict] = [],
     beef: bool = False,
-    model: str = "gpt-4.1",
+    model: str = "gpt-5",
 ) -> None:
     """Handles single message interaction with the chat model."""
     messages = (
@@ -65,7 +65,7 @@ async def dadroid_multiple(
     send_method: SendMethod,
     beef: bool = False,
     response_starter: str = "",
-    model: str = "gpt-4.1",
+    model: str = "gpt-5",
 ) -> None:
     """Handles multiple messages interaction with the chat model."""
     # Use the provided model parameter instead of hardcoded logic
@@ -78,15 +78,15 @@ async def dadroid_multiple(
 
 
 def create_chat_completion(
-    messages: List[dict], model: str = "gpt-4.1", beef: bool = False
+    messages: List[dict], model: str = "gpt-5", beef: bool = False
 ) -> dict:
     """Creates a chat completion using OpenAI's API."""
 
     client = OpenAI(api_key=config["openapi_token"])
 
-    # If beef is True and no specific model is provided, use gpt-4.1
-    if beef and model == "gpt-4.1":
-        model = "gpt-4.1"
+    # If beef is True and no specific model is provided, use gpt-5
+    if beef and model == "gpt-5":
+        model = "gpt-5"
 
     return client.chat.completions.create(model=model, messages=messages, stream=False)
 

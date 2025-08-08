@@ -34,10 +34,9 @@ class Chat(commands.Cog, name="chat"):
         model: str = SlashOption(
             description="The AI model to use for the conversation",
             required=False,
-            default="gpt-4.1",
+            default="gpt-5",
             choices=[
-                "gpt-4.1 (Fast and powerful)",
-                "o3 (Most powerful, but can be very slow)",
+                "gpt-5 (Fast and powerful)",
             ],
         ),
     ):

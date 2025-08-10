@@ -4,6 +4,7 @@ from nextcord import Thread, MessageType
 from noncommands.chatsplit import chat_split
 from pdfminer.high_level import extract_text
 import openai
+import asyncio
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -24,7 +25,7 @@ class Chat:
             return
 
         thread = message.channel
-        await thread.trigger_typing()
+        # await thread.trigger_typing()
 
         messages = [msg async for msg in thread.history(oldest_first=True)]
         first_message = await self.get_first_message(thread)
@@ -37,23 +38,110 @@ class Chat:
 
         chat_messages, hasImages = await self.prepare_chat_messages(messages)
 
-        client = openai.OpenAI(api_key=config["openapi_token"])
+        client = openai.AsyncOpenAI(api_key=config["openapi_token"])
 
         supported_tools = {
             "o3": [],
+            "gpt-5-mini": [{"type": "web_search_preview"}],
             "gpt-5": [{"type": "web_search_preview"}],
         }
 
+        # Stream the response and progressively edit a Discord message
         async with thread.typing():
-            response = client.responses.create(
-                model=model,
-                tools=supported_tools.get(model, []),
-                instructions=personality,
-                input=chat_messages,
-            )
+            # Don't send a placeholder; wait for first content
+            current_msg = None
+            buffer = ""
+            last_edit_time = asyncio.get_event_loop().time()
+            last_edited_len = 0
 
-        for message in chat_split(response.output_text):
-            await thread.send(message, suppress_embeds=True)
+            try:
+                async with client.responses.stream(
+                    model=model,
+                    tools=supported_tools.get(model, []),
+                    instructions=personality,
+                    input=chat_messages,
+                    text={"format": {"type": "text"}, "verbosity": "low"},
+                ) as stream:
+                    edit_interval = 1.0
+                    min_delta_chars = 120
+
+                    async for event in stream:
+                        if event.type == "response.output_text.delta":
+                            buffer += event.delta
+
+                            now = asyncio.get_event_loop().time()
+
+                            if len(buffer) >= 1800:
+                                chunks = list(chat_split(buffer))
+                                if chunks:
+                                    if current_msg is None:
+                                        current_msg = await thread.send(
+                                            chunks[0], suppress_embeds=True
+                                        )
+                                    else:
+                                        await current_msg.edit(
+                                            content=chunks[0], suppress=True
+                                        )
+                                    for chunk in chunks[1:]:
+                                        current_msg = await thread.send(
+                                            chunk, suppress_embeds=True
+                                        )
+                                    buffer = chunks[-1]
+                                    last_edit_time = now
+                                    last_edited_len = len(buffer)
+                            elif (
+                                now - last_edit_time >= edit_interval
+                                and (len(buffer) - last_edited_len) >= min_delta_chars
+                            ) or (len(buffer) - last_edited_len) >= 400:
+                                if current_msg is None:
+                                    current_msg = await thread.send(
+                                        buffer, suppress_embeds=True
+                                    )
+                                else:
+                                    await current_msg.edit(
+                                        content=buffer, suppress=True
+                                    )
+                                last_edit_time = now
+                                last_edited_len = len(buffer)
+                    if buffer:
+                        if current_msg is None:
+                            await thread.send(buffer, suppress_embeds=True)
+                        else:
+                            await current_msg.edit(content=buffer, suppress=True)
+
+            except Exception:
+                self.bot.logger.exception(
+                    "Streaming failed; falling back to non-streaming."
+                )
+                try:
+                    response = await client.responses.create(
+                        model=model,
+                        tools=supported_tools.get(model, []),
+                        instructions=personality,
+                        input=chat_messages,
+                        text={"format": {"type": "text"}, "verbosity": "low"},
+                    )
+                    chunks = list(chat_split(response.output_text))
+                    if chunks:
+                        if current_msg is None:
+                            current_msg = await thread.send(
+                                chunks[0], suppress_embeds=True
+                            )
+                        else:
+                            await current_msg.edit(content=chunks[0], suppress=True)
+                        for chunk in chunks[1:]:
+                            await thread.send(chunk, suppress_embeds=True)
+                except Exception:
+                    if current_msg is None:
+                        await thread.send(
+                            "Sorry, I couldn't generate a response.",
+                            suppress_embeds=True,
+                        )
+                    else:
+                        await current_msg.edit(
+                            content="Sorry, I couldn't generate a response.",
+                            suppress=True,
+                        )
 
     def is_valid_thread(self, message) -> bool:
         if not isinstance(message.channel, Thread):
@@ -158,8 +246,7 @@ class Chat:
                             "text": f"Text of PDF the user uploaded:\n\n {text}",
                         }
                     )
-                except Exception as e:
-                    print(e)
+                except Exception:
                     content.append(
                         {
                             "type": "input_text",

@@ -176,10 +176,7 @@ class Chat(commands.Cog, name="chat"):
 
         first_message = first_message[0]
 
-        personality = (
-            config["default_personality"]
-            + " You are operating in Discord, feel free to use Discord formatting if you'd like, it is a form of Markdown."
-        )
+        personality = config["default_personality"]
 
         if "having for dinner?" in thread.name:
             personality = config["chef_personality"]

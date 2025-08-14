@@ -61,7 +61,7 @@ class Chat:
                     tools=supported_tools.get(model, []),
                     instructions=personality,
                     input=chat_messages,
-                    text={"format": {"type": "text"}, "verbosity": "low"},
+                    text={"format": {"type": "text"}, "verbosity": "high"},
                 ) as stream:
                     edit_interval = 1.0
                     min_delta_chars = 120

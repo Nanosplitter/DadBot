@@ -37,6 +37,7 @@ class Chat(commands.Cog, name="chat"):
             default="gpt-5",
             choices=[
                 "gpt-5 (Fast and powerful)",
+                "gpt-5-mini (Faster, still powerful)",
             ],
         ),
     ):

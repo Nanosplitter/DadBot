@@ -14,5 +14,5 @@
     "startbook",
     "todaysbirthdays"
   ],
-  "conventionalCommits.scopes": ["models"]
+  "conventionalCommits.scopes": ["models", "chat"]
 }

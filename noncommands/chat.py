@@ -5,6 +5,7 @@ from noncommands.chatsplit import chat_split
 from pdfminer.high_level import extract_text
 import openai
 import asyncio
+import aiohttp
 
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -223,21 +224,66 @@ class Chat:
 
         return chat_messages, hasImages
 
-    @staticmethod
-    async def prepare_attachment_content(attachments):
+    async def _test_image_url(self, url: str, session: aiohttp.ClientSession) -> bool:
+        retries = 4
+        backoff = 0.75
+        for attempt in range(retries):
+            try:
+                async with session.head(
+                    url, timeout=aiohttp.ClientTimeout(total=5)
+                ) as resp:
+                    ctype = resp.headers.get("Content-Type", "")
+                    if resp.status == 200 and ctype.startswith("image"):
+                        return True
+                    if resp.status in (405, 501):
+                        raise aiohttp.ClientResponseError(
+                            resp.request_info, resp.history, status=resp.status
+                        )
+            except Exception:
+                try:
+                    async with session.get(
+                        url, timeout=aiohttp.ClientTimeout(total=8)
+                    ) as resp:
+                        ctype = resp.headers.get("Content-Type", "")
+                        if resp.status == 200 and ctype.startswith("image"):
+                            return True
+                except Exception:
+                    pass
+            if attempt < retries - 1:
+                await asyncio.sleep(backoff * (attempt + 1))
+        return False
+
+    async def _build_stable_image_url(self, attachment) -> str:
+        base_proxy = attachment.proxy_url
+        delimiter = "&" if "?" in base_proxy else "?"
+        formatted = f"{base_proxy}{delimiter}format=webp&quality=high"
+        async with aiohttp.ClientSession() as session:
+            if await self._test_image_url(formatted, session):
+                return formatted
+            if await self._test_image_url(base_proxy, session):
+                return base_proxy
+            original = attachment.url
+            if original != base_proxy and await self._test_image_url(original, session):
+                return original
+        return formatted
+
+    async def prepare_attachment_content(self, attachments):
         content = []
         for attachment in attachments:
-            if "image" in attachment.content_type:
+            ctype = (attachment.content_type or "").lower()
+            if "image" in ctype:
+                try:
+                    image_url = await self._build_stable_image_url(attachment)
+                except Exception:
+                    self.bot.logger.exception(
+                        "Failed preflighting image URL; using raw URL"
+                    )
+                    image_url = attachment.url
                 content.append(
-                    {
-                        "type": "input_image",
-                        "image_url": attachment.url,
-                        "detail": "high",
-                    }
+                    {"type": "input_image", "image_url": image_url, "detail": "high"}
                 )
-            elif "pdf" in attachment.content_type:
+            elif "pdf" in ctype:
                 await attachment.save("temp.pdf")
-
                 try:
                     text = extract_text("temp.pdf")
                     content.append(
@@ -255,10 +301,6 @@ class Chat:
                     )
             else:
                 content.append(
-                    {
-                        "type": "input_text",
-                        "text": f"Attachment: {attachment.url}",
-                    }
+                    {"type": "input_text", "text": f"Attachment: {attachment.url}"}
                 )
-
         return content

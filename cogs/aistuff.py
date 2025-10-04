@@ -4,7 +4,8 @@ import yaml
 import nextcord
 import io
 import base64
-from nextcord import Interaction, Embed, SlashOption
+import aiohttp
+from nextcord import Interaction, SlashOption
 from nextcord.ext import commands
 from noncommands.dadroid import dadroid_single
 from noncommands.dadroid import dadroid_response
@@ -273,7 +274,6 @@ class AiStuff(commands.Cog, name="aistuff"):
                     ],
                 },
             ],
-            max_tokens=300,
         )
 
         apodContent = chatCompletion.choices[0].message.content
@@ -293,14 +293,21 @@ class AiStuff(commands.Cog, name="aistuff"):
             stream=False,
         )
 
-        title = titleCompletion.choices[0].message.content
-        embed = Embed(
-            title=title, description=chatCompletion.choices[0].message.content
-        )
+        title = "# APOD - " + titleCompletion.choices[0].message.content + "\n"
+        explanation = ">>> " + apodContent + "\n"
 
-        embed.set_image(url=image.url)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(image.url) as resp:
+                if resp.status == 200:
+                    data = await resp.read()
+                    await interaction.followup.send(
+                        title + explanation,
+                        file=nextcord.File(io.BytesIO(data), "image.png"),
+                    )
+                    return
 
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(title + explanation)
+        await interaction.channel.send(image.url)
 
     @nextcord.slash_command(
         "whatsfordinner",

@@ -14,5 +14,5 @@
     "startbook",
     "todaysbirthdays"
   ],
-  "conventionalCommits.scopes": ["models", "chat"]
+  "conventionalCommits.scopes": ["models", "chat", "newapod"]
 }

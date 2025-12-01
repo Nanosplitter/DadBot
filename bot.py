@@ -46,9 +46,13 @@ class DadBot(commands.Bot):
     def load_all_settings(self):
         settings = ServerSettings.select()
         for setting in settings:
-            self.settings[int(setting.server_id)][setting.setting_name] = setting.setting_value
+            self.settings[int(setting.server_id)][setting.setting_name] = (
+                setting.setting_value
+            )
 
-    def update_setting(self, server_id: str, setting_name: str, setting_value: bool) -> None:
+    def update_setting(
+        self, server_id: str, setting_name: str, setting_value: bool
+    ) -> None:
         self.settings[server_id][setting_name] = setting_value
 
     def ensure_all_settings(self):
@@ -63,7 +67,7 @@ class DadBot(commands.Bot):
                             server_id=server_id,
                             server_name=guild.name,
                             setting_name=setting_name,
-                            setting_value=default_value
+                            setting_value=default_value,
                         )
                         self.update_setting(server_id, setting_name, default_value)
 
@@ -132,10 +136,10 @@ chat = chat.Chat(bot)
 async def on_ready() -> None:
     if not scheduler.running:
         scheduler.start()
-        
+
     if bot.user is None:
         sys.exit("Bot has no user!")
-    
+
     bot.ensure_all_settings()
 
     bot.logger.info(f"Logged in as {bot.user.name}")
@@ -150,7 +154,7 @@ async def on_ready() -> None:
     bot.logger.info("-------------------")
 
     status_task.start()
-    
+
     watcher = Watcher(bot, path="cogs")
     await watcher.start()
 
@@ -172,11 +176,14 @@ async def on_message(message: nextcord.Message) -> None:
             await imChecker.checkIm(message, bot.settings[message.guild.id])
             await haikuDetector.checkForHaiku(message, bot.settings[message.guild.id])
             await musicDetector.detectMusic(message, bot.settings[message.guild.id])
-            await paywall_detector.detectPaywall(message, bot.settings[message.guild.id])
+            await paywall_detector.detectPaywall(
+                message, bot.settings[message.guild.id]
+            )
 
         await chat.respond(message)
 
     await bot.process_commands(message)
+
 
 @bot.event
 async def on_application_command_completion(interaction: Interaction) -> None:
@@ -184,28 +191,28 @@ async def on_application_command_completion(interaction: Interaction) -> None:
 
     full_command_path = [command_name]
 
-    parent_command = getattr(interaction.application_command, 'parent_cmd', None)
+    parent_command = getattr(interaction.application_command, "parent_cmd", None)
     if parent_command is not None:
         full_command_path.insert(0, parent_command.name)
 
     full_command_name = ".".join(full_command_path)
-    
+
     bot.logger.info(f"Command completed: {full_command_name}")
-    
+
     # Log command to database
     server_id = str(interaction.guild.id) if interaction.guild else None
     server_name = interaction.guild.name if interaction.guild else None
     user_id = str(interaction.user.id)
     user_name = str(interaction.user)
-    
+
     command_log_service.log_command(
         server_id=server_id,
         server_name=server_name,
         user_id=user_id,
         user_name=user_name,
-        command_name=full_command_name
+        command_name=full_command_name,
     )
-    
+
     if interaction.guild is not None:
         bot.logger.info(
             f"Executed {full_command_name} command in {interaction.guild.name} (ID: {interaction.guild.id}) by {interaction.user} (ID: {interaction.user.id})"
@@ -253,7 +260,7 @@ async def on_application_command_error(interaction: Interaction, error) -> None:
         await interaction.response.send_message(embed=embed, ephemeral=True)
     else:
         bot.logger.error(f"Unhandled application command error: {error}")
-        
+
         try:
             embed = nextcord.Embed(
                 title="Error!",
@@ -267,7 +274,7 @@ async def on_application_command_error(interaction: Interaction, error) -> None:
                 await interaction.followup.send(embed=embed, ephemeral=True)
         except Exception as e:
             bot.logger.error(f"Failed to send error message: {e}")
-            
+
         raise error
 
 
@@ -291,7 +298,7 @@ if __name__ == "__main__":
 checkTimes.start()
 scheduler = AsyncIOScheduler()
 scheduler.add_job(
-    scooby.apod, CronTrigger(hour="8", minute="0", second="0", timezone="EST")
+    scooby.apod, CronTrigger(hour="9", minute="0", second="0", timezone="EST")
 )
 
 # scheduler.add_job(
@@ -299,15 +306,15 @@ scheduler.add_job(
 # )
 scheduler.add_job(
     birthdayChecker.checkBirthdays,
-    CronTrigger(hour="7", minute="0", second="0", timezone="EST"),
+    CronTrigger(hour="8", minute="0", second="0", timezone="EST"),
 )
 scheduler.add_job(
     scooby.praiseFireGator,
-    CronTrigger(day_of_week="WED", hour="23", minute="0", second="0", timezone="EST"),
+    CronTrigger(day_of_week="THU", hour="0", minute="0", second="0", timezone="EST"),
 )
-# scheduler.add_job(
-#     scooby.advent_of_code,
-#     CronTrigger(hour="9", minute="0", second="0", timezone="EST"),
-# )
+scheduler.add_job(
+    scooby.advent_of_code,
+    CronTrigger(hour="9", minute="0", second="0", timezone="EST"),
+)
 
 bot.run(config["token"])

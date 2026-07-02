@@ -1,6 +1,5 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import requests
 import aiohttp
 import io
 import nextcord
@@ -10,6 +9,7 @@ from services.step_log_service import (
     build_step_logger_view,
 )
 from noncommands.adventofcode_service import create_advent_of_code_messages
+from noncommands.apod_service import fetch_apod
 
 
 class Scooby:
@@ -27,26 +27,20 @@ class Scooby:
                     channels.append(channel)
             
 
-        response = requests.get(
-            "https://api.nasa.gov/planetary/apod?api_key=hQqgupM0Ghb1OTjjrPkoIDw1EJq6pZQQdgMGBpnb"
-        )
+        apod = await fetch_apod()
 
-        if response.status_code != 200 or len(response.json()) == 0:
+        if apod is None:
+            self.bot.logger.error("NASA APOD is down")
             for channel in channels:
                 await channel.send("NASA APOD is currently down :(")
-                self.bot.logger.error("NASA APOD is down")
-                return
+            return
 
-        title = "# APOD - " + response.json()["title"] + "\n"
-        explanation = ">>> " + response.json()["explanation"] + "\n"
-        
-        url = (
-            response.json()["hdurl"]
-            if "hdurl" in response.json()
-            else response.json()["url"]
-        )
+        title = "# APOD - " + apod["title"] + "\n"
+        explanation = ">>> " + apod["explanation"] + "\n"
 
-        if response.json()["media_type"] == "image":
+        url = apod["hdurl"] if "hdurl" in apod else apod["url"]
+
+        if apod["media_type"] == "image":
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as resp:
                     if resp.status == 200:

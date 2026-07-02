@@ -43,8 +43,8 @@ class Chat:
 
         supported_tools = {
             "o3": [],
-            "gpt-5-mini": [{"type": "web_search_preview"}],
-            "gpt-5": [{"type": "web_search_preview"}],
+            "gpt-5.4-mini": [{"type": "web_search_preview"}],
+            "gpt-5.4": [{"type": "web_search_preview"}],
         }
 
         # Stream the response and progressively edit a Discord message
@@ -193,7 +193,7 @@ class Chat:
     def extract_model(input_string):
         """Extract model from first message content"""
         match = re.search(r"Model: \[(.*?)\]", input_string)
-        return match.group(1) if match else "gpt-5"  # Default to gpt-5
+        return match.group(1) if match else "gpt-5.4"  # Default to gpt-5.4
 
     async def prepare_chat_messages(self, messages):
         chat_messages = []

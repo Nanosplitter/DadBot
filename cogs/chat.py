@@ -34,10 +34,10 @@ class Chat(commands.Cog, name="chat"):
         model: str = SlashOption(
             description="The AI model to use for the conversation",
             required=False,
-            default="gpt-5",
+            default="gpt-5.4",
             choices=[
-                "gpt-5 (Fast and powerful)",
-                "gpt-5-mini (Faster, still powerful)",
+                "gpt-5.4 (Fast and powerful)",
+                "gpt-5.4-mini (Faster, still powerful)",
             ],
         ),
     ):

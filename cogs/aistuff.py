@@ -258,7 +258,7 @@ class AiStuff(commands.Cog, name="aistuff"):
         await interaction.response.defer()
 
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-5",
+            model="gpt-5.4",
             messages=[
                 {
                     "role": "system",
@@ -279,7 +279,7 @@ class AiStuff(commands.Cog, name="aistuff"):
         apodContent = chatCompletion.choices[0].message.content
 
         titleCompletion = self.client.chat.completions.create(
-            model="gpt-5",
+            model="gpt-5.4",
             messages=[
                 {
                     "role": "system",
@@ -366,7 +366,7 @@ class AiStuff(commands.Cog, name="aistuff"):
 
         await thread.trigger_typing()
         chatCompletion = self.client.chat.completions.create(
-            model="gpt-5",
+            model="gpt-5.4",
             messages=[
                 {
                     "role": "system",

@@ -38,7 +38,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             if interaction.user.id == 776256478877057035:
                 quality = "high"
             img = self.client.images.generate(
-                model="gpt-image-1",
+                model="gpt-image-2",
                 prompt=prompt,
                 n=1,
                 size="auto",
@@ -47,7 +47,7 @@ class AiStuff(commands.Cog, name="aistuff"):
             image_bytes = base64.b64decode(img.data[0].b64_json)
             image_file = io.BytesIO(image_bytes)
             await interaction.followup.send(
-                f"**Prompt:** {prompt}",
+                f"**Prompt:** ```\n{prompt}\n```",
                 file=nextcord.File(image_file, filename="image.png"),
             )
         except openai.BadRequestError as e:

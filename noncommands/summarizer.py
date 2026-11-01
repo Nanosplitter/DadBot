@@ -1,16 +1,31 @@
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.decomposition import TruncatedSVD
-import pandas as pd
-import nltk
-import numpy as np
-from nltk.corpus import stopwords 
-from nltk.tokenize import word_tokenize
-from trafilatura import bare_extraction
-import trafilatura
 import nextcord
 
-nltk.download('punkt')
-nltk.download('stopwords')
+_ready = False
+
+
+def _ensure_models():
+    """Import scikit-learn, pandas, and NLTK the first time a summary is built.
+
+    These imports pull in a lot of files and NLTK tries to download data.
+    Doing that while the bot is loading cogs blocks Discord login for minutes.
+    """
+    global _ready, CountVectorizer, TruncatedSVD, pd, np, nltk, stopwords, word_tokenize
+    global trafilatura, bare_extraction
+    if _ready:
+        return
+    import nltk
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.decomposition import TruncatedSVD
+    import pandas as pd
+    import numpy as np
+    from trafilatura import bare_extraction
+    import trafilatura
+
+    nltk.download("punkt", quiet=True)
+    nltk.download("stopwords", quiet=True)
+    _ready = True
 
 def scoreSent(sent, scoreMatrix, scoreCol):
     score = 0
@@ -22,12 +37,14 @@ def scoreSent(sent, scoreMatrix, scoreCol):
 
 
 def filterStopwords(sent):
+    _ensure_models()
     stop_words = set(stopwords.words('english'))
     word_tokens = word_tokenize(sent)
 
     return " ".join([w for w in word_tokens if w not in stop_words])
 
 def getSummarySpread(filePath, numSent):
+    _ensure_models()
     
     f = open(filePath, "r")
     text = f.read()
@@ -70,6 +87,7 @@ def getSummarySpread(filePath, numSent):
         chosen.append(s[0])
 
 def getSummaryMono(text, numSent):
+    _ensure_models()
 
     text = " ".join(text.split())
 
@@ -118,6 +136,7 @@ def getSummaryMono(text, numSent):
 
 
 def getSummaryUrl(config, url):
+    _ensure_models()
     numSent = 5
     downloaded = trafilatura.fetch_url(url)
     article = bare_extraction(downloaded)

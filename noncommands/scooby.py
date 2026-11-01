@@ -1,15 +1,14 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import aiohttp
 import io
 import nextcord
 from noncommands.constants import SETTINGS_HINT
+from services.apod_service import download_image, fetch_apod, format_apod_message
 from services.step_log_service import (
     build_embed_for_server,
     build_step_logger_view,
 )
 from noncommands.adventofcode_service import create_advent_of_code_messages
-from noncommands.apod_service import fetch_apod
 
 
 class Scooby:
@@ -18,43 +17,37 @@ class Scooby:
 
     async def apod(self):
         channels = []
-        
+
         for server_id in self.bot.settings:
             server_settings = self.bot.settings[server_id]
             if server_settings.get("apod_enabled") == "True":
                 channel = self.bot.get_channel(int(server_settings["apod_channel"]))
                 if channel:
                     channels.append(channel)
-            
 
-        apod = await fetch_apod()
-
-        if apod is None:
+        post = fetch_apod()
+        if post is None:
             self.bot.logger.error("NASA APOD is down")
             for channel in channels:
                 await channel.send("NASA APOD is currently down :(")
             return
 
-        title = "# APOD - " + apod["title"] + "\n"
-        explanation = ">>> " + apod["explanation"] + "\n"
+        text = format_apod_message(post, SETTINGS_HINT)
+        if post.image_url:
+            downloaded = await download_image(post)
+            if downloaded:
+                data, filename = downloaded
+                for channel in channels:
+                    await channel.send(
+                        text, file=nextcord.File(io.BytesIO(data), filename)
+                    )
+                return
 
-        url = apod["hdurl"] if "hdurl" in apod else apod["url"]
-
-        if apod["media_type"] == "image":
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    if resp.status == 200:
-                        data = await resp.read()
-                        for channel in channels:
-                            await channel.send(
-                                title + explanation + f"{SETTINGS_HINT}",
-                                file=nextcord.File(io.BytesIO(data), "image.png"),
-                            )
-                        return
         for channel in channels:
-            await channel.send(title + explanation)
-            await channel.send(url)
-            await channel.send(f"{SETTINGS_HINT}")
+            await channel.send(text)
+            if post.link_url:
+                await channel.send(post.link_url)
+        return
 
     async def praiseFireGator(self):
         c = self.bot.get_channel(856919399789625376)

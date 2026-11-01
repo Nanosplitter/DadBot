@@ -29,6 +29,12 @@ from cogwatch import Watcher
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 
+TEST_APPLICATION_ID = "850471747358687242"
+if os.environ.get("DADBOT_TEST") == "1" and str(config.get("application_id")) != TEST_APPLICATION_ID:
+    sys.exit(
+        "Refusing to start. DADBOT_TEST is set, but config.yaml is not the DadBotTest application."
+    )
+
 
 class DadBot(commands.Bot):
     def __init__(self, loggingFormatter, botConfig) -> None:
@@ -289,6 +295,7 @@ if __name__ == "__main__":
         if file.endswith(".py") and file != "template.py":
             extension = file[:-3]
             try:
+                bot.logger.info(f"Loading extension '{extension}'")
                 bot.load_extension(f"cogs.{extension}")
                 bot.logger.info(f"Loaded extension '{extension}'")
             except Exception as e:

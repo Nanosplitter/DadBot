@@ -1,6 +1,16 @@
 {
   "configurations": [
     {
+      "name": "Run DadBotTest",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "run_test.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    },
+    {
       "name": "Run Bot",
       "type": "debugpy",
       "request": "launch",

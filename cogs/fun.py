@@ -13,7 +13,7 @@ from nextcord import Interaction, SlashOption
 
 from noncommands.dadroid import dadroid_single
 from noncommands.adventofcode_service import create_advent_of_code_messages
-from noncommands.apod_service import fetch_apod
+from services.apod_service import download_image, fetch_apod, format_apod_message
 
 
 with open("config.yaml") as file:
@@ -92,31 +92,26 @@ class Fun(commands.Cog, name="fun"):
         """
         await interaction.response.defer()
 
-        apod = await fetch_apod()
-
-        if apod is None:
-            await interaction.channel.send("NASA APOD is currently down :(")
+        post = fetch_apod()
+        if post is None:
+            await interaction.followup.send("NASA APOD is currently down :(")
             self.bot.logger.error("NASA APOD is down")
             return
 
-        title = "# APOD - " + apod["title"] + "\n"
-        explanation = ">>> " + apod["explanation"] + "\n"
+        text = format_apod_message(post)
+        if post.image_url:
+            downloaded = await download_image(post)
+            if downloaded:
+                data, filename = downloaded
+                await interaction.followup.send(
+                    text, file=nextcord.File(io.BytesIO(data), filename)
+                )
+                return
 
-        url = apod["hdurl"] if "hdurl" in apod else apod["url"]
-
-        if apod["media_type"] == "image":
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    if resp.status == 200:
-                        data = await resp.read()
-                        await interaction.followup.send(
-                            title + explanation,
-                            file=nextcord.File(io.BytesIO(data), "image.png"),
-                        )
-                        return
-
-        await interaction.followup.send(title + explanation)
-        await interaction.channel.send(url)
+        await interaction.followup.send(text)
+        if post.link_url:
+            await interaction.channel.send(post.link_url)
+        return
 
     @nextcord.slash_command(
         name="iswanted", description="See if someone is on the FBI's most wanted list."

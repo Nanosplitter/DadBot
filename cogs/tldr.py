@@ -3,7 +3,6 @@ import nextcord
 from typing import Optional
 from nextcord.ext import commands
 from nextcord import Interaction, SlashOption
-from noncommands import summarizer
 import openai
 from noncommands.chatsplit import chat_split
 
@@ -80,6 +79,8 @@ class TLDR(commands.Cog, name="tldr"):
         [URL] Get a TLDR a web page.
         """
         try:
+            from noncommands import summarizer
+
             await interaction.response.send_message(
                 embed=summarizer.getSummaryUrl(config, url)
             )
